@@ -6,7 +6,7 @@
 <Project version="5.1">
   <Language></Language>
   <Hash>9d96368115b16991c161e12b3663fe165a282671</Hash>
-  <ProgLanguage mixed="0">Python3</ProgLanguage>
+  <ProgLanguage mixed="0">Python2</ProgLanguage>
   <ProjectType>Django</ProjectType>
   <Description>Production information management system.</Description>
   <Version>0.1</Version>

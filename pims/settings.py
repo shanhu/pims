@@ -51,9 +51,9 @@ MIDDLEWARE_CLASSES = (
   #  'django.middleware.cache.FetchFromCacheMiddleware',#
 )
 
-ROOT_URLCONF = 'pims4.urls'
+ROOT_URLCONF = 'pims.urls'
 
-WSGI_APPLICATION = 'pims4.wsgi.application'
+WSGI_APPLICATION = 'pims.wsgi.application'
 
 
 # Database
@@ -65,8 +65,8 @@ DATABASES = {
         'NAME': 'pims',
         'USER': 'root', 
         'PASSWORD': '123456', 
-        'HOST': 'localhost', 
-        #'port': '3306', 
+        'HOST': '127.0.0.1', 
+        'port': '3306', 
     }
 }
 
@@ -108,7 +108,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/tmp/django/pims4-debug.log',
+            'filename': '/tmp/django/pims-debug.log',
             'formatter': 'verbose'
         },
         'console':{
