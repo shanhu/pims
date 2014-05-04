@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric5 project file for project pims -->
-<!-- Saved: 2014-04-29, 23:02:41 -->
+<!-- Saved: 2014-05-04, 13:11:07 -->
 <!-- Copyright (C) 2014 shanhu, shanhu.cn@gmail.com -->
 <Project version="5.1">
   <Language></Language>
@@ -13,6 +13,7 @@
   <Author>shanhu</Author>
   <Email>shanhu.cn@gmail.com</Email>
   <TranslationPattern>locale/%language%/LC_MESSAGES/django.po</TranslationPattern>
+  <Eol index="-1"/>
   <Sources>
     <Source>manage.py</Source>
     <Source>pims/settings.py</Source>
@@ -20,12 +21,20 @@
     <Source>pims/wsgi.py</Source>
     <Source>pims/__init__.py</Source>
     <Source>__init__.py</Source>
+    <Source>system/admin.py</Source>
+    <Source>system/models.py</Source>
+    <Source>system/tests.py</Source>
+    <Source>system/urls.py</Source>
+    <Source>system/views.py</Source>
+    <Source>system/__init__.py</Source>
   </Sources>
   <Forms/>
   <Translations/>
   <Resources/>
   <Interfaces/>
-  <Others/>
+  <Others>
+    <Other>system</Other>
+  </Others>
   <Vcs>
     <VcsType>None</VcsType>
   </Vcs>

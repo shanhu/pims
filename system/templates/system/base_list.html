@@ -1,0 +1,70 @@
+{% extends "system/base.html" %}
+
+{% block title %}列表页{% endblock title %}
+
+{% block sidebar %}   
+
+
+ <ul class="nav nav-pills nav-stacked">
+                            <li class="nav-header">
+                                <i class='fa fa-users'></i> 人事管理
+                            </li>
+                            <li class="active">
+                                <a href="#">员工注册</a>
+                            </li>
+                            <li>
+                                <a href="#">员工汇总</a>
+                            </li>
+                            <li class="nav-divider">
+                            <li class="nav-header">
+                                 <i class='fa fa-money'></i>  工资配置模块
+                            </li>
+                            <li>
+                                <a href="#">添加工资参数</a>
+                            </li>
+                            <li>
+                                <a href="#">工资参数汇总</a>
+                            </li>
+                               <li class="nav-divider">
+                               <li class="nav-header">
+                                  <i class='fa fa-credit-card'></i> 卡片管理
+                            </li>
+                                <li>
+                                <a href="#">卡片管理</a>
+                            </li>
+                            <li class="nav-divider">
+                            <li class="nav-header">
+                                  <i class='fa fa-shopping-cart'></i> 物料管理
+                                </li>
+                                <li>
+                                    <a href="#">物料管理</a>
+                            </li>
+                            <li class="nav-divider">
+                            <li class="nav-header">
+                                  <i class='fa fa-sort-numeric-asc'></i> 工艺管理
+                                </li>
+                                <li>
+                                    <a href="#">工艺管理</a>
+                            </li>
+                            </li>
+                            <li class="nav-divider">
+                            <li>
+                                <a href="#">帮助</a>
+                            </li>
+                        </ul> 
+
+
+{% endblock sidebar %}
+
+
+{% block pageHeader  %} 
+
+   {{pageHeader}}
+   
+ {% endblock pageHeader  %}
+
+
+{% block breadcrumb %} 
+
+
+ {% endblock breadcrumb %}

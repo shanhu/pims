@@ -1,5 +1,5 @@
 """
-Django settings for pims project.
+Django settings for pims4 project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'xeap9#q332#79bqjkjbbpnpv-2w=o0(&z3j2!x(_xjtn7-0mwq'
+SECRET_KEY = '16--&m%zo=i+kqgy$d#2le%ph*k76%fo-t8fp12v(_w9t32gi6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -36,20 +36,24 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bootstrap3',
+    'system'
 )
 
 MIDDLEWARE_CLASSES = (
+  #  'django.middleware.cache.UpdateCacheMiddleware',     #
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', 
+  #  'django.middleware.cache.FetchFromCacheMiddleware',#
 )
 
-ROOT_URLCONF = 'pims.urls'
+ROOT_URLCONF = 'pims4.urls'
 
-WSGI_APPLICATION = 'pims.wsgi.application'
+WSGI_APPLICATION = 'pims4.wsgi.application'
 
 
 # Database
@@ -57,26 +61,72 @@ WSGI_APPLICATION = 'pims.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'pims',
+        'USER': 'root', 
+        'PASSWORD': '123456', 
+        'HOST': 'localhost', 
+        #'port': '3306', 
     }
 }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-CN'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(pathname)s %(funcName)s %(process)d [%(thread)d] - %(threadName)s %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/tmp/django/pims4-debug.log',
+            'formatter': 'verbose'
+        },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'system': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

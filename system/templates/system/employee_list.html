@@ -1,0 +1,104 @@
+{% extends "system/base_list.html" %}
+
+{% block maincontent %}
+
+<div >
+    <form role="form" class="form-inline">
+    
+                    <div class="row clearfix">
+						<div class="col-md-12 column">
+                            <div class="form-group">
+                                 <label for="exampleInputEmail1">工号</label><input type="email" class="form-control" id="exampleInputEmail1" />
+                            </div>
+                             <div class="form-group">
+                                 <label for="exampleInputEmail1">姓名</label><input type="email" class="form-control" id="exampleInputEmail1" />
+                            </div>
+                            <div class="form-group">
+                                 <label for="exampleInputPassword1">身份证</label><input type="password" class="form-control" id="exampleInputPassword1" />
+                            </div>
+                          <div class="form-group">
+                                 <label for="sex">性别</label><input type="text" class="form-control" id="sex"  name="sex" />
+                              </div> 
+						</div>
+						<div class="col-md-4 column">
+                                <a   class="btn btn-info "><i class="fa fa-search"></i>&nbsp;&nbsp;查询</a>
+                            <a   class="btn btn-info "><i class="fa fa-plus-square"></i>&nbsp;&nbsp;新增</a>
+						</div>
+					</div>
+                   
+                    
+                       
+                
+                    
+    </form>
+</div>
+
+	<table class="table table-hover table-condensed">
+				<thead>
+					<tr>
+						<th>
+							工号
+						</th>
+						<th>
+							姓名
+						</th>
+						<th>
+							性别
+						</th>
+						<th>
+                            身份证
+						</th>
+                        <th>
+                            操作
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+                {% for employee in employee_list %}
+					<tr class={% cycle 'warning'  'success' %}>
+						<td>
+							{{employee.num}}
+						</td>
+						<td>
+							{{employee.name}}
+						</td>
+						<td>
+							{{employee.sex}}
+						</td>
+						<td>
+							{{employee.idCard}}
+						</td>
+                        <td>
+							<a href="{% url 'employee_detail'  employee.id %}">查看</a> <a href="#">删除</a>
+						</td>
+					</tr> 
+                    {% endfor %}
+				</tbody>
+			</table>
+			
+			<ul class="pagination pagination-right">
+				<li>
+                <a href="#">上一页</a>
+				</li>
+				<li>
+					<a href="#">1</a>
+				</li>
+				<li>
+					<a href="#">2</a>
+				</li>
+				<li>
+					<a href="#">3</a>
+				</li>
+				<li>
+					<a href="#">4</a>
+				</li>
+				<li>
+					<a href="#">5</a>
+				</li>
+				<li>
+					<a href="#">下一页</a>
+				</li>
+			</ul>
+{% endblock maincontent %}         
+
+

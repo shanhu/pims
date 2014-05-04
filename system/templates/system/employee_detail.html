@@ -1,0 +1,86 @@
+{% extends "system/base_detail.html" %}
+
+{% block maincontent %}
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+						<div class="panel-heading">
+							<h3 class="panel-title">
+								{{employee.num}}&nbsp;&nbsp;/&nbsp;&nbsp;{{employee.name}} 
+							</h3>
+						</div>
+						<div class="panel-body"> 
+                            <div class="row clearfix">
+                                <div class="col-md-4 column">
+                                <dl class="dl-horizontal">
+                                  <dt>员工号：</dt>
+                                  <dd>{{employee.num}}</dd>
+                                </dl>
+                                  <dl class="dl-horizontal">
+                                  <dt>身份证：</dt>
+                                  <dd>{{employee.idCard}}</dd>
+                                </dl>
+                                  <dl class="dl-horizontal">
+                                      <dt>类型：</dt>
+                                  <dd>{{employee.type}}</dd>
+                                </dl>
+                                  <dl class="dl-horizontal">
+                                  <dt>工作卡号：</dt>
+                                  <dd>{{employee.cardNum1}}</dd>
+                                </dl> 
+                                </div>
+                                <div class="col-md-4 column">
+                                
+                                <dl class="dl-horizontal">
+                                  <dt>姓名：</dt>
+                                  <dd>{{employee.name}}</dd>
+                                </dl>
+                                  <dl class="dl-horizontal">
+                                  <dt>电话号码：</dt>
+                                  <dd>{{employee.tel}}</dd>
+                                </dl>
+                                  <dl class="dl-horizontal">
+                                      <dt>状态：</dt>
+                                  <dd>{{employee.status}}</dd>
+                                </dl>
+                                  <dl class="dl-horizontal">
+                                  <dt>  员工卡号：</dt>
+                                  <dd>{{employee.cardNum2}}</dd>
+                                </dl> 
+                                     
+                                </div>
+                                <div class="col-md-4 column">
+                                
+                                  <dl class="dl-horizontal">
+                                  <dt>性别：</dt>
+                                  <dd>{{employee.sex}}</dd>
+                                </dl>
+                                  <dl class="dl-horizontal">
+                                  <dt>入职时间：</dt>
+                                  <dd>{{employee.joinTime | date:"Y-m-d H:i:s"}}</dd>
+                                </dl>
+                               <dl class="dl-horizontal">
+                                            <dt>备注：</dt>
+                                      <dd class="text-overflow">{{employee.remarks}}</dd>
+                                    </dl> 
+                               
+                                </div>
+                              
+                            </div>
+                              
+                              
+                           
+                             
+						</div> 
+					</div>
+
+ <div class="btn-group">
+		 <a class="btn btn-primary"  href="{% url 'employee_list' %}" ><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;返回</a> <a class="btn btn-primary"   href="#"><i class="fa fa-edit"></i>&nbsp;&nbsp;编辑</a>
+</div>
+                    
+{% endblock maincontent %}          
