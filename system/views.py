@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
 from django.views import generic
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+
 # Create your views here.
 from django.http import HttpResponse
-from system.models import MaterialType, Material, Employee
+from system.models import MaterialType, Material, Employee, EmployeeForm
 # import the logging library
 import logging
 
@@ -54,9 +54,15 @@ class EmployeeDetailView(SystemDetailView):
     def get_context_data(self, **kwargs): 
         context = super(EmployeeDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"员工详细信息"
-        return context
-        
-class EmployeeCreate(CreateView):
+        return context 
+
+from django.views.generic.edit import FormView, CreateView
+class EmployeeFormView(CreateView):
+    form_class= EmployeeForm
     model = Employee
-    fields = ['num','name','sex']
+   
+    
+    
+    
+    
     
