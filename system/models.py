@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 from django.db import models
-
+from django.core.urlresolvers import reverse
 
 
        
@@ -16,13 +17,13 @@ class DictConfig(models.Model):
        db_table = 'dictionary_config'
     def __unicode__(self):  # Python 3: def __str__(self):
             return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.typeCode ,  self.typeDesc ,  self.type)
-            
-
-
-sexChoices = DictConfig.objects.filter(type="sex")
-employeeTypeChoices  = DictConfig.objects.filter(type="employee_type")
-statusChoices = DictConfig.objects.filter(type="employee_status")
-
+    @staticmethod
+    def getTypeChoices(type=""):
+        types = DictConfig.objects.filter(type=type).order_by("displayOrder")
+        choices = []
+        for t in types:
+            choices.append((t.typeCode, t.typeDesc)) 
+        return choices
 
 class Workshop(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
@@ -108,17 +109,15 @@ class Terminal(models.Model):
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
         
-        
-
          
 class Employee(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    num = models.CharField(db_column='NUM', max_length=20, blank=True) # Field name made lowercase.
+    num = models.CharField(db_column='NUM', max_length=20, blank=True ,  verbose_name="") # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, blank=True) # Field name made lowercase.
     sex = models.CharField(db_column='SEX', max_length=1, blank=True) # Field name made lowercase.
     idCard = models.CharField(db_column='IDCARD', max_length=20, blank=True) # Field name made lowercase.
     tel = models.CharField(db_column='TEL', max_length=20, blank=True) # Field name made lowercase.
-    joinTime = models.DateTimeField(auto_now=True, db_column='JOIN_TIME' , blank=True)
+    joinTime = models.DateTimeField(db_column='JOIN_TIME' , auto_now=True,blank=True)
     type = models.CharField(db_column='TYPE', max_length=1, blank=True) # Field name made lowercase.   
     status = models.CharField(db_column='STATUS', max_length=1, blank=True) # Field name made lowercase.
     cardNum1 = models.CharField(db_column='CARD_NUM1', max_length=20, blank=True) # Field name made lowercase.
@@ -130,7 +129,8 @@ class Employee(models.Model):
         db_table = 'employee'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"id {0} num {1} name {2}  remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
-        
+    def get_absolute_url(self):
+        return reverse('employee_detail', kwargs={'pk': self.pk})
         
 class WorkClass(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
@@ -193,14 +193,22 @@ class SalaryCountConfig(models.Model):
         
  
     
-
+from django.forms.extras import widgets 
 from django import forms
-class EmployeeForm(forms.Form):
+class EmployeeForm(forms.ModelForm):
+    sexChoices = DictConfig.getTypeChoices(type="sex")
+    employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
+    statusChoices = DictConfig.getTypeChoices(type="employee_status")
     class Meta:
         model = Employee
+        fields  = ['num', 'name', 'idCard', 'tel', 'joinTime',  'cardNum1', 'cardNum2', 'remarks', 'sex', 'type', 'status',  ]
     sex = forms.CharField(max_length=1, widget=forms.Select(choices=sexChoices)) # Field name made lowercase.    
     type = forms.CharField(max_length=1, widget=forms.Select(choices=employeeTypeChoices)) # Field name made lowercase.   
-    status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) ) # Field name made lowercase.
-    
+    status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) ) # Field name made lowercase.    
+    input_formats = ['%Y-%m-%d %H:%M:%S',    # '2006-10-25 14:30:59'
+        '%Y-%m-%d %H:%M',        # '2006-10-25 14:30'
+        '%Y-%m-%d',              # '2006-10-25'
+        ]
+    joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget())
     
     

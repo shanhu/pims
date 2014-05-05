@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric5 project file for project pims -->
-<!-- Saved: 2014-05-04, 13:11:07 -->
+<!-- Saved: 2014-05-05, 16:02:55 -->
 <!-- Copyright (C) 2014 shanhu, shanhu.cn@gmail.com -->
 <Project version="5.1">
   <Language></Language>
@@ -27,13 +27,17 @@
     <Source>system/urls.py</Source>
     <Source>system/views.py</Source>
     <Source>system/__init__.py</Source>
+    <Source>system/formpreview.py</Source>
   </Sources>
-  <Forms/>
+  <Forms>
+    <Form>system/templates/system/form.html</Form>
+  </Forms>
   <Translations/>
   <Resources/>
   <Interfaces/>
   <Others>
     <Other>system</Other>
+    <Other>system/templates/system</Other>
   </Others>
   <Vcs>
     <VcsType>None</VcsType>
