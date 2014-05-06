@@ -111,15 +111,20 @@ class Terminal(models.Model):
         
          
 class Employee(models.Model):
+    
+    sexChoices = DictConfig.getTypeChoices(type="sex")
+    employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
+    statusChoices = DictConfig.getTypeChoices(type="employee_status")
+    
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
     num = models.CharField(db_column='NUM', max_length=20, blank=True ,  verbose_name="员工号") # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, blank=True, verbose_name="姓名") # Field name made lowercase.
-    sex = models.CharField(db_column='SEX', max_length=1, blank=True,verbose_name="性别") # Field name made lowercase.
+    sex = models.CharField(db_column='SEX', max_length=1, blank=True,verbose_name="性别", choices=sexChoices) # Field name made lowercase.
     idCard = models.CharField(db_column='IDCARD', max_length=20, blank=True ,verbose_name="身份证") # Field name made lowercase.
     tel = models.CharField(db_column='TEL', max_length=20, blank=True,  verbose_name="联系方式") # Field name made lowercase.
     joinTime = models.DateTimeField(db_column='JOIN_TIME' , auto_now=True,blank=True, verbose_name="入职时间")
-    type = models.CharField(db_column='TYPE', max_length=1, blank=True ,verbose_name="员工类型") # Field name made lowercase.   
-    status = models.CharField(db_column='STATUS', max_length=1, blank=True,verbose_name="员工状态") # Field name made lowercase.
+    type = models.CharField(db_column='TYPE', max_length=1, blank=True ,verbose_name="员工类型",  choices=employeeTypeChoices) # Field name made lowercase.   
+    status = models.CharField(db_column='STATUS', max_length=1, blank=True,verbose_name="员工状态" , choices=statusChoices) # Field name made lowercase.
     cardNum1 = models.CharField(db_column='CARD_NUM1', max_length=20, blank=True,verbose_name="工作卡号") # Field name made lowercase.
     cardNum2 = models.CharField(db_column='CARD_NUM2', max_length=20, blank=True,verbose_name="员工卡号") # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True,verbose_name="备注") # Field name made lowercase.

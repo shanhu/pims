@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-from django.shortcuts import render
+# -*- coding: utf-8 -*- 
 from django.views import generic
-
-# Create your views here.
-from django.http import HttpResponse
 from system.models import MaterialType, Material, Employee, EmployeeForm
 # import the logging library
 import logging
@@ -56,12 +52,29 @@ class EmployeeDetailView(SystemDetailView):
         context['pageHeader'] = u"员工详细信息"
         return context 
 
-from django.views.generic.edit import  CreateView
-class EmployeeFormView(CreateView):
+from django.views.generic.edit import  CreateView, UpdateView, DeleteView
+from django.core.urlresolvers import reverse_lazy
+from django.shortcuts import redirect
+
+class EmployeeCreateView(CreateView):
     form_class= EmployeeForm
     model = Employee
-  
-    
-    
-    
+class EmployeeUpdateView(UpdateView):
+    form_class= EmployeeForm
+    model = Employee 
+class EmployeeDeleteView(DeleteView):
+    form_class= EmployeeForm
+    model = Employee     
+    success_url = reverse_lazy('employee_list')  
+    def post(self,*args, **kwargs):
+        employee = self.get_object();
+        if employee.cardNum1 != '' or employee.cardNum2 != '':
+            employee.status = 0
+            employee.save()
+        else:
+            employee.delete()
+        return redirect('employee_list');
+            
+   
+   
     

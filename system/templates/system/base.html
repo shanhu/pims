@@ -50,21 +50,24 @@
 					</h3>
 				</div>
 				<div class="panel-body">
-{% block sidebar %}     
-           
-                        <ul class="nav nav-pills nav-stacked">
+
+                
+{% block sidebar %}   
+
+
+ <ul id="sidebar" class="nav nav-pills nav-stacked">
                             <li class="nav-header">
-                                人事管理
+                                <i class='fa fa-users'></i> 人事管理
                             </li>
                             <li class="active">
-                                <a href="#">员工注册</a>
+                                <a href="{% url 'employee_add' %}">员工注册</a>
                             </li>
                             <li>
-                                <a href="#">员工汇总</a>
+                                <a href="{% url 'employee_list' %}">员工汇总</a>
                             </li>
                             <li class="nav-divider">
                             <li class="nav-header">
-                                工资配置模块
+                                 <i class='fa fa-money'></i>  工资配置模块
                             </li>
                             <li>
                                 <a href="#">添加工资参数</a>
@@ -74,21 +77,21 @@
                             </li>
                                <li class="nav-divider">
                                <li class="nav-header">
-                                卡片管理
+                                  <i class='fa fa-credit-card'></i> 卡片管理
                             </li>
                                 <li>
                                 <a href="#">卡片管理</a>
                             </li>
                             <li class="nav-divider">
                             <li class="nav-header">
-                                物料管理
+                                  <i class='fa fa-shopping-cart'></i> 物料管理
                                 </li>
                                 <li>
                                     <a href="#">物料管理</a>
                             </li>
                             <li class="nav-divider">
                             <li class="nav-header">
-                                工艺管理
+                                  <i class='fa fa-sort-numeric-asc'></i> 工艺管理
                                 </li>
                                 <li>
                                     <a href="#">工艺管理</a>
@@ -98,8 +101,11 @@
                             <li>
                                 <a href="#">帮助</a>
                             </li>
-                        </ul>  
-    {% endblock sidebar %}       
+                        </ul> 
+
+
+{% endblock sidebar %}
+     
             	</div> 
 			</div>
 		</div> <!-- col-md-2 column -->
