@@ -56,12 +56,11 @@ class EmployeeDetailView(SystemDetailView):
         context['pageHeader'] = u"员工详细信息"
         return context 
 
-from django.views.generic.edit import FormView, CreateView
+from django.views.generic.edit import  CreateView
 class EmployeeFormView(CreateView):
     form_class= EmployeeForm
     model = Employee
-   
-    
+  
     
     
     
