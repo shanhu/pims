@@ -14,4 +14,77 @@
 
 
  {% endblock breadcrumb %}
+ 
+ {% block paginator %} 
+ 
+ 	<ul class="pagination pagination-right">
+            {% if page_obj.has_previous %}
+				<li>
+                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+				</li>
+             {% endif  %} 
+             
+            {% if page_obj.number == 1 %}
+				<li>
+                <a href="?page={{ 1 }}">上一页</a>
+				</li>
+             {% endif  %} 
+             
+              {% if page_obj.number|add:-1  > 1 %}  
+				<li>
+					<a href="?page={{ page_obj.number | add:-2   }}"> {{ page_obj.number | add:-2  }} </a>
+				</li>
+              {% endif  %}   
+             
+              {% if page_obj.number|add:-1  >  1 %}  
+				<li>
+					<a href="?page={{ page_obj.number | add:-1   }}"> {{ page_obj.number | add:-1  }} </a>
+				</li>
+              {% endif  %}   
+              
+				<li>
+					<a href="?page={{ page_obj.number }}">{{ page_obj.number }} </a>
+				</li>
+                
+                
+                
+                {% if page_obj.number|add:1  < paginator.num_pages  %}  
+                    <li>
+                        <a href="?page={{ page_obj.number|add:1 }}">{{page_obj.number|add:1 }}</a>
+                    </li>
+                {% endif  %} 
+                
+                
+                
+                {% if page_obj.number|add:1  < paginator.num_pages   %}  
+				<li>
+					<a href="?page={{ page_obj.number|add:2  }}">{{page_obj.number|add:2 }}</a>
+				</li>
+                 {% endif  %} 
+                 
+                 
+                 
+                 
+                 
+                 
+            {% if page_obj.has_next  %}
+				<li>
+					<a href="?page={{ page_obj.next_page_number }}">下一页</a>
+				</li>
+            {% endif %}
+             {% if page_obj.has_next == False %}
+				<li>
+					<a href="?page={{ paginator.num_pages }}">下一页</a>
+				</li>
+            {% endif %}
+            
+                <li>
+                    <a href="#">共&nbsp;&nbsp;{{paginator.num_pages}}&nbsp;&nbsp;页</a>
+                </li>
+                 <li>
+                    <a href="#">当前第&nbsp;&nbsp;{{page_obj.number }}&nbsp;&nbsp;页</a>
+                </li>
+            
+			</ul>
+{% endblock paginator %}
   

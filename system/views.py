@@ -38,6 +38,7 @@ class EmployeeListView(SystemListView):
     template_name = 'system/employee_list.html'
     context_object_name = 'employee_list'
     model = Employee
+    paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(EmployeeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"员工汇总"
@@ -47,7 +48,7 @@ class EmployeeListView(SystemListView):
 class EmployeeDetailView(SystemDetailView): 
     template_name = 'system/employee_detail.html'
     context_object_name = 'employee'
-    model = Employee
+    model = Employee 
     def get_context_data(self, **kwargs): 
         context = super(EmployeeDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"员工详细信息"
@@ -92,6 +93,7 @@ class MaterialTypeListView(SystemListView):
     template_name = 'system/materialType_list.html'
     context_object_name = 'materialType_list'
     model = MaterialType
+    paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(MaterialTypeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料类型管理"
@@ -122,6 +124,7 @@ class MaterialTypeCreateView(CreateView):
 class MaterialTypeUpdateView(UpdateView):
     form_class= MaterialTypeForm
     model = MaterialType
+    success_url =  reverse_lazy("material_type_list")
     
 class MaterialTypeDeleteView(DeleteView):
     form_class= MaterialTypeForm
