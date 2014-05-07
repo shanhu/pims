@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric5 project file for project pims -->
-<!-- Saved: 2014-05-05, 23:50:32 -->
+<!-- Saved: 2014-05-07, 18:14:10 -->
 <!-- Copyright (C) 2014 shanhu, shanhu.cn@gmail.com -->
 <Project version="5.1">
   <Language></Language>
@@ -29,7 +29,11 @@
     <Source>system/views.py</Source>
     <Source>system/__init__.py</Source>
   </Sources>
-  <Forms/>
+  <Forms>
+    <Form>system/templates/system/materialType_list.html</Form>
+    <Form>system/templates/system/materialType_detail.html</Form>
+    <Form>system/templates/system/materialType_form.html</Form>
+  </Forms>
   <Translations/>
   <Resources/>
   <Interfaces/>
@@ -37,6 +41,7 @@
     <Other>system/templates</Other>
     <Other>system</Other>
     <Other>system/data/init-data.yml</Other>
+    <Other>system/data/init-data.json</Other>
   </Others>
   <Vcs>
     <VcsType>None</VcsType>

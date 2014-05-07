@@ -84,6 +84,102 @@
   }
 },
 {
+  "pk": 8, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u53ef\u7528", 
+    "typeCode": "1", 
+    "dicTable": "materialType", 
+    "dicColumn": "status", 
+    "type": "material_type_status", 
+    "displayOrder": 10
+  }
+},
+{
+  "pk": 9, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u4e0d\u53ef\u7528", 
+    "typeCode": "0", 
+    "dicTable": "materialType", 
+    "dicColumn": "status", 
+    "type": "material_type_status", 
+    "displayOrder": 20
+  }
+},
+{
+  "pk": 1, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "\u7ea2", 
+    "parent": null
+  }
+},
+{
+  "pk": 2, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "\u7ea21A", 
+    "parent": 1
+  }
+},
+{
+  "pk": 3, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "\u9ed11", 
+    "parent": null
+  }
+},
+{
+  "pk": 4, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "0", 
+    "num": "\u9ed11B", 
+    "parent": 3
+  }
+},
+{
+  "pk": 5, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "\u7ea21AX", 
+    "parent": 2
+  }
+},
+{
+  "pk": 6, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "\u7ea21AX1", 
+    "parent": 5
+  }
+},
+{
+  "pk": 7, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "\u9ed11X", 
+    "parent": 3
+  }
+},
+{
+  "pk": 8, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "\u7ea21AA", 
+    "parent": 2
+  }
+},
+{
   "pk": 1, 
   "model": "system.employee", 
   "fields": {
