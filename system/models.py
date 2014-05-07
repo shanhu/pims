@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.core.urlresolvers import reverse
-
+from django.forms.extras import widgets 
+from django import forms
 
        
 class DictConfig(models.Model):
@@ -18,8 +19,8 @@ class DictConfig(models.Model):
     def __unicode__(self):  # Python 3: def __str__(self):
             return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.typeCode ,  self.typeDesc ,  self.type)
     @staticmethod
-    def getTypeChoices(type=""):
-        types = DictConfig.objects.filter(type=type).order_by("displayOrder")
+    def getTypeChoices(**kwargs):
+        types = DictConfig.objects.filter(**kwargs).order_by("displayOrder")
         choices = []
         for t in types:
             choices.append((t.typeCode, t.typeDesc)) 
@@ -48,21 +49,31 @@ class WorkGroup(models.Model):
     
 
 class MaterialType(models.Model):
+    choices = DictConfig.getTypeChoices(type = 'material_type_status')
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    num = models.CharField(db_column='NUM', max_length=20, blank=True) # Field name made lowercase.
-    status = models.CharField(db_column='STATUS', max_length=1, blank=True) # Field name made lowercase.
-    parent = models.ForeignKey('self', db_column='PARENT_ID', blank=True, null=True) # Field name made lowercase.
+    num = models.CharField(db_column='NUM', max_length=20, blank=True ,  unique=True , verbose_name="编号") # Field name made lowercase.
+    status = models.CharField(db_column='STATUS', max_length=1, blank=True, verbose_name="状态", choices=choices) # Field name made lowercase.
+    parent = models.ForeignKey('self', db_column='PARENT_ID', blank=True, null=True, verbose_name="父类型") # Field name made lowercase.
     class Meta:
      #   managed = False
         db_table = 'material_type'
     def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} num {1} status {2} ".format(self.id ,  self.num ,  self.status)
+        return  u" {0} ".format(self.num, )
         
+class MaterialTypeForm(forms.ModelForm): 
+    statusChoices =  DictConfig.getTypeChoices(type="material_type_status")
+    class Meta:
+        model = MaterialType
+        fields  = ['num', 'status', 'parent',   ]   
+    status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="员工状态" ) # Field name made lowercase.                
+
+
+
 class Material(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    num = models.CharField(db_column='NUM', max_length=20, blank=True) # Field name made lowercase.
-    name = models.CharField(db_column='NAME', max_length=20, blank=True) # Field name made lowercase.
-    materialType = models.ForeignKey(MaterialType, db_column='MATERIAL_TYPE_ID', blank=True, null=True) # Field name made lowercase.
+    num = models.CharField(db_column='NUM', max_length=20, blank=True ,  unique=True, verbose_name="编号") # Field name made lowercase.
+    name = models.CharField(db_column='NAME', max_length=20, blank=True, verbose_name="名称") # Field name made lowercase.
+    materialType = models.ForeignKey(MaterialType, db_column='MATERIAL_TYPE_ID', blank=True, null=True, verbose_name="类型") # Field name made lowercase.
     mode = models.CharField(db_column='MODE', max_length=1, blank=True) # Field name made lowercase.
     unit = models.CharField(db_column='UNIT', max_length=20, blank=True) # Field name made lowercase.
     conver = models.IntegerField(db_column='CONVER', blank=True, null=True) # Field name made lowercase.
@@ -117,7 +128,7 @@ class Employee(models.Model):
     statusChoices = DictConfig.getTypeChoices(type="employee_status")
     
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    num = models.CharField(db_column='NUM', max_length=20, blank=True ,  verbose_name="员工号") # Field name made lowercase.
+    num = models.CharField(db_column='NUM', max_length=20, blank=True ,  verbose_name="员工号",  unique=True) # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, blank=True, verbose_name="姓名") # Field name made lowercase.
     sex = models.CharField(db_column='SEX', max_length=1, blank=True,verbose_name="性别", choices=sexChoices) # Field name made lowercase.
     idCard = models.CharField(db_column='IDCARD', max_length=20, blank=True ,verbose_name="身份证") # Field name made lowercase.
@@ -197,8 +208,7 @@ class SalaryCountConfig(models.Model):
         return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.price ,  self.isDefault ,  self.remarks)
  
     
-from django.forms.extras import widgets 
-from django import forms
+
 class EmployeeForm(forms.ModelForm):
     sexChoices = DictConfig.getTypeChoices(type="sex")
     employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
