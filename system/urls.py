@@ -13,6 +13,13 @@ urlpatterns = patterns('',
     
     url(r'^employee/form/employeeFormPreview$', EmployeeFormPreview(EmployeeForm)),
     
+    
+    url(r'^materialType/$', views.MaterialTypeListView.as_view(), name="material_type_list"),
+    url(r'^materialType/add/$', views.MaterialTypeCreateView.as_view(), name="material_type_add"),
+    url(r'^materialType/add/$', views.MaterialTypeUpdateView.as_view(), name="material_type_update"),
+    url(r'^materialType/add/$', views.MaterialTypeDeleteView.as_view(), name="material_type_delete"),
+    url(r'^materialTypes/(?P<pk>\d+)$', views.MaterialTypeDetailView.as_view(), name="material_type_detail"),
+    
 
     
 )
