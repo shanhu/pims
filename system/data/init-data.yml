@@ -1,0 +1,63 @@
+- model: system.DictConfig
+  pk: 1
+  fields:
+    TYPE_CODE: 0
+    TYPE_DESC: 女
+    TYPE: sex
+    DIC_TABLE: employee
+    DIC_COLUMN: sex
+    DISPLAY_ORDER: 20
+- model: system.DictConfig
+  pk: 2
+  fields:
+    TYPE_CODE: 1
+    TYPE_DESC: 男
+    TYPE: sex
+    DIC_TABLE: employee
+    DIC_COLUMN: sex
+    DISPLAY_ORDER: 10
+- model: system.DictConfig
+  pk: 3
+  fields:
+    TYPE_CODE: 0
+    TYPE_DESC: 离职
+    TYPE: sex
+    DIC_TABLE: employee
+    DIC_COLUMN: sex
+    DISPLAY_ORDER: 20
+- model: system.DictConfig
+  pk: 4
+  fields:
+    TYPE_CODE: 1
+    TYPE_DESC: 在岗
+    TYPE: sex
+    DIC_TABLE: employee
+    DIC_COLUMN: sex
+    DISPLAY_ORDER: 10
+- model: system.DictConfig
+  pk: 5
+  fields:
+    TYPE_CODE: 1
+    TYPE_DESC: 计件工
+    TYPE: sex
+    DIC_TABLE: employee
+    DIC_COLUMN: sex
+    DISPLAY_ORDER: 10
+- model: system.DictConfig
+  pk: 6
+  fields:
+    TYPE_CODE: 2
+    TYPE_DESC: 计时工
+    TYPE: sex
+    DIC_TABLE: employee
+    DIC_COLUMN: sex
+    DISPLAY_ORDER: 20
+- model: system.DictConfig
+  pk: 7
+  fields:
+    TYPE_CODE: 1
+    TYPE_DESC: 固定工资
+    TYPE: sex
+    DIC_TABLE: employee
+    DIC_COLUMN: sex
+    DISPLAY_ORDER: 30

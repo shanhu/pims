@@ -46,6 +46,12 @@
                             身份证
 						</th>
                         <th>
+                            类型
+						</th>
+                        <th>
+                            状态
+						</th>
+                        <th>
                             操作
 						</th>
 					</tr>
@@ -60,13 +66,20 @@
 							{{employee.name}}
 						</td>
 						<td>
-							{{employee.sex}}
+							{{employee.get_sex_display}}
 						</td>
+                       
 						<td>
 							{{employee.idCard}}
 						</td>
                         <td>
-							<a href="{% url 'employee_detail'  employee.id %}">查看</a> <a href="#">删除</a>
+							{{employee.get_type_display}}
+						</td>
+                        <td>
+							{{employee.get_status_display}}
+						</td>
+                        <td>
+							<a class="btn btn-primary btn-xs" href="{% url 'employee_detail'  employee.id %}"><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a> <!--<a  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal"  >删除</a>-->
 						</td>
 					</tr> 
                     {% endfor %}
@@ -96,6 +109,11 @@
 					<a href="#">下一页</a>
 				</li>
 			</ul>
+            
+            
+      
+ 
+
 {% endblock maincontent %}         
 
  

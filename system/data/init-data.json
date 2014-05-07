@@ -1,0 +1,103 @@
+[
+{
+  "pk": 1, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5973", 
+    "typeCode": "0", 
+    "dicTable": "employee", 
+    "dicColumn": "sex", 
+    "type": "sex", 
+    "displayOrder": 0
+  }
+},
+{
+  "pk": 2, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u7537", 
+    "typeCode": "1", 
+    "dicTable": "employee", 
+    "dicColumn": "sex", 
+    "type": "sex", 
+    "displayOrder": 1
+  }
+},
+{
+  "pk": 3, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u8ba1\u4ef6\u5de5", 
+    "typeCode": "1", 
+    "dicTable": "employee", 
+    "dicColumn": "type", 
+    "type": "employee_type", 
+    "displayOrder": 0
+  }
+},
+{
+  "pk": 4, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u8ba1\u65f6\u5de5", 
+    "typeCode": "2", 
+    "dicTable": "employee", 
+    "dicColumn": "type", 
+    "type": "employee_type", 
+    "displayOrder": 1
+  }
+},
+{
+  "pk": 5, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u56fa\u5b9a\u5de5\u8d44", 
+    "typeCode": "3", 
+    "dicTable": "employee", 
+    "dicColumn": "type", 
+    "type": "employee_type", 
+    "displayOrder": 2
+  }
+},
+{
+  "pk": 6, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5728\u5c97 ", 
+    "typeCode": "1", 
+    "dicTable": "employee", 
+    "dicColumn": "status", 
+    "type": "employee_status", 
+    "displayOrder": 0
+  }
+},
+{
+  "pk": 7, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u79bb\u804c", 
+    "typeCode": "0", 
+    "dicTable": "employee", 
+    "dicColumn": "status", 
+    "type": "employee_status", 
+    "displayOrder": 1
+  }
+},
+{
+  "pk": 1, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "3", 
+    "tel": "34", 
+    "name": "\u674e\u5c0f\u840c", 
+    "idCard": "3", 
+    "cardNum2": "3242342343253", 
+    "sex": "1", 
+    "cardNum1": "342354234234", 
+    "num": "1", 
+    "remarks": "\u674e\u5c0f\u840c\u662f\u4e2a\u597d\u540c\u5fd7\uff01", 
+    "joinTime": "2014-05-04T15:32:13", 
+    "type": "3"
+  }
+}
+]
