@@ -65,7 +65,7 @@ class MaterialTypeForm(forms.ModelForm):
     class Meta:
         model = MaterialType
         fields  = ['num', 'status', 'parent',   ]   
-    status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="员工状态" ) # Field name made lowercase.                
+    status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="物料类型状态" ) # Field name made lowercase.                
 
 
 

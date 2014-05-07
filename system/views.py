@@ -104,8 +104,8 @@ class MaterialTypeDetailView(SystemDetailView):
     model = MaterialType
     def get_context_data(self, **kwargs): 
         context = super(MaterialTypeDetailView, self).get_context_data(**kwargs)  
-        context['pageHeader'] = u"详细物料类型详细信息"
-        context['title'] = u"详细物料类型详细信息"
+        context['pageHeader'] = u"物料类型详细信息"
+        context['title'] = u"物料类型详细信息"
         return context
 class MaterialTypeCreateView(CreateView):
     form_class= MaterialTypeForm
@@ -114,8 +114,8 @@ class MaterialTypeCreateView(CreateView):
         context = super(MaterialTypeCreateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
         context['form'] = self.get_form(form_class)
-        context['pageHeader'] = u"详细物料类型详细信息"
-        context['title'] = u"详细物料类型详细信息"
+        context['pageHeader'] = u"物料类型详细信息"
+        context['title'] = u"物料类型详细信息"
         return context
     success_url =  reverse_lazy("material_type_list")
         
@@ -126,12 +126,9 @@ class MaterialTypeUpdateView(UpdateView):
 class MaterialTypeDeleteView(DeleteView):
     form_class= MaterialTypeForm
     model = MaterialType     
-    success_url = reverse_lazy('material_type_list')  
+    #success_url = reverse_lazy('material_type_list')  
     def post(self,*args, **kwargs):
-        employee = self.get_object();
-        if employee.cardNum1 != '' or employee.cardNum2 != '':
-            employee.status = 0
-            employee.save()
-        else:
-            employee.delete()
+        materialType = self.get_object(); 
+        materialType.status = 0
+        materialType.save() 
         return redirect('material_type_list');

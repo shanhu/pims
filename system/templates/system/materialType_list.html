@@ -64,7 +64,7 @@
 							{{material_type.parent.get_status_display}}
 						</td>
                         <td>
-					<!--		<a class="btn btn-primary btn-xs" href="{#% url 'material_type_delete'  material_type.id %#}"><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a>  -->  <a  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal"  >删除</a>
+                            <a class="btn btn-primary btn-xs" href="{% url 'material_type_detail'  material_type.id %}"><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a> 
 						</td>  
 					</tr> 
                     {% endfor %}
