@@ -202,13 +202,13 @@ class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
         fields  = ['num', 'name', 'idCard', 'tel', 'joinTime',  'cardNum1', 'cardNum2', 'remarks', 'sex', 'type', 'status',  ]
-    sex = forms.CharField(max_length=1, widget=forms.Select(choices=sexChoices)) # Field name made lowercase.    
-    type = forms.CharField(max_length=1, widget=forms.Select(choices=employeeTypeChoices)) # Field name made lowercase.   
-    status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) ) # Field name made lowercase.    
+    sex = forms.CharField(max_length=1, widget=forms.Select(choices=sexChoices), label="性别") # Field name made lowercase.    
+    type = forms.CharField(max_length=1, widget=forms.Select(choices=employeeTypeChoices),label= '员工类型') # Field name made lowercase.   
+    status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label ='员工状态') # Field name made lowercase.    
     input_formats = ['%Y-%m-%d %H:%M:%S',    # '2006-10-25 14:30:59'
         '%Y-%m-%d %H:%M',        # '2006-10-25 14:30'
         '%Y-%m-%d',              # '2006-10-25'
         ]
-    joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget())
+    joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget(), label='入职时间')
     
     
