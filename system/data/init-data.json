@@ -252,6 +252,54 @@
   }
 },
 {
+  "pk": 22, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u662f", 
+    "typeCode": "1", 
+    "dicTable": "salary_count_config", 
+    "dicColumn": "isdefault", 
+    "type": "salary_count_default", 
+    "displayOrder": 10
+  }
+},
+{
+  "pk": 23, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5426", 
+    "typeCode": "0", 
+    "dicTable": "salary_count_config", 
+    "dicColumn": "isdefault", 
+    "type": "salary_count_default", 
+    "displayOrder": 20
+  }
+},
+{
+  "pk": 24, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u662f", 
+    "typeCode": "1", 
+    "dicTable": "salary_time_config", 
+    "dicColumn": "isdefault", 
+    "type": "salary_time_default", 
+    "displayOrder": 10
+  }
+},
+{
+  "pk": 25, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5426", 
+    "typeCode": "0", 
+    "dicTable": "salary_time_config", 
+    "dicColumn": "isdefault", 
+    "type": "salary_time_default", 
+    "displayOrder": 20
+  }
+},
+{
   "pk": 1, 
   "model": "system.materialtype", 
   "fields": {
@@ -423,6 +471,227 @@
   }
 },
 {
+  "pk": 3, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "0", 
+    "tel": "dsaf", 
+    "name": "\u674e\u5927\u9f50", 
+    "idCard": "343443vfdsasdf", 
+    "cardNum2": "234", 
+    "sex": "1", 
+    "cardNum1": "324", 
+    "num": "234234", 
+    "remarks": "5324", 
+    "joinTime": "2014-05-10T23:49:00", 
+    "type": "2"
+  }
+},
+{
+  "pk": 5, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "", 
+    "name": "2234", 
+    "idCard": "34", 
+    "cardNum2": "", 
+    "sex": "0", 
+    "cardNum1": "", 
+    "num": "1", 
+    "remarks": "", 
+    "joinTime": "2014-05-06T21:52:33", 
+    "type": "1"
+  }
+},
+{
+  "pk": 6, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "3", 
+    "name": "324", 
+    "idCard": "2", 
+    "cardNum2": "34", 
+    "sex": "0", 
+    "cardNum1": "34", 
+    "num": "234", 
+    "remarks": "34", 
+    "joinTime": "2014-05-06T21:52:49", 
+    "type": "1"
+  }
+},
+{
+  "pk": 7, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "13900130343", 
+    "name": "\u738b1", 
+    "idCard": "1390101013431432324", 
+    "cardNum2": "234324", 
+    "sex": "1", 
+    "cardNum1": "234324", 
+    "num": "32893284", 
+    "remarks": "234234", 
+    "joinTime": "2014-05-06T20:55:51", 
+    "type": "1"
+  }
+},
+{
+  "pk": 8, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "0", 
+    "tel": "13900130343", 
+    "name": "\u738b1", 
+    "idCard": "1390101013431432324", 
+    "cardNum2": "234324", 
+    "sex": "1", 
+    "cardNum1": "234324", 
+    "num": "32893284", 
+    "remarks": "234234", 
+    "joinTime": "2014-05-07T22:51:50", 
+    "type": "1"
+  }
+},
+{
+  "pk": 9, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "13900130343", 
+    "name": "\u738b1", 
+    "idCard": "1390101013431432324", 
+    "cardNum2": "234324", 
+    "sex": "1", 
+    "cardNum1": "234324", 
+    "num": "32893284", 
+    "remarks": "234234", 
+    "joinTime": "2014-05-06T21:13:53", 
+    "type": "1"
+  }
+},
+{
+  "pk": 10, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "", 
+    "name": "2234", 
+    "idCard": "34", 
+    "cardNum2": "32", 
+    "sex": "0", 
+    "cardNum1": "32", 
+    "num": "12", 
+    "remarks": "23", 
+    "joinTime": "2014-05-06T21:15:36", 
+    "type": "1"
+  }
+},
+{
+  "pk": 11, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "23423423423", 
+    "name": "2234", 
+    "idCard": "34", 
+    "cardNum2": "32", 
+    "sex": "1", 
+    "cardNum1": "32", 
+    "num": "12", 
+    "remarks": "233", 
+    "joinTime": "2014-05-06T21:16:01", 
+    "type": "1"
+  }
+},
+{
+  "pk": 12, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "23423423423", 
+    "name": "2234", 
+    "idCard": "34", 
+    "cardNum2": "32", 
+    "sex": "1", 
+    "cardNum1": "32", 
+    "num": "12", 
+    "remarks": "233", 
+    "joinTime": "2014-05-06T21:16:21", 
+    "type": "1"
+  }
+},
+{
+  "pk": 13, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "23423423423", 
+    "name": "2234", 
+    "idCard": "34", 
+    "cardNum2": "32", 
+    "sex": "1", 
+    "cardNum1": "32", 
+    "num": "12", 
+    "remarks": "23332", 
+    "joinTime": "2014-05-06T21:16:34", 
+    "type": "1"
+  }
+},
+{
+  "pk": 14, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "139001303431", 
+    "name": "2234", 
+    "idCard": "34", 
+    "cardNum2": "32", 
+    "sex": "0", 
+    "cardNum1": "32", 
+    "num": "12", 
+    "remarks": "2335", 
+    "joinTime": "2014-05-06T21:17:32", 
+    "type": "1"
+  }
+},
+{
+  "pk": 15, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "0", 
+    "tel": "1231231", 
+    "name": "\u5c712", 
+    "idCard": "1231231231", 
+    "cardNum2": "234324", 
+    "sex": "1", 
+    "cardNum1": "1213123", 
+    "num": "3", 
+    "remarks": "3243234", 
+    "joinTime": "2014-05-06T23:49:08", 
+    "type": "1"
+  }
+},
+{
+  "pk": 16, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": "1231231", 
+    "name": "\u5c713", 
+    "idCard": "1231231231", 
+    "cardNum2": "234324", 
+    "sex": "1", 
+    "cardNum1": "1213123", 
+    "num": "3", 
+    "remarks": "3243243", 
+    "joinTime": "2014-05-06T21:25:05", 
+    "type": "1"
+  }
+},
+{
   "pk": 1, 
   "model": "system.workclass", 
   "fields": {
@@ -432,6 +701,30 @@
     "cardNum": "ABC000001", 
     "remarks": "\u65e9\u73ed\u73ed\u6b2101", 
     "type": "1"
+  }
+},
+{
+  "pk": 1, 
+  "model": "system.salarycountconfig", 
+  "fields": {
+    "process": 1, 
+    "price": "0.50", 
+    "material": 1, 
+    "startTime": "2014-04-01T23:46:00", 
+    "remarks": "\u7b2c\u4e8c\u5b63\u5ea6\u9ec4\u82b1\u9c7c\u52a0\u5de5\u8ba1\u4ef6\u5de5\u8d44\u6c34\u5e73", 
+    "endTime": "2014-06-30T23:46:00", 
+    "isDefault": "0"
+  }
+},
+{
+  "pk": 1, 
+  "model": "system.salarytimeconfig", 
+  "fields": {
+    "remarks": "2014\u5e74\u8ba1\u65f6\u5de5\u8d44\u5355\u4ef71", 
+    "price": "1.12", 
+    "endTime": "2014-12-31T23:51:00", 
+    "startTime": "2014-01-01T23:51:00", 
+    "isDefault": "1"
   }
 }
 ]
