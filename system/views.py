@@ -60,7 +60,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 
 class EmployeeCreateView(CreateView):
-    #form_class= EmployeeForm
+    form_class= EmployeeForm
     model = Employee
     def get_context_data(self, **kwargs):
         context = super(EmployeeCreateView, self).get_context_data(**kwargs)
@@ -86,7 +86,7 @@ class EmployeeDeleteView(DeleteView):
             employee.delete()
         return redirect('employee_list');
             
-#--------------------------------------------------物料管理 界面定义------------------------------------------------------------------   
+#--------------------------------------------------物料类型管理 界面定义------------------------------------------------------------------   
 from system.models import MaterialType, MaterialTypeForm
 
 class MaterialTypeListView(SystemListView): 
@@ -135,3 +135,154 @@ class MaterialTypeDeleteView(DeleteView):
         materialType.status = 0
         materialType.save() 
         return redirect('material_type_list');
+           
+#--------------------------------------------------物料管理 界面定义------------------------------------------------------------------   
+from system.models import Material, MaterialForm
+
+class MaterialListView(SystemListView): 
+    template_name = 'system/material_list.html'
+    context_object_name = 'material_list'
+    model = Material
+    paginate_by = 10
+    def get_context_data(self, **kwargs): 
+        context = super(MaterialListView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"物料管理"
+        context['title'] = u"物料管理"        
+        return context  
+
+class MaterialDetailView(SystemDetailView): 
+    template_name = 'system/material_detail.html'
+    context_object_name = 'material'
+    model = Material
+    def get_context_data(self, **kwargs): 
+        context = super(MaterialDetailView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"物料详细信息"
+        context['title'] = u"物料详细信息"
+        return context
+class MaterialCreateView(CreateView):
+    form_class= MaterialForm
+    model = Material
+    def get_context_data(self, **kwargs):
+        context = super(MaterialCreateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"物料详细信息"
+        context['title'] = u"物料详细信息"
+        return context
+    success_url =  reverse_lazy("material_list")
+        
+class MaterialUpdateView(UpdateView):
+    form_class= MaterialForm
+    model = Material
+    success_url =  reverse_lazy("material_list")
+    
+class MaterialDeleteView(DeleteView):
+    form_class= MaterialForm
+    model = Material     
+    #success_url = reverse_lazy('material_type_list')  
+    def post(self,*args, **kwargs):
+        material = self.get_object(); 
+        material.status = 0
+        material.save() 
+        return redirect('material_list');
+        
+          
+#--------------------------------------------------工艺管理 界面定义------------------------------------------------------------------   
+from system.models import Process, ProcessForm
+
+class ProcessListView(SystemListView): 
+    template_name = 'system/process_list.html'
+    context_object_name = 'process_list'
+    model = Process
+    paginate_by = 10
+    def get_context_data(self, **kwargs): 
+        context = super(ProcessListView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"工艺管理"
+        context['title'] = u"工艺管理"        
+        return context  
+
+class ProcessDetailView(SystemDetailView): 
+    template_name = 'system/process_detail.html'
+    context_object_name = 'process'
+    model = Process
+    def get_context_data(self, **kwargs): 
+        context = super(ProcessDetailView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"工艺详细信息"
+        context['title'] = u"工艺详细信息"
+        return context
+class ProcessCreateView(CreateView):
+    form_class= ProcessForm
+    model = Process
+    def get_context_data(self, **kwargs):
+        context = super(ProcessCreateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"创建工艺信息"
+        context['title'] = u"创建工艺信息"
+        return context
+    success_url =  reverse_lazy("process_list")
+        
+class ProcessUpdateView(UpdateView):
+    form_class= ProcessForm
+    model = Process
+    success_url =  reverse_lazy("process_list")
+    
+class ProcessDeleteView(DeleteView):
+    form_class= ProcessForm
+    model = Process     
+    #success_url = reverse_lazy('material_type_list')  
+    def post(self,*args, **kwargs):
+        process = self.get_object(); 
+        process.status = 0
+        process.save() 
+        return redirect('process_list');
+   
+#--------------------------------------------------班次管理 界面定义------------------------------------------------------------------   
+from system.models import WorkClass, WorkClassForm
+
+class WorkClassListView(SystemListView): 
+    template_name = 'system/workclass_list.html'
+    context_object_name = 'workclass_list'
+    model = WorkClass
+    paginate_by = 10
+    def get_context_data(self, **kwargs): 
+        context = super(WorkClassListView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"班次管理"
+        context['title'] = u"班次管理"        
+        return context  
+
+class WorkClassDetailView(SystemDetailView): 
+    template_name = 'system/workclass_detail.html'
+    context_object_name = 'workclass'
+    model = WorkClass
+    def get_context_data(self, **kwargs): 
+        context = super(WorkClassDetailView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"班次详细信息"
+        context['title'] = u"班次详细信息"
+        return context
+class WorkClassCreateView(CreateView):
+    form_class= WorkClassForm
+    model = WorkClass
+    def get_context_data(self, **kwargs):
+        context = super(WorkClassCreateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"创建班次信息"
+        context['title'] = u"创建班次信息"
+        return context
+    success_url =  reverse_lazy("workclass_list")
+        
+class WorkClassUpdateView(UpdateView):
+    form_class= WorkClassForm
+    model = WorkClass
+    success_url =  reverse_lazy("workclass_list")
+    
+class WorkClassDeleteView(DeleteView):
+    form_class= WorkClassForm
+    model = WorkClass     
+    #success_url = reverse_lazy('material_type_list')  
+    def post(self,*args, **kwargs):
+        workclass = self.get_object(); 
+        workclass.status = 0
+        workclass.save() 
+        return redirect('workclass_list');

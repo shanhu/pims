@@ -22,5 +22,25 @@ urlpatterns = patterns('',
     url(r'^materialTypes/(?P<pk>\d+)$', views.MaterialTypeDetailView.as_view(), name="material_type_detail"),
     
 
+    url(r'^material/$', views.MaterialListView.as_view(), name="material_list"),
+    url(r'^material/add/$', views.MaterialCreateView.as_view(), name="material_add"),
+    url(r'^material/(?P<pk>\d+)/$', views.MaterialUpdateView.as_view(), name="material_update"),
+    url(r'^material/(?P<pk>\d+)/delete$', views.MaterialDeleteView.as_view(), name="material_delete"),
+    url(r'^materials/(?P<pk>\d+)$', views.MaterialDetailView.as_view(), name="material_detail"),
+    
+    
+    
+    url(r'^process/$', views.ProcessListView.as_view(), name="process_list"),
+    url(r'^process/add/$', views.ProcessCreateView.as_view(), name="process_add"),
+    url(r'^process/(?P<pk>\d+)/$', views.ProcessUpdateView.as_view(), name="process_update"),
+    url(r'^process/(?P<pk>\d+)/delete$', views.ProcessDeleteView.as_view(), name="process_delete"),
+    url(r'^processes/(?P<pk>\d+)$', views.ProcessDetailView.as_view(), name="process_detail"),
+    
+      
+    url(r'^workclass/$', views.WorkClassListView.as_view(), name="workclass_list"),
+    url(r'^workclass/add/$', views.WorkClassCreateView.as_view(), name="workclass_add"),
+    url(r'^workclass/(?P<pk>\d+)/$', views.WorkClassUpdateView.as_view(), name="workclass_update"),
+    url(r'^workclass/(?P<pk>\d+)/delete$', views.WorkClassDeleteView.as_view(), name="workclass_delete"),
+    url(r'^workclasses/(?P<pk>\d+)$', views.WorkClassDetailView.as_view(), name="workclass_detail"),
     
 )

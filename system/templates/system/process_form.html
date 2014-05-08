@@ -1,0 +1,18 @@
+{% extends "system/base_detail.html" %}
+{% load bootstrap3 %}
+{% block maincontent %}
+
+<form action="" method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    {% buttons %}
+        <button type="submit" class="btn btn-primary">
+             <i class="fa fa-save"></i>&nbsp;&nbsp;保存
+        </button> 
+        <a  class="btn btn-primary"  href="{% url 'process_list' %}" >
+            <i class="fa fa-arrow-left"></i> &nbsp;&nbsp;返回
+        </a> 
+    {% endbuttons %}
+</form>
+
+{% endblock maincontent %}          

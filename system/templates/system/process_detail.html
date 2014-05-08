@@ -1,0 +1,97 @@
+{% extends "system/base_detail.html" %}
+
+{% block maincontent %}
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+						<div class="panel-heading">
+							<h3 class="panel-title">
+								{{process.num}}&nbsp;&nbsp;/&nbsp;&nbsp;{{process.get_status_display}} 
+							</h3>
+						</div>
+						<div class="panel-body"> 
+                            <div class="row clearfix">
+                                <div class="col-md-6 column">
+                                    <dl class="dl-horizontal">
+                                      <dt>编号：</dt>
+                                      <dd>{{process.num}}</dd>
+                                    </dl>
+                                    <dl class="dl-horizontal">
+                                    <dt>名称：</dt>
+                                      <dd>{{process.name}}</dd>
+                                    </dl>
+                                     <dl class="dl-horizontal">
+                                    <dt>是否前工艺：</dt>
+                                      <dd>{{process.get_isFirst_display}}</dd>
+                                    </dl> 
+                                    <dl class="dl-horizontal">
+                                      <dt>工艺状态：</dt>
+                                      <dd>{{process.get_status_display}}</dd>
+                                    </dl> 
+                                    
+                                  <dl class="dl-horizontal">
+                                  <dt>备注：</dt>
+                                  <dd>{{process.remarks}}</dd>
+                                </dl> 
+ 
+                                </div>
+                                <div class="col-md-6 column">
+                                
+                                    <dl class="dl-horizontal">
+                                      <dt>前工艺编号：</dt>
+                                      <dd>{{process.firstProcess.num}}</dd>
+                                    </dl>
+                                      <dl class="dl-horizontal">
+                                      <dt>前工艺名称：</dt>
+                                      <dd>{{process.firstProcess.name}}</dd>
+                                    </dl> 
+                                      <dl class="dl-horizontal">
+                                      <dt>前工艺状态：</dt>
+                                      <dd>{{process.firstProcess.get_status_display}}</dd>
+                                    </dl> 
+                                     <dl class="dl-horizontal">
+                                      <dt>工艺卡号：</dt>
+                                      <dd>{{process.card_num}}</dd>
+                                    </dl> 
+                                </div> 
+                            </div> 
+						</div> 
+					</div>
+
+ <div class="btn-group">
+		 <a class="btn btn-primary"  href="{% url 'process_list' %}" ><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;返回</a>
+         <a class="btn btn-primary"   href="{% url 'process_update' process.id %}"><i class="fa fa-edit"></i>&nbsp;&nbsp;编辑</a>
+         <a class="btn btn-primary  " data-toggle="modal" data-target="#myModal"  ><i class="fa fa-trash-o"></i>&nbsp;&nbsp;删除</a>
+</div>
+
+      
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">{{modal_header}}</h4>
+      </div>
+      <form action="{% url 'process_delete' process.id %}" method="post">{% csrf_token %}
+      <div class="modal-body"> 
+        <p>是否确认删除 "{{ process.name }}物料"？ </p> 
+        <input type="hidden" name="id" value="{{process.id}}" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="submit" class="btn btn-primary">确认</button>
+      </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+ 
+                    
+{% endblock maincontent %}          

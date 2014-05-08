@@ -38,7 +38,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.formtools', 
     'bootstrap3',
-    'system'
+    'system', 
+    'bootstrap3_datetime', 
+    
 )
 
 MIDDLEWARE_CLASSES = (

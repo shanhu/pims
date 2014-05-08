@@ -1,0 +1,125 @@
+{% extends "system/base_list.html" %}
+
+{% block maincontent %}
+
+<div >
+    <form role="form" class="form-inline">
+    
+                    <div class="row clearfix">
+						<div class="col-md-12 column">
+                            <div class="form-group">
+                                 <label for="exampleInputEmail1">工号</label><input type="email" class="form-control" id="exampleInputEmail1" />
+                            </div>
+                             <div class="form-group">
+                                 <label for="exampleInputEmail1">姓名</label><input type="email" class="form-control" id="exampleInputEmail1" />
+                            </div>
+                            <div class="form-group">
+                                 <label for="exampleInputPassword1">身份证</label><input type="password" class="form-control" id="exampleInputPassword1" />
+                            </div>
+                          <div class="form-group">
+                                 <label for="sex">性别</label><input type="text" class="form-control" id="sex"  name="sex" />
+                              </div> 
+						</div>
+						<div class="col-md-4 column">
+                                <a   class="btn btn-info " ><i class="fa fa-search"></i>&nbsp;&nbsp;查询</a>
+                            <a   class="btn btn-info " href="{% url 'material_add' %}"><i class="fa fa-plus-square"></i>&nbsp;&nbsp;新增</a>
+						</div>
+					</div>
+                   
+                     
+    </form>
+</div>
+
+	<table class="table table-hover table-condensed">
+				<thead>
+					<tr>
+						<th>
+							编号
+						</th>
+                        	<th>
+							名称
+						</th>
+                        <th>
+                            物料类型编号
+						</th>
+                         <th>
+                            统计方式
+						</th>
+                         <th>
+                            单位
+						</th>
+                         <th>
+                            换算
+						</th>
+                        <th>
+                            物料卡编号
+						</th>                        
+                         <th>
+                            状态
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+                {% for material in material_list %}
+					<tr class={% cycle 'warning'  'success' %}>
+						<td>
+							{{material.num}}
+						</td> 
+                        <td>
+							{{material.name}}
+						</td> 
+                        <td>
+							{{material.materialType.num}}
+						</td>
+                         <td>
+							{{material.get_mode_display}}
+						</td>
+                         <td>
+							{{material.unit}}
+						</td>
+                         <td>
+							{{material.conver}}
+						</td>
+                          <td>
+							{{material.card_num}}
+						</td>
+                        <td>
+							{{material.get_status_display}}
+						</td>
+                        <td>
+                            <a class="btn btn-primary btn-xs" href="{% url 'material_detail'  material.id %}"><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a> 
+						</td>  
+					</tr> 
+                    {% endfor %}
+				</tbody>
+			</table>
+	
+    
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">{{modal_header}}</h4>
+      </div>
+      <form action="" method="post">{% csrf_token %}
+      <div class="modal-body"> 
+        <p>是否确认删除   物料类型？ </p> 
+        <input type="hidden" name="id" value="" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="submit" class="btn btn-primary">确认</button>
+      </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->     
+      
+ 
+
+{% endblock maincontent %}         
+
+ 

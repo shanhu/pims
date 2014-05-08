@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Tasks SYSTEM "Tasks-5.1.dtd">
+<!-- eric5 tasks file for project pims -->
+<!-- Saved: 2014-05-08, 17:57:13 -->
+<Tasks version="5.1">
+  <ProjectScanFilter></ProjectScanFilter>
+  <Task priority="1" completed="False" type="2">
+    <Summary>WARNING: keep the secret key used in production secret!</Summary>
+    <Description></Description>
+    <Created>2014-05-08, 17:28:22</Created>
+    <Resource>
+      <Filename>pims/settings.py</Filename>
+      <Linenumber>19</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="2">
+    <Summary>WARNING: don't run with debug turned on in production!</Summary>
+    <Description></Description>
+    <Created>2014-05-08, 17:28:22</Created>
+    <Resource>
+      <Filename>pims/settings.py</Filename>
+      <Linenumber>22</Linenumber>
+    </Resource>
+  </Task>
+</Tasks>
