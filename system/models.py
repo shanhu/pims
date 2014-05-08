@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.core.urlresolvers import reverse
-from django.forms.extras import widgets 
+
 from django import forms
 from bootstrap3_datetime.widgets import DateTimePicker
        
