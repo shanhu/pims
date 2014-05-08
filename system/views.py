@@ -286,3 +286,108 @@ class WorkClassDeleteView(DeleteView):
         workclass.status = 0
         workclass.save() 
         return redirect('workclass_list');
+
+
+
+ 
+#--------------------------------------------------计件工资参数管理 界面定义------------------------------------------------------------------   
+from system.models import SalaryCountConfig, SalaryCountConfigForm
+
+class SalaryCountConfigListView(SystemListView): 
+    template_name = 'system/salarycountconfig_list.html'
+    context_object_name = 'salarycountconfig_list'
+    model = SalaryCountConfig
+    paginate_by = 10
+    def get_context_data(self, **kwargs): 
+        context = super(SalaryCountConfigListView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"计件工资管理"
+        context['title'] = u"计件工资管理"        
+        return context  
+
+class SalaryCountConfigDetailView(SystemDetailView): 
+    template_name = 'system/salarycountconfig_detail.html'
+    context_object_name = 'salarycount'
+    model = SalaryCountConfig
+    def get_context_data(self, **kwargs): 
+        context = super(SalaryCountConfigDetailView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"计件工资详细信息"
+        context['title'] = u"计件工资详细信息"
+        return context
+class SalaryCountConfigCreateView(CreateView):
+    form_class= SalaryCountConfigForm
+    model = SalaryCountConfig
+    def get_context_data(self, **kwargs):
+        context = super(SalaryCountConfigCreateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"创建计件工资信息"
+        context['title'] = u"创建计件工资信息"
+        return context
+    success_url =  reverse_lazy("salarycount_list")
+        
+class SalaryCountConfigUpdateView(UpdateView):
+    form_class= SalaryCountConfigForm
+    model = SalaryCountConfig
+    success_url =  reverse_lazy("salarycount_list")
+    
+class SalaryCountConfigDeleteView(DeleteView):
+    form_class= SalaryCountConfigForm
+    model = SalaryCountConfig     
+    #success_url = reverse_lazy('material_type_list')  
+    def post(self,*args, **kwargs):
+        salarycountconfig = self.get_object(); 
+        salarycountconfig.status = 0
+        salarycountconfig.save() 
+        return redirect('salarycount_list');
+
+
+#--------------------------------------------------计件工资参数管理 界面定义------------------------------------------------------------------   
+from system.models import SalaryTimeConfig, SalaryTimeConfigForm
+
+class SalaryTimeConfigListView(SystemListView): 
+    template_name = 'system/salarytimeconfig_list.html'
+    context_object_name = 'salarytimeconfig_list'
+    model = SalaryTimeConfig
+    paginate_by = 10
+    def get_context_data(self, **kwargs): 
+        context = super(SalaryTimeConfigListView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"计件工资管理"
+        context['title'] = u"计件工资管理"        
+        return context  
+
+class SalaryTimeConfigDetailView(SystemDetailView): 
+    template_name = 'system/salarytimeconfig_detail.html'
+    context_object_name = 'salarytime'
+    model = SalaryTimeConfig
+    def get_context_data(self, **kwargs): 
+        context = super(SalaryTimeConfigDetailView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"计时工资详细信息"
+        context['title'] = u"计时工资详细信息"
+        return context
+class SalaryTimeConfigCreateView(CreateView):
+    form_class= SalaryTimeConfigForm
+    model = SalaryTimeConfig
+    def get_context_data(self, **kwargs):
+        context = super(SalaryTimeConfigCreateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"创建计时工资信息"
+        context['title'] = u"创建计时工资信息"
+        return context
+    success_url =  reverse_lazy("salarytime_list")
+        
+class SalaryTimeConfigUpdateView(UpdateView):
+    form_class= SalaryTimeConfigForm
+    model = SalaryTimeConfig
+    success_url =  reverse_lazy("salarytime_list")
+    
+class SalaryTimeConfigDeleteView(DeleteView):
+    form_class= SalaryTimeConfigForm
+    model = SalaryTimeConfig     
+    #success_url = reverse_lazy('material_type_list')  
+    def post(self,*args, **kwargs):
+        salarytimeconfig = self.get_object(); 
+        salarytimeconfig.status = 0
+        salarytimeconfig.save() 
+        return redirect('salarytime_list');
+

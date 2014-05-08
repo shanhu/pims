@@ -87,7 +87,7 @@ class Material(models.Model):
        # managed = False
         db_table = 'material'
     def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} num {1} name {2} conver {3} mode {4} card_num {5} remarks {6} ".format(self.id , self.num ,  self.name ,  self.conver ,  self.mode ,  self.card_num ,  self.remarks)
+        return  u" 编号({0}) 名称({1}) 物料卡号({2})".format(  self.num ,  self.name  , self.card_num )
 
    
 class MaterialForm(forms.ModelForm): 
@@ -252,20 +252,53 @@ class Card(models.Model):
         
         
 
-class SalaryCountConfig(models.Model):
+class SalaryCountConfig(models.Model): 
+    iddefaultsChoices = DictConfig.getTypeChoices(type="salary_count_default")
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    material = models.ForeignKey(Material, db_column='MATERIAL_ID', blank=True, null=True) # Field name made lowercase.
-    process = models.ForeignKey(Process, db_column='PROCESS_ID', blank=True, null=True) # Field name made lowercase.
-    price = models.DecimalField(db_column='PRICE', max_digits=10, decimal_places=2) # Field name made lowercase.
-    isDefault = models.CharField(db_column='IS_DEFAULT', max_length=1, blank=True) # Field name made lowercase.
-    startTime = models.DateTimeField(auto_now=True, db_column='START_TIME',  blank=True) # Field name made lowercase.
-    endTime = models.DateTimeField(auto_now=True, db_column='END_TIME',  blank=True) # Field name made lowercase. 
-    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase. 
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID',verbose_name="物料" ,  ) # Field name made lowercase.
+    process = models.ForeignKey(Process, db_column='PROCESS_ID',verbose_name="工艺" ,  ) # Field name made lowercase.
+    price = models.DecimalField(db_column='PRICE', max_digits=10, decimal_places=2,verbose_name="单价" ) # Field name made lowercase.
+    isDefault = models.CharField(db_column='IS_DEFAULT', max_length=1, blank=True,verbose_name="是否默认", choices=iddefaultsChoices ) # Field name made lowercase.
+    startTime = models.DateTimeField(db_column='START_TIME',  blank=True,verbose_name="开始时间"  ) # Field name made lowercase.
+    endTime = models.DateTimeField( db_column='END_TIME',  blank=True,verbose_name="结束时间" ) # Field name made lowercase. 
+    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True,verbose_name="备注" ) # Field name made lowercase. 
     class Meta:
        # managed = False
         db_table = 'salary_count_config'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.price ,  self.isDefault ,  self.remarks)
  
-    
+
+class SalaryCountConfigForm(forms.ModelForm): 
+    startTime = forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="开始时间" )
+    endTime =  forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="结束时间" )
+    class Meta:
+        model = SalaryCountConfig
+        fields  = '__all__'
+
+class SalaryTimeConfig(models.Model): 
+    iddefaultsChoices = DictConfig.getTypeChoices(type="salary_time_default")
+    id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
+    #material = models.ForeignKey(Material, db_column='MATERIAL_ID',verbose_name="物料" ,  ) # Field name made lowercase.
+    #process = models.ForeignKey(Process, db_column='PROCESS_ID',verbose_name="工艺" ,  ) # Field name made lowercase.
+    price = models.DecimalField(db_column='PRICE', max_digits=10, decimal_places=2,verbose_name="单价" ) # Field name made lowercase.
+    isDefault = models.CharField(db_column='IS_DEFAULT', max_length=1, blank=True,verbose_name="是否默认", choices=iddefaultsChoices ) # Field name made lowercase.
+    startTime = models.DateTimeField( db_column='START_TIME',  blank=True,verbose_name="开始时间"  ) # Field name made lowercase.
+    endTime = models.DateTimeField( db_column='END_TIME',  blank=True,verbose_name="结束时间" ) # Field name made lowercase. 
+    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True,verbose_name="备注" ) # Field name made lowercase. 
+    class Meta:
+       # managed = False
+        db_table = 'salary_time_config'
+    def __unicode__(self):  # Python 3: def __str__(self):
+        return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.price ,  self.isDefault ,  self.remarks)
+ 
+
+class SalaryTimeConfigForm(forms.ModelForm): 
+    startTime =  forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="开始时间" )
+    endTime =  forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="结束时间" )
+    class Meta:
+        model = SalaryTimeConfig
+        fields  = '__all__' 
+
+
     

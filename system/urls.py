@@ -43,4 +43,19 @@ urlpatterns = patterns('',
     url(r'^workclass/(?P<pk>\d+)/delete$', views.WorkClassDeleteView.as_view(), name="workclass_delete"),
     url(r'^workclasses/(?P<pk>\d+)$', views.WorkClassDetailView.as_view(), name="workclass_detail"),
     
+    
+    
+    url(r'^salaryCount/$', views.SalaryCountConfigListView.as_view(), name="salarycount_list"),
+    url(r'^salaryCount/add/$', views.SalaryCountConfigCreateView.as_view(), name="salarycount_add"),
+    url(r'^salaryCount/(?P<pk>\d+)/$', views.SalaryCountConfigUpdateView.as_view(), name="salarycount_update"),
+    url(r'^salaryCount/(?P<pk>\d+)/delete$', views.SalaryCountConfigDeleteView.as_view(), name="salarycount_delete"),
+    url(r'^salaryCounts/(?P<pk>\d+)$', views.SalaryCountConfigDetailView.as_view(), name="salarycount_detail"),
+    
+    
+    url(r'^salaryTime/$', views.SalaryTimeConfigListView.as_view(), name="salarytime_list"),
+    url(r'^salaryTime/add/$', views.SalaryTimeConfigCreateView.as_view(), name="salarytime_add"),
+    url(r'^salaryTime/(?P<pk>\d+)/$', views.SalaryTimeConfigUpdateView.as_view(), name="salarytime_update"),
+    url(r'^salaryTime/(?P<pk>\d+)/delete$', views.SalaryTimeConfigDeleteView.as_view(), name="salarytime_delete"),
+    url(r'^salaryTimes/(?P<pk>\d+)$', views.SalaryTimeConfigDetailView.as_view(), name="salarytime_detail"),
+    
 )
