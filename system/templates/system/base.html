@@ -59,49 +59,49 @@
                             <li class="nav-header">
                                 <i class='fa fa-users'></i> 人事管理
                             </li>
-                            <li class="active">
+                            <li class="{{sidebar.employee_add}}">
                                 <a href="{% url 'employee_add' %}">员工注册</a>
                             </li>
-                            <li>
+                            <li class="{{sidebar.employee_list}}">
                                 <a href="{% url 'employee_list' %}">员工汇总</a>
                             </li>
                             <li class="nav-divider">
                             <li class="nav-header">
                                  <i class='fa fa-money'></i>  工资配置模块
                             </li>
-                            <li>
-                                <a href="#">添加工资参数</a>
+                            <li class="{{sidebar.salary_count_config}}" >
+                                <a href="#">计件工资参数</a>
                             </li>
-                            <li>
-                                <a href="#">工资参数汇总</a>
+                            <li class="{{sidebar.salary_time_config}}" >
+                                <a href="#">计时工资参数</a>
                             </li>
                                <li class="nav-divider">
                                <li class="nav-header">
                                   <i class='fa fa-credit-card'></i> 卡片管理
                             </li>
-                                <li>
+                                <li class="{{sidebar.card}}">
                                 <a href="#">卡片管理</a>
                             </li>
                             <li class="nav-divider">
                             <li class="nav-header">
                                   <i class='fa fa-shopping-cart'></i> 物料管理
                             </li>
-							<li>
+							<li class="{{sidebar.material_type}}" >
 								<a href="#">物料类型管理</a>
 							</li>
-							<li>
+							<li class="{{sidebar.material}}" >
 								<a href="#">物料管理</a>
 							</li>
                             <li class="nav-divider">
 							<li class="nav-header">
 								  <i class='fa fa-sort-numeric-asc'></i> 工艺管理
 							</li>
-							<li>
+							<li  class="{{sidebar.process}}" >
 								<a href="#">工艺管理</a>
 							</li>
                            
                             <li class="nav-divider">
-                            <li>
+                            <li  class="{{sidebar.help}}" >
                                 <a href="#">帮助</a>
                             </li>
                         </ul> 

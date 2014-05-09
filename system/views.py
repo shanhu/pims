@@ -43,6 +43,7 @@ class EmployeeListView(SystemListView):
         context = super(EmployeeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"员工汇总"
         context['title'] = u"员工汇总"
+        context['sidebar'] = {'employee_list':'active'}
         return context
     
 class EmployeeDetailView(SystemDetailView): 
@@ -53,6 +54,7 @@ class EmployeeDetailView(SystemDetailView):
         context = super(EmployeeDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"员工详细信息"
         context['title'] = u"员工详细信息"
+        context['sidebar'] = {'employee_list':'active'}
         return context 
 
 from django.views.generic.edit import  CreateView, UpdateView, DeleteView
@@ -68,11 +70,13 @@ class EmployeeCreateView(CreateView):
         context['form'] = self.get_form(form_class)
         context['pageHeader'] = u"员工注册"
         context['title'] = u"员工注册"
+        context['sidebar'] = {'employee_add':'active'}
         return context
         
 class EmployeeUpdateView(UpdateView):
     form_class= EmployeeForm
     model = Employee 
+    
 class EmployeeDeleteView(DeleteView):
     form_class= EmployeeForm
     model = Employee     
@@ -260,6 +264,7 @@ class WorkClassDetailView(SystemDetailView):
         context['pageHeader'] = u"班次详细信息"
         context['title'] = u"班次详细信息"
         return context
+
 class WorkClassCreateView(CreateView):
     form_class= WorkClassForm
     model = WorkClass
