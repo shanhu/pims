@@ -24,7 +24,53 @@ class DictConfig(models.Model):
         choices = []
         for t in types:
             choices.append((t.typeCode, t.typeDesc)) 
-        return choices
+        return choices 
+
+class Card(models.Model):
+    id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
+    num = models.CharField(db_column='NUM', max_length=20) # Field name made lowercase.
+    serial_num = models.IntegerField(db_column='SERIAL_NUM') # Field name made lowercase.
+    type = models.CharField(db_column='TYPE', max_length=1) # Field name made lowercase.
+    owner_id = models.IntegerField(db_column='OWNER_ID', blank=True, null=True) # Field name made lowercase.
+    status = models.CharField(db_column='STATUS', max_length=1) # Field name made lowercase.
+    remarks = models.CharField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase.
+    class Meta:
+        #managed = False
+        db_table = 'card'
+    def __unicode__(self):  # Python 3: def __str__(self):
+        return  u"id {0} num {1} name {2} remarks {3} ".format(self.id , self.num ,  self.remarks)
+        
+    
+        
+class Employee(models.Model):
+    
+    sexChoices = DictConfig.getTypeChoices(type="sex")
+    employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
+    statusChoices = DictConfig.getTypeChoices(type="employee_status")
+    
+    id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
+    num = models.CharField(db_column='NUM', max_length=20, verbose_name="员工号",  unique=True) # Field name made lowercase.
+    name = models.CharField(db_column='NAME', max_length=20, verbose_name="姓名") # Field name made lowercase.
+    sex = models.CharField(db_column='SEX', max_length=1, verbose_name="性别", choices=sexChoices) # Field name made lowercase.
+    idCard = models.CharField(db_column='IDCARD', max_length=20,verbose_name="身份证") # Field name made lowercase.
+    tel = models.CharField(db_column='TEL', max_length=20, blank=True,  verbose_name="联系方式") # Field name made lowercase.
+    joinTime = models.DateTimeField(db_column='JOIN_TIME' , )#verbose_name="入职时间"
+    type = models.CharField(db_column='TYPE', max_length=1, verbose_name="员工类型",  choices=employeeTypeChoices) # Field name made lowercase.   
+    status = models.CharField(db_column='STATUS', max_length=1, verbose_name="员工状态" , choices=statusChoices) # Field name made lowercase.
+    cardNum1 = models.CharField(db_column='CARD_NUM1', max_length=20, blank=True,verbose_name="工作卡号") # Field name made lowercase.
+    cardNum2 = models.CharField(db_column='CARD_NUM2', max_length=20, blank=True,verbose_name="员工卡号") # Field name made lowercase.
+    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True,verbose_name="备注") # Field name made lowercase.
+     
+    class Meta:
+       # managed = False
+        db_table = 'employee'
+    def __unicode__(self):  # Python 3: def __str__(self):
+        return  u"id {0} num {1} name {2}  remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
+    def get_absolute_url(self):
+        return reverse('employee_detail', kwargs={'pk': self.pk})
+
+
+        
 
 class Workshop(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
@@ -46,7 +92,7 @@ class WorkGroup(models.Model):
         db_table = 'work_group'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"id {0} name {1}  ".format(self.id ,  self.name ) 
-    
+  
 
 class MaterialType(models.Model):
     choices = DictConfig.getTypeChoices(type = 'material_type_status')
@@ -123,12 +169,7 @@ class Process(models.Model):
 class ProcessForm(forms.ModelForm):  
     class Meta:
         model = Process
-        fields  = '__all__'
- 
-
-
-
-
+        fields  = '__all__' 
 
          
 class Terminal(models.Model):
@@ -148,35 +189,15 @@ class Terminal(models.Model):
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
         
-         
-class Employee(models.Model):
-    
-    sexChoices = DictConfig.getTypeChoices(type="sex")
-    employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
-    statusChoices = DictConfig.getTypeChoices(type="employee_status")
-    
-    id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    num = models.CharField(db_column='NUM', max_length=20, verbose_name="员工号",  unique=True) # Field name made lowercase.
-    name = models.CharField(db_column='NAME', max_length=20, verbose_name="姓名") # Field name made lowercase.
-    sex = models.CharField(db_column='SEX', max_length=1, verbose_name="性别", choices=sexChoices) # Field name made lowercase.
-    idCard = models.CharField(db_column='IDCARD', max_length=20,verbose_name="身份证") # Field name made lowercase.
-    tel = models.CharField(db_column='TEL', max_length=20, blank=True,  verbose_name="联系方式") # Field name made lowercase.
-    joinTime = models.DateTimeField(db_column='JOIN_TIME' , )#verbose_name="入职时间"
-    type = models.CharField(db_column='TYPE', max_length=1, verbose_name="员工类型",  choices=employeeTypeChoices) # Field name made lowercase.   
-    status = models.CharField(db_column='STATUS', max_length=1, verbose_name="员工状态" , choices=statusChoices) # Field name made lowercase.
-    cardNum1 = models.CharField(db_column='CARD_NUM1', max_length=20, blank=True,verbose_name="工作卡号") # Field name made lowercase.
-    cardNum2 = models.CharField(db_column='CARD_NUM2', max_length=20, blank=True,verbose_name="员工卡号") # Field name made lowercase.
-    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True,verbose_name="备注") # Field name made lowercase.
-     
+
+class Workshift(models.Model):
+    id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
+    terminal = models.ForeignKey(Terminal, db_column='TERMINAL_ID') # Field name made lowercase.
+    card = models.ForeignKey(Card, db_column='CARD_ID') # Field name made lowercase.
+    time = models.DateTimeField(db_column='TIME') # Field name made lowercase.
     class Meta:
-       # managed = False
-        db_table = 'employee'
-    def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} num {1} name {2}  remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
-    def get_absolute_url(self):
-        return reverse('employee_detail', kwargs={'pk': self.pk})
-
-
+        managed = False
+        db_table = 'workshift'  
 
 class EmployeeForm(forms.ModelForm):
     sexChoices = DictConfig.getTypeChoices(type="sex")
@@ -223,34 +244,17 @@ class WorkClassForm(forms.ModelForm):
  
 
 
-class CardType(models.Model):
-    id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    name = models.CharField(db_column='NAME', max_length=20, blank=True) # Field name made lowercase.
-    status = models.CharField(db_column='STATUS', max_length=1, blank=True) # Field name made lowercase.
-    type = models.CharField(db_column='TYPE', max_length=1, blank=True) # Field name made lowercase.   
-    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase.     
+class Attendance(models.Model):
+    id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
+    terminal = models.ForeignKey('Terminal', db_column='TERMINAL_ID') # Field name made lowercase.
+    employee = models.ForeignKey('Employee', db_column='EMPLOYEE_ID') # Field name made lowercase.
+    card = models.ForeignKey('Card', db_column='CARD_ID') # Field name made lowercase.
+    time = models.DateTimeField(db_column='TIME') # Field name made lowercase.
     class Meta:
-     #   managed = False
-        db_table = 'card_type'
-    def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} name {1} status {2} ".format(self.id ,  self.name ,  self.status)
-        
- 
-class Card(models.Model):
-    id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    num = models.CharField(db_column='NUM', max_length=20, blank=True) # Field name made lowercase.
-    serialNum = models.IntegerField(db_column='SERIAL_NUM',  blank=True,  null=True, unique=True) # Field name made lowercase.
-    cardType = models.ForeignKey(CardType, db_column='CARD_TYPE_ID', blank=True, null=True) # Field name made lowercase.
-    ownerId = models.IntegerField(db_column='OWNER_ID',  blank=True,  null=True) # Field name made lowercase. 
-    status = models.CharField(db_column='STATUS', max_length=1, blank=True) # Field name made lowercase. 
-    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase.
-    class Meta:
-       # managed = False
-        db_table = 'card'
-    def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} num {1} name {2} remarks {3} ".format(self.id , self.num ,  self.remarks)
-        
-        
+        #managed = False
+        db_table = 'attendance'
+
+  
 
 class SalaryCountConfig(models.Model): 
     iddefaultsChoices = DictConfig.getTypeChoices(type="salary_count_default")
@@ -302,3 +306,49 @@ class SalaryTimeConfigForm(forms.ModelForm):
 
 
     
+
+
+
+class Production(models.Model):
+    id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
+    terminal = models.ForeignKey('Terminal', db_column='TERMINAL_ID') # Field name made lowercase.
+    card = models.ForeignKey(Card, db_column='CARD_ID') # Field name made lowercase.
+    employee = models.ForeignKey(Employee, db_column='EMPLOYEE_ID') # Field name made lowercase.
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID') # Field name made lowercase.
+    process = models.ForeignKey(Process, db_column='PROCESS_ID') # Field name made lowercase.
+    time = models.DateTimeField(db_column='TIME') # Field name made lowercase.
+    count = models.DecimalField(db_column='COUNT', max_digits=10, decimal_places=2) # Field name made lowercase.
+    class Meta:
+        managed = False
+        db_table = 'production'
+
+class ReportClass(models.Model):
+    id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
+    starttime = models.DateTimeField(db_column='STARTTIME') # Field name made lowercase.
+    endtime = models.DateTimeField(db_column='ENDTIME') # Field name made lowercase.
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID') # Field name made lowercase.
+    process_first = models.ForeignKey(Process,   related_name='+' ,  db_column='PROCESS_FIRST_ID', blank=True, null=True) # Field name made lowercase.
+    get_count = models.DecimalField(db_column='GET_COUNT', max_digits=10, decimal_places=2, blank=True, null=True) # Field name made lowercase.
+    process_last = models.ForeignKey(Process,   related_name='+' ,  db_column='PROCESS_LAST_ID') # Field name made lowercase.
+    put_count = models.DecimalField(db_column='PUT_COUNT', max_digits=10, decimal_places=2) # Field name made lowercase.
+    average_rate = models.DecimalField(db_column='AVERAGE_RATE', max_digits=10, decimal_places=2) # Field name made lowercase.
+    class Meta:
+        managed = False
+        db_table = 'report_class'
+        
+        
+
+class ReportEmployee(models.Model):
+    id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
+    starttime = models.DateTimeField(db_column='STARTTIME') # Field name made lowercase.
+    endtime = models.DateTimeField(db_column='ENDTIME') # Field name made lowercase.
+    employee = models.ForeignKey(Employee, db_column='EMPLOYEE_ID') # Field name made lowercase.
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID') # Field name made lowercase.
+    process_first = models.ForeignKey(Process,  related_name='+'  , db_column='PROCESS_FIRST_ID', blank=True, null=True , ) # Field name made lowercase.
+    get_count = models.DecimalField(db_column='GET_COUNT', max_digits=10, decimal_places=2, blank=True, null=True ) # Field name made lowercase.
+    process_last = models.ForeignKey(Process, related_name='+', db_column='PROCESS_LAST_ID' ,  ) # Field name made lowercase.
+    put_count = models.DecimalField(db_column='PUT_COUNT', max_digits=10, decimal_places=2) # Field name made lowercase.
+    average_rate = models.DecimalField(db_column='AVERAGE_RATE', max_digits=10, decimal_places=2) # Field name made lowercase.
+    class Meta:
+        managed = False
+        db_table = 'report_employee'
