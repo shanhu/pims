@@ -2,19 +2,16 @@
 {% load bootstrap3 %}
 {% block maincontent %}
 
-<form action="" method="post"  class="form-horizontal" role="form">
+<form action="" method="post" class="form">
     {% csrf_token %}
-    {% bootstrap_form form layout='horizontal' %}
+    {% bootstrap_form form %}
     {% buttons %}
-       <div  class="col-md-2 ">  </div>
-        <div  class="col-md-10 "> 
         <button type="submit" class="btn btn-primary">
              <i class="fa fa-save"></i>&nbsp;&nbsp;保存
         </button> 
-        <a  class="btn btn-primary"  href="{% url 'salarycount_list' %}" >
+        <a  class="btn btn-primary"  href="{% url 'material_type_list' %}" >
             <i class="fa fa-arrow-left"></i> &nbsp;&nbsp;返回
         </a> 
-        </div>
     {% endbuttons %}
 </form>
 

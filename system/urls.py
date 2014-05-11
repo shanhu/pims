@@ -58,4 +58,12 @@ urlpatterns = patterns('',
     url(r'^salaryTime/(?P<pk>\d+)/delete$', views.SalaryTimeConfigDeleteView.as_view(), name="salarytime_delete"),
     url(r'^salaryTimes/(?P<pk>\d+)$', views.SalaryTimeConfigDetailView.as_view(), name="salarytime_detail"),
     
+    
+    
+    url(r'^card/$', views.CardListView.as_view(), name="card_list"),
+    url(r'^card/add/$', views.CardCreateView.as_view(), name="card_add"),
+    url(r'^card/(?P<pk>\d+)/$', views.CardUpdateView.as_view(), name="card_update"),
+    url(r'^card/(?P<pk>\d+)/delete$', views.CardDeleteView.as_view(), name="card_delete"),
+    url(r'^cards/(?P<pk>\d+)$', views.CardDetailView.as_view(), name="card_detail"),
+    
 )

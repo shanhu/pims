@@ -1,0 +1,81 @@
+{% extends "system/base_detail.html" %}
+
+{% block maincontent %}
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+						<div class="panel-heading">
+							<h3 class="panel-title">
+								{{materialType.num}}&nbsp;&nbsp;/&nbsp;&nbsp;{{materialType.get_status_display}} 
+							</h3>
+						</div>
+						<div class="panel-body"> 
+                            <div class="row clearfix">
+                                <div class="col-md-6 column">
+                                    <dl class="dl-horizontal">
+                                      <dt>编号：</dt>
+                                      <dd>{{materialType.num}}</dd>
+                                    </dl>
+                                    <dl class="dl-horizontal">
+                                      <dt>状态：</dt>
+                                      <dd>{{materialType.get_status_display}}</dd>
+                                    </dl> 
+                                </div>
+                                <div class="col-md-6 column">
+                                
+                                    <dl class="dl-horizontal">
+                                      <dt>父类型编号：</dt>
+                                      <dd>{{materialType.parent.num}}</dd>
+                                    </dl>
+                                      <dl class="dl-horizontal">
+                                      <dt>父类型状态：</dt>
+                                      <dd>{{materialType.parent.get_status_display}}</dd>
+                                    </dl> 
+                                </div>
+                              
+                              
+                            </div>
+                              
+                              
+                           
+                             
+						</div> 
+					</div>
+
+ <div class="btn-group">
+		 <a class="btn btn-primary"  href="{% url 'material_type_list' %}" ><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;返回</a>
+         <a class="btn btn-primary"   href="{% url 'material_type_update' materialType.id %}"><i class="fa fa-edit"></i>&nbsp;&nbsp;编辑</a>
+         <a class="btn btn-primary  " data-toggle="modal" data-target="#myModal"  ><i class="fa fa-trash-o"></i>&nbsp;&nbsp;删除</a>
+</div>
+
+      
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">{{modal_header}}</h4>
+      </div>
+      <form action="{% url 'material_type_delete' materialType.id %}" method="post">{% csrf_token %}
+      <div class="modal-body"> 
+        <p>是否确认删除 "{{ materialType.num }}物料类型"？ </p> 
+        <input type="hidden" name="id" value="{{materialType.id}}" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="submit" class="btn btn-primary">确认</button>
+      </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+ 
+                    
+{% endblock maincontent %}          

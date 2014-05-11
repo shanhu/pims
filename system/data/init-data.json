@@ -305,6 +305,7 @@
   "fields": {
     "status": "1", 
     "num": "\u7ea2", 
+    "name": "12341",
     "parent": null
   }
 },
@@ -314,6 +315,7 @@
   "fields": {
     "status": "1", 
     "num": "\u7ea21A", 
+    "name": "1233",
     "parent": 1
   }
 },
@@ -323,6 +325,7 @@
   "fields": {
     "status": "1", 
     "num": "\u9ed11", 
+    "name": "1233",
     "parent": null
   }
 },
@@ -332,6 +335,7 @@
   "fields": {
     "status": "0", 
     "num": "\u9ed11B", 
+    "name": "1234",
     "parent": 3
   }
 },
@@ -341,6 +345,7 @@
   "fields": {
     "status": "1", 
     "num": "\u7ea21AX", 
+    "name": "1235",
     "parent": 2
   }
 },
@@ -350,6 +355,7 @@
   "fields": {
     "status": "1", 
     "num": "\u7ea21AX1", 
+    "name": "1236",
     "parent": 5
   }
 },
@@ -359,6 +365,7 @@
   "fields": {
     "status": "1", 
     "num": "\u9ed11X", 
+    "name": "17",
     "parent": 3
   }
 },
@@ -367,6 +374,7 @@
   "model": "system.materialtype", 
   "fields": {
     "status": "1", 
+    "name": "1234",
     "num": "\u7ea21AA", 
     "parent": 2
   }
@@ -376,6 +384,7 @@
   "model": "system.materialtype", 
   "fields": {
     "status": "1", 
+    "name": "9",
     "num": "\u7ea21AA2", 
     "parent": 8
   }
@@ -389,10 +398,10 @@
     "name": "\u9ec4\u82b1\u9c7c", 
     "materialType": 3, 
     "num": "\u7269\u65991ACDFDE#", 
-    "mode": "1", 
-    "remarks": "\u5907\u6ce8\u4fe1\u606f\u9ec4\u82b1\u9c7c\uff0c\u6ce8\u610f\u4e8b\u9879\uff0c\u7b49\u7b49\u5185\u5bb9\u3002", 
-    "conver": 1000, 
-    "unit": "\u516c\u65a4"
+   
+    "remarks": "\u5907\u6ce8\u4fe1\u606f\u9ec4\u82b1\u9c7c\uff0c\u6ce8\u610f\u4e8b\u9879\uff0c\u7b49\u7b49\u5185\u5bb9\u3002"
+   
+   
   }
 },
 {
@@ -404,10 +413,10 @@
     "name": "\u6d77\u87ba\u4e1d", 
     "materialType": 3, 
     "num": "A23423423432", 
-    "mode": "2", 
-    "remarks": "\u6682\u65f6\u672a\u5206\u914d\u7269\u6599\u5361", 
-    "conver": 8000, 
-    "unit": "\u4e2a"
+  
+    "remarks": "\u6682\u65f6\u672a\u5206\u914d\u7269\u6599\u5361"
+   
+   
   }
 },
 {
@@ -418,8 +427,10 @@
     "card_num": "234234234", 
     "isFirst": "1", 
     "num": "A28736", 
+    "mode": "2", 
     "remarks": "3242342", 
     "firstProcess": null, 
+     "unit": "\u4e2a",
     "name": "\u53bb\u5934\u5de5\u827a"
   }
 },
@@ -430,7 +441,9 @@
     "status": "1", 
     "card_num": "234234325", 
     "isFirst": "0", 
+      "mode": "2", 
     "num": "A28737", 
+     "unit": "\u4e2a",
     "remarks": "\u540e\u5de5\u827a\u53bb\u5c3e\u5de5\u827a\u3002", 
     "firstProcess": 1, 
     "name": "\u53bb\u5c3e\u5de5\u827a"
@@ -710,10 +723,10 @@
     "process": 1, 
     "price": "0.50", 
     "material": 1, 
-    "startTime": "2014-04-01T23:46:00", 
-    "remarks": "\u7b2c\u4e8c\u5b63\u5ea6\u9ec4\u82b1\u9c7c\u52a0\u5de5\u8ba1\u4ef6\u5de5\u8d44\u6c34\u5e73", 
-    "endTime": "2014-06-30T23:46:00", 
-    "isDefault": "0"
+   
+    "remarks": "\u7b2c\u4e8c\u5b63\u5ea6\u9ec4\u82b1\u9c7c\u52a0\u5de5\u8ba1\u4ef6\u5de5\u8d44\u6c34\u5e73"
+   
+  
   }
 },
 {
@@ -721,10 +734,8 @@
   "model": "system.salarytimeconfig", 
   "fields": {
     "remarks": "2014\u5e74\u8ba1\u65f6\u5de5\u8d44\u5355\u4ef71", 
-    "price": "1.12", 
-    "endTime": "2014-12-31T23:51:00", 
-    "startTime": "2014-01-01T23:51:00", 
-    "isDefault": "1"
+    "price": "1.12"
+  
   }
 }
 ]
