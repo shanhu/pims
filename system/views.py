@@ -18,12 +18,7 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """Return the last five published polls."""
-        return MaterialType.objects.order_by('id')[:5]
-
-
-
-
- 
+        return MaterialType.objects.order_by('id')[:5] 
 
 
 class SystemListView(generic.ListView):
@@ -557,7 +552,7 @@ class CardDetailView(SystemDetailView):
         data = json.dumps(data)
         logger.info(data)
         response_kwargs['content_type'] = 'application/json'
-        return HttpResponse(data, response_kwargs)
+        return HttpResponse(data, **response_kwargs)
     
 class CardCreateView(CreateView):
     form_class= CardForm
