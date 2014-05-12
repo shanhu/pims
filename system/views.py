@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
 from django.views import generic
+from django.views.generic.edit import FormMixin
 
 # import the logging library
 import logging
@@ -11,9 +12,11 @@ logger = logging.getLogger(__name__)
 class IndexView(generic.ListView):
     template_name = 'system/index.html'
     context_object_name = 'latest_materialType_list'
+
     def get_queryset(self):
         """Return the last five published polls."""
         return MaterialType.objects.order_by('id')[:5]
+
 
 class SystemListView(generic.ListView):
     #template_name = 'system/base_list.html'
@@ -21,7 +24,10 @@ class SystemListView(generic.ListView):
     def get_context_data(self, **kwargs): 
         context = super(SystemListView, self).get_context_data(**kwargs)  
         context['pageHeader'] =  u"列表页"
+
+
         return context
+
         
 class SystemDetailView(generic.DetailView):
     template_name = 'system/base_detail.html'
@@ -29,6 +35,8 @@ class SystemDetailView(generic.DetailView):
     def get_context_data(self, **kwargs): 
         context = super(SystemDetailView, self).get_context_data(**kwargs) 
         context['menu_list'] = []
+
+
         context['breadcrumb'] = []
         return context
 
@@ -76,6 +84,14 @@ class EmployeeCreateView(CreateView):
 class EmployeeUpdateView(UpdateView):
     form_class= EmployeeForm
     model = Employee 
+    def get_context_data(self, **kwargs):
+        context = super(EmployeeUpdateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"员工修改"
+        context['title'] = u"员工修改"
+        context['sidebar'] = {'employee_list':'active'}
+        return context
     
 class EmployeeDeleteView(DeleteView):
     form_class= EmployeeForm
@@ -89,6 +105,10 @@ class EmployeeDeleteView(DeleteView):
         else:
             employee.delete()
         return redirect('employee_list');
+    def get_context_data(self, **kwargs):
+        context = super(EmployeeDeleteView, self).get_context_data(**kwargs)   
+        context['sidebar'] = {'employee_list':'active'}
+        return context 
             
 #--------------------------------------------------物料类型管理 界面定义------------------------------------------------------------------   
 from system.models import MaterialType, MaterialTypeForm
@@ -101,7 +121,8 @@ class MaterialTypeListView(SystemListView):
     def get_context_data(self, **kwargs): 
         context = super(MaterialTypeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料类型管理"
-        context['title'] = u"物料类型管理"        
+        context['title'] = u"物料类型管理"
+        context['sidebar'] = {'material_type':'active'}        
         return context  
 
 class MaterialTypeDetailView(SystemDetailView): 
@@ -112,6 +133,7 @@ class MaterialTypeDetailView(SystemDetailView):
         context = super(MaterialTypeDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料类型详细信息"
         context['title'] = u"物料类型详细信息"
+        context['sidebar'] = {'material_type':'active'}   
         return context
 class MaterialTypeCreateView(CreateView):
     form_class= MaterialTypeForm
@@ -122,6 +144,7 @@ class MaterialTypeCreateView(CreateView):
         context['form'] = self.get_form(form_class)
         context['pageHeader'] = u"物料类型详细信息"
         context['title'] = u"物料类型详细信息"
+        context['sidebar'] = {'material_type':'active'}   
         return context
     success_url =  reverse_lazy("material_type_list")
         
@@ -129,6 +152,14 @@ class MaterialTypeUpdateView(UpdateView):
     form_class= MaterialTypeForm
     model = MaterialType
     success_url =  reverse_lazy("material_type_list")
+    def get_context_data(self, **kwargs):
+        context = super(MaterialTypeUpdateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"物料类型修改"
+        context['title'] = u"物料类型修改"
+        context['sidebar'] = {'material_type':'active'}   
+        return context
     
 class MaterialTypeDeleteView(DeleteView):
     form_class= MaterialTypeForm
@@ -139,6 +170,10 @@ class MaterialTypeDeleteView(DeleteView):
         materialType.status = 0
         materialType.save() 
         return redirect('material_type_list');
+    def get_context_data(self, **kwargs):
+        context = super(MaterialTypeDeleteView, self).get_context_data(**kwargs)  
+        context['sidebar'] = {'material_type':'active'}   
+        return context
            
 #--------------------------------------------------物料管理 界面定义------------------------------------------------------------------   
 from system.models import Material, MaterialForm
@@ -151,7 +186,8 @@ class MaterialListView(SystemListView):
     def get_context_data(self, **kwargs): 
         context = super(MaterialListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料管理"
-        context['title'] = u"物料管理"        
+        context['title'] = u"物料管理"  
+        context['sidebar'] = {'material':'active'}       
         return context  
 
 class MaterialDetailView(SystemDetailView): 
@@ -162,6 +198,7 @@ class MaterialDetailView(SystemDetailView):
         context = super(MaterialDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
+        context['sidebar'] = {'material':'active'} 
         return context
 class MaterialCreateView(CreateView):
     form_class= MaterialForm
@@ -172,6 +209,7 @@ class MaterialCreateView(CreateView):
         context['form'] = self.get_form(form_class)
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
+        context['sidebar'] = {'material':'active'} 
         return context
     success_url =  reverse_lazy("material_list")
         
@@ -179,7 +217,14 @@ class MaterialUpdateView(UpdateView):
     form_class= MaterialForm
     model = Material
     success_url =  reverse_lazy("material_list")
-    
+    def get_context_data(self, **kwargs):
+        context = super(MaterialUpdateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"物料详细信息"
+        context['title'] = u"物料详细信息"
+        context['sidebar'] = {'material':'active'} 
+        return context
 class MaterialDeleteView(DeleteView):
     form_class= MaterialForm
     model = Material     
@@ -189,7 +234,10 @@ class MaterialDeleteView(DeleteView):
         material.status = 0
         material.save() 
         return redirect('material_list');
-        
+    def get_context_data(self, **kwargs):
+        context = super(MaterialDeleteView, self).get_context_data(**kwargs) 
+        context['sidebar'] = {'material':'active'} 
+        return context    
           
 #--------------------------------------------------工艺管理 界面定义------------------------------------------------------------------   
 from system.models import Process, ProcessForm
@@ -202,7 +250,8 @@ class ProcessListView(SystemListView):
     def get_context_data(self, **kwargs): 
         context = super(ProcessListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"工艺管理"
-        context['title'] = u"工艺管理"        
+        context['title'] = u"工艺管理" 
+        context['sidebar'] = {'process':'active'}        
         return context  
 
 class ProcessDetailView(SystemDetailView): 
@@ -213,6 +262,7 @@ class ProcessDetailView(SystemDetailView):
         context = super(ProcessDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"工艺详细信息"
         context['title'] = u"工艺详细信息"
+        context['sidebar'] = {'process':'active'} 
         return context
 class ProcessCreateView(CreateView):
     form_class= ProcessForm
@@ -223,6 +273,7 @@ class ProcessCreateView(CreateView):
         context['form'] = self.get_form(form_class)
         context['pageHeader'] = u"创建工艺信息"
         context['title'] = u"创建工艺信息"
+        context['sidebar'] = {'process':'active'} 
         return context
     success_url =  reverse_lazy("process_list")
         
@@ -230,6 +281,14 @@ class ProcessUpdateView(UpdateView):
     form_class= ProcessForm
     model = Process
     success_url =  reverse_lazy("process_list")
+    def get_context_data(self, **kwargs):
+        context = super(ProcessUpdateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"修改工艺信息"
+        context['title'] = u"修改工艺信息"
+        context['sidebar'] = {'process':'active'} 
+        return context
     
 class ProcessDeleteView(DeleteView):
     form_class= ProcessForm
@@ -240,7 +299,10 @@ class ProcessDeleteView(DeleteView):
         process.status = 0
         process.save() 
         return redirect('process_list');
-   
+    def get_context_data(self, **kwargs):
+        context = super(ProcessDeleteView, self).get_context_data(**kwargs) 
+        context['sidebar'] = {'process':'active'} 
+        return context
 #--------------------------------------------------班次管理 界面定义------------------------------------------------------------------   
 from system.models import WorkClass, WorkClassForm
 
@@ -252,7 +314,8 @@ class WorkClassListView(SystemListView):
     def get_context_data(self, **kwargs): 
         context = super(WorkClassListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"班次管理"
-        context['title'] = u"班次管理"        
+        context['title'] = u"班次管理" 
+        context['sidebar'] = {'process':'active'}        
         return context  
 
 class WorkClassDetailView(SystemDetailView): 
@@ -306,7 +369,8 @@ class SalaryCountConfigListView(SystemListView):
     def get_context_data(self, **kwargs): 
         context = super(SalaryCountConfigListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"计件工资管理"
-        context['title'] = u"计件工资管理"        
+        context['title'] = u"计件工资管理"  
+        context['sidebar'] = {'salary_count_config':'active'}       
         return context  
 
 class SalaryCountConfigDetailView(SystemDetailView): 
@@ -317,6 +381,7 @@ class SalaryCountConfigDetailView(SystemDetailView):
         context = super(SalaryCountConfigDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"计件工资详细信息"
         context['title'] = u"计件工资详细信息"
+        context['sidebar'] = {'salary_count_config':'active'}   
         return context
 class SalaryCountConfigCreateView(CreateView):
     form_class= SalaryCountConfigForm
@@ -327,6 +392,7 @@ class SalaryCountConfigCreateView(CreateView):
         context['form'] = self.get_form(form_class)
         context['pageHeader'] = u"创建计件工资信息"
         context['title'] = u"创建计件工资信息"
+        context['sidebar'] = {'salary_count_config':'active'}   
         return context
     success_url =  reverse_lazy("salarycount_list")
         
@@ -334,6 +400,14 @@ class SalaryCountConfigUpdateView(UpdateView):
     form_class= SalaryCountConfigForm
     model = SalaryCountConfig
     success_url =  reverse_lazy("salarycount_list")
+    def get_context_data(self, **kwargs):
+        context = super(SalaryCountConfigUpdateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"修改计件工资信息"
+        context['title'] = u"修改计件工资信息"
+        context['sidebar'] = {'salary_count_config':'active'}   
+        return context
     
 class SalaryCountConfigDeleteView(DeleteView):
     form_class= SalaryCountConfigForm
@@ -344,6 +418,10 @@ class SalaryCountConfigDeleteView(DeleteView):
         salarycountconfig.status = 0
         salarycountconfig.save() 
         return redirect('salarycount_list');
+    def get_context_data(self, **kwargs):
+        context = super(SalaryCountConfigDeleteView, self).get_context_data(**kwargs) 
+        context['sidebar'] = {'salary_count_config':'active'}   
+        return context
 
 
 #--------------------------------------------------计件工资参数管理 界面定义------------------------------------------------------------------   
@@ -357,7 +435,8 @@ class SalaryTimeConfigListView(SystemListView):
     def get_context_data(self, **kwargs): 
         context = super(SalaryTimeConfigListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"计件工资管理"
-        context['title'] = u"计件工资管理"        
+        context['title'] = u"计件工资管理"
+        context['sidebar'] = {'salary_time_config':'active'}         
         return context  
 
 class SalaryTimeConfigDetailView(SystemDetailView): 
@@ -368,6 +447,7 @@ class SalaryTimeConfigDetailView(SystemDetailView):
         context = super(SalaryTimeConfigDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"计时工资详细信息"
         context['title'] = u"计时工资详细信息"
+        context['sidebar'] = {'salary_time_config':'active'} 
         return context
 class SalaryTimeConfigCreateView(CreateView):
     form_class= SalaryTimeConfigForm
@@ -378,6 +458,7 @@ class SalaryTimeConfigCreateView(CreateView):
         context['form'] = self.get_form(form_class)
         context['pageHeader'] = u"创建计时工资信息"
         context['title'] = u"创建计时工资信息"
+        context['sidebar'] = {'salary_time_config':'active'} 
         return context
     success_url =  reverse_lazy("salarytime_list")
         
@@ -385,6 +466,14 @@ class SalaryTimeConfigUpdateView(UpdateView):
     form_class= SalaryTimeConfigForm
     model = SalaryTimeConfig
     success_url =  reverse_lazy("salarytime_list")
+    def get_context_data(self, **kwargs):
+        context = super(SalaryTimeConfigUpdateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"修改计时工资信息"
+        context['title'] = u"修改计时工资信息"
+        context['sidebar'] = {'salary_time_config':'active'} 
+        return context
     
 class SalaryTimeConfigDeleteView(DeleteView):
     form_class= SalaryTimeConfigForm
@@ -395,4 +484,84 @@ class SalaryTimeConfigDeleteView(DeleteView):
         salarytimeconfig.status = 0
         salarytimeconfig.save() 
         return redirect('salarytime_list');
+    def get_context_data(self, **kwargs):
+        context = super(SalaryTimeConfigDeleteView, self).get_context_data(**kwargs) 
+        context['sidebar'] = {'salary_time_config':'active'} 
+        return context
+
+
+#--------------------------------------------------卡片管理 界面定义------------------------------------------------------------------   
+from system.models import Card, CardForm, CardSearchForm
+
+class CardListView(SystemListView, FormMixin): 
+    template_name = 'system/card_list.html'
+    context_object_name = 'card_list'
+    model = Card
+    form_class = CardSearchForm
+    #paginate_by = 10
+    logger.info("system out test.")
+    def get_context_data(self, **kwargs): 
+        context = super(CardListView, self).get_context_data(**kwargs)  
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"计件工资管理"
+        context['title'] = u"计件工资管理"
+        context['sidebar'] = {'card':'active'}         
+        return context
+    def get_queryset(self):
+        type = self.request.GET.get('type')
+        logger.info("request params type is %s", type)
+       # logger.info("1111%request",  self.request) 
+    def get_success_url(self):
+        return reverse_lazy('card_list', kwargs={'pk': self.object.pk})
+
+class CardDetailView(SystemDetailView): 
+    template_name = 'system/card_detail.html'
+    context_object_name = 'card'
+    model = Card
+    def get_context_data(self, **kwargs): 
+        context = super(CardDetailView, self).get_context_data(**kwargs)  
+        context['pageHeader'] = u"计时工资详细信息"
+        context['title'] = u"计时工资详细信息"
+        context['sidebar'] = {'card':'active'} 
+        return context
+class CardCreateView(CreateView):
+    form_class= CardForm
+    model = Card
+    def get_context_data(self, **kwargs):
+        context = super(CardCreateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"创建计时工资信息"
+        context['title'] = u"创建计时工资信息"
+        context['sidebar'] = {'card':'active'} 
+        return context
+    success_url =  reverse_lazy("card_list")
+        
+class CardUpdateView(UpdateView):
+    form_class= CardForm
+    model = Card
+    success_url =  reverse_lazy("card_list")
+    def get_context_data(self, **kwargs):
+        context = super(CardUpdateView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        context['pageHeader'] = u"修改计时工资信息"
+        context['title'] = u"修改计时工资信息"
+        context['sidebar'] = {'card':'active'} 
+        return context
+    
+class CardDeleteView(DeleteView):
+    form_class= CardForm
+    model = Card     
+    #success_url = reverse_lazy('material_type_list')  
+    def post(self,*args, **kwargs):
+        card = self.get_object(); 
+        card.status = 0
+        card.save() 
+        return redirect('card_list');
+    def get_context_data(self, **kwargs):
+        context = super(CardDeleteView, self).get_context_data(**kwargs) 
+        context['sidebar'] = {'card':'active'} 
+        return context
 
