@@ -20,37 +20,37 @@
  	<ul class="pagination pagination-right">
             {% if page_obj.has_previous %}
 				<li>
-                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                <a href="?page={{ page_obj.previous_page_number }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"">上一页</a>
 				</li>
              {% endif  %} 
              
             {% if page_obj.number == 1 %}
 				<li>
-                <a href="?page={{ 1 }}">上一页</a>
+                <a href="?page={{ 1 }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}">上一页</a>
 				</li>
              {% endif  %} 
              
               {% if page_obj.number|add:-1  > 1 %}  
 				<li>
-					<a href="?page={{ page_obj.number | add:-2   }}"> {{ page_obj.number | add:-2  }} </a>
+					<a href="?page={{ page_obj.number | add:-2   }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}""> {{ page_obj.number | add:-2  }} </a>
 				</li>
               {% endif  %}   
              
               {% if page_obj.number|add:-1  >  1 %}  
 				<li>
-					<a href="?page={{ page_obj.number | add:-1   }}"> {{ page_obj.number | add:-1  }} </a>
+					<a href="?page={{ page_obj.number | add:-1   }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}""> {{ page_obj.number | add:-1  }} </a>
 				</li>
               {% endif  %}   
               
 				<li>
-					<a href="?page={{ page_obj.number }}">{{ page_obj.number }} </a>
+					<a href="?page={{ page_obj.number }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"">{{ page_obj.number }} </a>
 				</li>
                 
                 
                 
                 {% if page_obj.number|add:1  < paginator.num_pages  %}  
                     <li>
-                        <a href="?page={{ page_obj.number|add:1 }}">{{page_obj.number|add:1 }}</a>
+                        <a href="?page={{ page_obj.number|add:1 }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"">{{page_obj.number|add:1 }}</a>
                     </li>
                 {% endif  %} 
                 
@@ -58,7 +58,7 @@
                 
                 {% if page_obj.number|add:1  < paginator.num_pages   %}  
 				<li>
-					<a href="?page={{ page_obj.number|add:2  }}">{{page_obj.number|add:2 }}</a>
+					<a href="?page={{ page_obj.number|add:2  }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"">{{page_obj.number|add:2 }}</a>
 				</li>
                  {% endif  %} 
                  
@@ -69,12 +69,12 @@
                  
             {% if page_obj.has_next  %}
 				<li>
-					<a href="?page={{ page_obj.next_page_number }}">下一页</a>
+					<a href="?page={{ page_obj.next_page_number }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"">下一页</a>
 				</li>
             {% endif %}
              {% if page_obj.has_next == False %}
 				<li>
-					<a href="?page={{ paginator.num_pages }}">下一页</a>
+					<a href="?page={{ paginator.num_pages }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"">下一页</a>
 				</li>
             {% endif %}
             

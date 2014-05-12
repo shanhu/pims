@@ -300,153 +300,363 @@
   }
 },
 {
+  "pk": 26, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5f00\u59cb\u5361", 
+    "typeCode": "1", 
+    "dicTable": "card", 
+    "dicColumn": "type", 
+    "type": "card_type", 
+    "displayOrder": 10
+  }
+},
+{
+  "pk": 27, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u7ed3\u675f\u5361", 
+    "typeCode": "2", 
+    "dicTable": "card", 
+    "dicColumn": "type", 
+    "type": "card_type", 
+    "displayOrder": 20
+  }
+},
+{
+  "pk": 28, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u7269\u6599\u5361", 
+    "typeCode": "3", 
+    "dicTable": "card", 
+    "dicColumn": "type", 
+    "type": "card_type", 
+    "displayOrder": 30
+  }
+},
+{
+  "pk": 29, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5de5\u827a\u5361", 
+    "typeCode": "4", 
+    "dicTable": "card", 
+    "dicColumn": "type", 
+    "type": "card_type", 
+    "displayOrder": 40
+  }
+},
+{
+  "pk": 30, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5de5\u4f5c\u5361", 
+    "typeCode": "5", 
+    "dicTable": "card", 
+    "dicColumn": "type", 
+    "type": "card_type", 
+    "displayOrder": 50
+  }
+},
+{
+  "pk": 31, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5458\u5de5\u5361", 
+    "typeCode": "6", 
+    "dicTable": "card", 
+    "dicColumn": "type", 
+    "type": "card_type", 
+    "displayOrder": 60
+  }
+},
+{
+  "pk": 32, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u53ef\u7528", 
+    "typeCode": "1", 
+    "dicTable": "card", 
+    "dicColumn": "status", 
+    "type": "card_status", 
+    "displayOrder": 10
+  }
+},
+{
+  "pk": 33, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u4e0d\u53ef\u7528", 
+    "typeCode": "0", 
+    "dicTable": "card", 
+    "dicColumn": "status", 
+    "type": "card_status", 
+    "displayOrder": 20
+  }
+},
+{
+  "pk": 34, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u5df2\u5206\u914d", 
+    "typeCode": "1", 
+    "dicTable": "card", 
+    "dicColumn": "owner_id", 
+    "type": "card_assigned", 
+    "displayOrder": 10
+  }
+},
+{
+  "pk": 35, 
+  "model": "system.dictconfig", 
+  "fields": {
+    "typeDesc": "\u672a\u5206\u914d", 
+    "typeCode": "0", 
+    "dicTable": "card", 
+    "dicColumn": "owner_id", 
+    "type": "card_assigned", 
+    "displayOrder": 20
+  }
+},
+{
   "pk": 1, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "num": "\u7ea2", 
-    "name": "12341",
-    "parent": null
+    "serial_num": "3008894835", 
+    "num": "16777217", 
+    "remarks": null, 
+    "type": "1", 
+    "owner_id": 1
   }
 },
 {
   "pk": 2, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "num": "\u7ea21A", 
-    "name": "1233",
-    "parent": 1
+    "serial_num": "3008210723", 
+    "num": "33554434", 
+    "remarks": null, 
+    "type": "2", 
+    "owner_id": 2
   }
 },
 {
   "pk": 3, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "num": "\u9ed11", 
-    "name": "1233",
-    "parent": null
+    "serial_num": "3009531827", 
+    "num": "67108865", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 1
   }
 },
 {
   "pk": 4, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
-    "status": "0", 
-    "num": "\u9ed11B", 
-    "name": "1234",
-    "parent": 3
+    "status": "1", 
+    "serial_num": "3008532003", 
+    "num": "67108866", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 2
   }
 },
 {
   "pk": 5, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "num": "\u7ea21AX", 
-    "name": "1235",
-    "parent": 2
+    "serial_num": "3008888707", 
+    "num": "67108867", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 3
   }
 },
 {
   "pk": 6, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "num": "\u7ea21AX1", 
-    "name": "1236",
-    "parent": 5
+    "serial_num": "3008414611", 
+    "num": "67108868", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 4
   }
 },
 {
   "pk": 7, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "num": "\u9ed11X", 
-    "name": "17",
-    "parent": 3
+    "serial_num": "3009874531", 
+    "num": "67108869", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 5
   }
 },
 {
   "pk": 8, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "name": "1234",
-    "num": "\u7ea21AA", 
-    "parent": 2
+    "serial_num": "3008543843", 
+    "num": "67108870", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 6
   }
 },
 {
   "pk": 9, 
-  "model": "system.materialtype", 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "name": "9",
-    "num": "\u7ea21AA2", 
-    "parent": 8
+    "serial_num": "3008590979", 
+    "num": "67108871", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 7
   }
 },
 {
-  "pk": 1, 
-  "model": "system.material", 
+  "pk": 10, 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "card_num": "1234321423423423", 
-    "name": "\u9ec4\u82b1\u9c7c", 
-    "materialType": 3, 
-    "num": "\u7269\u65991ACDFDE#", 
-   
-    "remarks": "\u5907\u6ce8\u4fe1\u606f\u9ec4\u82b1\u9c7c\uff0c\u6ce8\u610f\u4e8b\u9879\uff0c\u7b49\u7b49\u5185\u5bb9\u3002"
-   
-   
+    "serial_num": "3009594755", 
+    "num": "67108872", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 8
   }
 },
 {
-  "pk": 2, 
-  "model": "system.material", 
+  "pk": 11, 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "card_num": "", 
-    "name": "\u6d77\u87ba\u4e1d", 
-    "materialType": 3, 
-    "num": "A23423423432", 
-  
-    "remarks": "\u6682\u65f6\u672a\u5206\u914d\u7269\u6599\u5361"
-   
-   
+    "serial_num": "3008820803", 
+    "num": "67108873", 
+    "remarks": null, 
+    "type": "4", 
+    "owner_id": 9
   }
 },
 {
-  "pk": 1, 
-  "model": "system.process", 
+  "pk": 12, 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "card_num": "234234234", 
-    "isFirst": "1", 
-    "num": "A28736", 
-    "mode": "2", 
-    "remarks": "3242342", 
-    "firstProcess": null, 
-     "unit": "\u4e2a",
-    "name": "\u53bb\u5934\u5de5\u827a"
+    "serial_num": "3008999971", 
+    "num": "50331649", 
+    "remarks": null, 
+    "type": "3", 
+    "owner_id": 1
   }
 },
 {
-  "pk": 2, 
-  "model": "system.process", 
+  "pk": 13, 
+  "model": "system.card", 
   "fields": {
     "status": "1", 
-    "card_num": "234234325", 
-    "isFirst": "0", 
-      "mode": "2", 
-    "num": "A28737", 
-     "unit": "\u4e2a",
-    "remarks": "\u540e\u5de5\u827a\u53bb\u5c3e\u5de5\u827a\u3002", 
-    "firstProcess": 1, 
-    "name": "\u53bb\u5c3e\u5de5\u827a"
+    "serial_num": "3008985955", 
+    "num": "50331650", 
+    "remarks": null, 
+    "type": "3", 
+    "owner_id": 2
+  }
+},
+{
+  "pk": 14, 
+  "model": "system.card", 
+  "fields": {
+    "status": "1", 
+    "serial_num": "3008594435", 
+    "num": "50331651", 
+    "remarks": null, 
+    "type": "3", 
+    "owner_id": 3
+  }
+},
+{
+  "pk": 15, 
+  "model": "system.card", 
+  "fields": {
+    "status": "1", 
+    "serial_num": "3009264851", 
+    "num": "83886081", 
+    "remarks": null, 
+    "type": "5", 
+    "owner_id": 1
+  }
+},
+{
+  "pk": 16, 
+  "model": "system.card", 
+  "fields": {
+    "status": "1", 
+    "serial_num": "3008547043", 
+    "num": "83886082", 
+    "remarks": null, 
+    "type": "5", 
+    "owner_id": 2
+  }
+},
+{
+  "pk": 17, 
+  "model": "system.card", 
+  "fields": {
+    "status": "1", 
+    "serial_num": "3008940051", 
+    "num": "83886082", 
+    "remarks": null, 
+    "type": "5", 
+    "owner_id": 2
+  }
+},
+{
+  "pk": 18, 
+  "model": "system.card", 
+  "fields": {
+    "status": "1", 
+    "serial_num": "3009746963", 
+    "num": "83886083", 
+    "remarks": null, 
+    "type": "5", 
+    "owner_id": 3
+  }
+},
+{
+  "pk": 19, 
+  "model": "system.card", 
+  "fields": {
+    "status": "1", 
+    "serial_num": "4229575682", 
+    "num": "83886083", 
+    "remarks": null, 
+    "type": "5", 
+    "owner_id": 3
+  }
+},
+{
+  "pk": 20, 
+  "model": "system.card", 
+  "fields": {
+    "status": "1", 
+    "serial_num": "3008181619", 
+    "num": "83886081", 
+    "remarks": null, 
+    "type": "5", 
+    "owner_id": 1
   }
 },
 {
@@ -454,32 +664,32 @@
   "model": "system.employee", 
   "fields": {
     "status": "1", 
-    "tel": "34", 
-    "name": "\u674e\u5c0f\u840c", 
-    "idCard": "3", 
-    "cardNum2": "3242342343253", 
-    "sex": "1", 
-    "cardNum1": "342354234234", 
-    "num": "1", 
-    "remarks": "\u674e\u5c0f\u840c\u662f\u4e2a\u597d\u540c\u5fd7\uff01", 
-    "joinTime": "2014-05-08T13:43:33", 
-    "type": "3"
-  }
-},
-{
-  "pk": 2, 
-  "model": "system.employee", 
-  "fields": {
-    "status": "1", 
-    "tel": "342412312", 
-    "name": "\u738b\u4e3d\u4e3d", 
-    "idCard": "234234432", 
-    "cardNum2": "123123123", 
+    "tel": null, 
+    "name": "\u5458\u5de51", 
+    "idCard": "1234567890", 
+    "cardNum2": null, 
     "sex": "0", 
-    "cardNum1": "1234123", 
-    "num": "238328483", 
-    "remarks": "12312321313", 
-    "joinTime": "2015-07-01T17:08:00", 
+    "cardNum1": "83886081", 
+    "num": "1", 
+    "remarks": null, 
+    "joinTime": "2014-04-01T00:04:54", 
+    "type": "1"
+  }
+},
+{
+  "pk": 2, 
+  "model": "system.employee", 
+  "fields": {
+    "status": "1", 
+    "tel": null, 
+    "name": "\u5458\u5de52", 
+    "idCard": "1234567890", 
+    "cardNum2": null, 
+    "sex": "0", 
+    "cardNum1": "83886082", 
+    "num": "2", 
+    "remarks": null, 
+    "joinTime": "2014-05-01T00:06:10", 
     "type": "1"
   }
 },
@@ -487,221 +697,421 @@
   "pk": 3, 
   "model": "system.employee", 
   "fields": {
-    "status": "0", 
-    "tel": "dsaf", 
-    "name": "\u674e\u5927\u9f50", 
-    "idCard": "343443vfdsasdf", 
-    "cardNum2": "234", 
-    "sex": "1", 
-    "cardNum1": "324", 
-    "num": "234234", 
-    "remarks": "5324", 
-    "joinTime": "2014-05-10T23:49:00", 
-    "type": "2"
+    "status": "1", 
+    "tel": null, 
+    "name": "\u5458\u5de53", 
+    "idCard": "1234567890", 
+    "cardNum2": null, 
+    "sex": "0", 
+    "cardNum1": "83886083", 
+    "num": "3", 
+    "remarks": null, 
+    "joinTime": "2014-05-10T00:06:46", 
+    "type": "1"
+  }
+},
+{
+  "pk": 1, 
+  "model": "system.workshop", 
+  "fields": {
+    "remarks": null, 
+    "name": "\u7f50\u5934\u8f66\u95f4"
+  }
+},
+{
+  "pk": 1, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "1", 
+    "name": "\u539f\u6599", 
+    "parent": null
+  }
+},
+{
+  "pk": 2, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "2", 
+    "name": "\u534a\u6210\u54c1", 
+    "parent": null
+  }
+},
+{
+  "pk": 3, 
+  "model": "system.materialtype", 
+  "fields": {
+    "status": "1", 
+    "num": "3", 
+    "name": "\u6210\u54c1", 
+    "parent": null
+  }
+},
+{
+  "pk": 1, 
+  "model": "system.material", 
+  "fields": {
+    "status": "1", 
+    "card_num": "50331649", 
+    "name": "\u7af9\u835a\u9c7c", 
+    "materialType": 1, 
+    "num": "1", 
+    "remarks": null
+  }
+},
+{
+  "pk": 2, 
+  "model": "system.material", 
+  "fields": {
+    "status": "1", 
+    "card_num": "50331650", 
+    "name": "\u6c99\u4e01\u9c7c", 
+    "materialType": 1, 
+    "num": "2", 
+    "remarks": null
+  }
+},
+{
+  "pk": 3, 
+  "model": "system.material", 
+  "fields": {
+    "status": "1", 
+    "card_num": "50331651", 
+    "name": "\u767d\u8eab\u9c7c", 
+    "materialType": 1, 
+    "num": "3", 
+    "remarks": null
+  }
+},
+{
+  "pk": 1, 
+  "model": "system.process", 
+  "fields": {
+    "status": "1", 
+    "card_num": "67108865", 
+    "isFirst": "0", 
+    "num": "1", 
+    "mode": "1", 
+    "remarks": null, 
+    "firstProcess": null, 
+    "unit": "\u7bb1", 
+    "name": "\u539f\u6599\u51fa\u5e93"
+  }
+},
+{
+  "pk": 2, 
+  "model": "system.process", 
+  "fields": {
+    "status": "1", 
+    "card_num": "67108866", 
+    "isFirst": "1", 
+    "num": "2", 
+    "mode": "0", 
+    "remarks": null, 
+    "firstProcess": null, 
+    "unit": "kg", 
+    "name": "\u6253\u9cde.\u9886\u6599"
+  }
+},
+{
+  "pk": 3, 
+  "model": "system.process", 
+  "fields": {
+    "status": "1", 
+    "card_num": "67108867", 
+    "isFirst": "0", 
+    "num": "3", 
+    "mode": "0", 
+    "remarks": null, 
+    "firstProcess": 2, 
+    "unit": "kg", 
+    "name": "\u6253\u9cde.\u4ea4\u6599"
+  }
+},
+{
+  "pk": 4, 
+  "model": "system.process", 
+  "fields": {
+    "status": "1", 
+    "card_num": "67108868", 
+    "isFirst": "1", 
+    "num": "4", 
+    "mode": "0", 
+    "remarks": null, 
+    "firstProcess": null, 
+    "unit": "kg", 
+    "name": "\u5206\u8eab.\u9886\u6599"
   }
 },
 {
   "pk": 5, 
-  "model": "system.employee", 
+  "model": "system.process", 
   "fields": {
     "status": "1", 
-    "tel": "", 
-    "name": "2234", 
-    "idCard": "34", 
-    "cardNum2": "", 
-    "sex": "0", 
-    "cardNum1": "", 
-    "num": "1", 
-    "remarks": "", 
-    "joinTime": "2014-05-06T21:52:33", 
-    "type": "1"
+    "card_num": "67108869", 
+    "isFirst": "0", 
+    "num": "5", 
+    "mode": "0", 
+    "remarks": null, 
+    "firstProcess": 4, 
+    "unit": "kg", 
+    "name": "\u5206\u8eab.\u4ea4\u6599"
   }
 },
 {
   "pk": 6, 
-  "model": "system.employee", 
+  "model": "system.process", 
   "fields": {
     "status": "1", 
-    "tel": "3", 
-    "name": "324", 
-    "idCard": "2", 
-    "cardNum2": "34", 
-    "sex": "0", 
-    "cardNum1": "34", 
-    "num": "234", 
-    "remarks": "34", 
-    "joinTime": "2014-05-06T21:52:49", 
-    "type": "1"
+    "card_num": "67108870", 
+    "isFirst": "0", 
+    "num": "6", 
+    "mode": "0", 
+    "remarks": null, 
+    "firstProcess": null, 
+    "unit": "kg", 
+    "name": "\u62fc\u7247"
   }
 },
 {
   "pk": 7, 
-  "model": "system.employee", 
+  "model": "system.process", 
   "fields": {
     "status": "1", 
-    "tel": "13900130343", 
-    "name": "\u738b1", 
-    "idCard": "1390101013431432324", 
-    "cardNum2": "234324", 
-    "sex": "1", 
-    "cardNum1": "234324", 
-    "num": "32893284", 
-    "remarks": "234234", 
-    "joinTime": "2014-05-06T20:55:51", 
-    "type": "1"
+    "card_num": "67108871", 
+    "isFirst": "0", 
+    "num": "7", 
+    "mode": "1", 
+    "remarks": null, 
+    "firstProcess": null, 
+    "unit": "\u76d8", 
+    "name": "\u7c98\u7c89"
   }
 },
 {
   "pk": 8, 
-  "model": "system.employee", 
+  "model": "system.process", 
   "fields": {
-    "status": "0", 
-    "tel": "13900130343", 
-    "name": "\u738b1", 
-    "idCard": "1390101013431432324", 
-    "cardNum2": "234324", 
-    "sex": "1", 
-    "cardNum1": "234324", 
-    "num": "32893284", 
-    "remarks": "234234", 
-    "joinTime": "2014-05-07T22:51:50", 
-    "type": "1"
+    "status": "1", 
+    "card_num": "67108872", 
+    "isFirst": "0", 
+    "num": "8", 
+    "mode": "1", 
+    "remarks": null, 
+    "firstProcess": null, 
+    "unit": "\u7bb1", 
+    "name": "\u5305\u88c5\u88c5\u7bb1"
   }
 },
 {
   "pk": 9, 
-  "model": "system.employee", 
+  "model": "system.process", 
   "fields": {
     "status": "1", 
-    "tel": "13900130343", 
-    "name": "\u738b1", 
-    "idCard": "1390101013431432324", 
-    "cardNum2": "234324", 
-    "sex": "1", 
-    "cardNum1": "234324", 
-    "num": "32893284", 
-    "remarks": "234234", 
-    "joinTime": "2014-05-06T21:13:53", 
-    "type": "1"
+    "card_num": "67108873", 
+    "isFirst": "0", 
+    "num": "9", 
+    "mode": "1", 
+    "remarks": null, 
+    "firstProcess": null, 
+    "unit": "\u7bb1", 
+    "name": "\u6210\u54c1\u5165\u5e93"
   }
 },
 {
-  "pk": 10, 
-  "model": "system.employee", 
+  "pk": 1, 
+  "model": "system.terminal", 
   "fields": {
-    "status": "1", 
-    "tel": "", 
-    "name": "2234", 
-    "idCard": "34", 
-    "cardNum2": "32", 
-    "sex": "0", 
-    "cardNum1": "32", 
-    "num": "12", 
-    "remarks": "23", 
-    "joinTime": "2014-05-06T21:15:36", 
-    "type": "1"
+    "num": "1", 
+    "name": "\u8ba1\u91cd\u524d\u7ec8\u7aef", 
+    "ip2": "192.168.127.111", 
+    "defaultProcess": 2, 
+    "ip1": "192.168.127.11", 
+    "defaultMaterial": 1, 
+    "remarks": null, 
+    "type": "1", 
+    "workGroup": 1
   }
 },
 {
-  "pk": 11, 
-  "model": "system.employee", 
+  "pk": 2, 
+  "model": "system.terminal", 
   "fields": {
-    "status": "1", 
-    "tel": "23423423423", 
-    "name": "2234", 
-    "idCard": "34", 
-    "cardNum2": "32", 
-    "sex": "1", 
-    "cardNum1": "32", 
-    "num": "12", 
-    "remarks": "233", 
-    "joinTime": "2014-05-06T21:16:01", 
-    "type": "1"
+    "num": "2", 
+    "name": "\u8ba1\u91cd\u540e\u7ec8\u7aef", 
+    "ip2": "192.168.127.112", 
+    "defaultProcess": 3, 
+    "ip1": "192.168.127.12", 
+    "defaultMaterial": 1, 
+    "remarks": null, 
+    "type": "1", 
+    "workGroup": 1
   }
 },
 {
-  "pk": 12, 
-  "model": "system.employee", 
+  "pk": 3, 
+  "model": "system.terminal", 
   "fields": {
-    "status": "1", 
-    "tel": "23423423423", 
-    "name": "2234", 
-    "idCard": "34", 
-    "cardNum2": "32", 
-    "sex": "1", 
-    "cardNum1": "32", 
-    "num": "12", 
-    "remarks": "233", 
-    "joinTime": "2014-05-06T21:16:21", 
-    "type": "1"
-  }
-},
-{
-  "pk": 13, 
-  "model": "system.employee", 
-  "fields": {
-    "status": "1", 
-    "tel": "23423423423", 
-    "name": "2234", 
-    "idCard": "34", 
-    "cardNum2": "32", 
-    "sex": "1", 
-    "cardNum1": "32", 
-    "num": "12", 
-    "remarks": "23332", 
-    "joinTime": "2014-05-06T21:16:34", 
-    "type": "1"
-  }
-},
-{
-  "pk": 14, 
-  "model": "system.employee", 
-  "fields": {
-    "status": "1", 
-    "tel": "139001303431", 
-    "name": "2234", 
-    "idCard": "34", 
-    "cardNum2": "32", 
-    "sex": "0", 
-    "cardNum1": "32", 
-    "num": "12", 
-    "remarks": "2335", 
-    "joinTime": "2014-05-06T21:17:32", 
-    "type": "1"
-  }
-},
-{
-  "pk": 15, 
-  "model": "system.employee", 
-  "fields": {
-    "status": "0", 
-    "tel": "1231231", 
-    "name": "\u5c712", 
-    "idCard": "1231231231", 
-    "cardNum2": "234324", 
-    "sex": "1", 
-    "cardNum1": "1213123", 
     "num": "3", 
-    "remarks": "3243234", 
-    "joinTime": "2014-05-06T23:49:08", 
-    "type": "1"
+    "name": "\u4e2d\u95f4\u8ba1\u91cd\u7ec8\u7aef", 
+    "ip2": "192.168.127.113", 
+    "defaultProcess": 6, 
+    "ip1": "192.168.127.13", 
+    "defaultMaterial": 1, 
+    "remarks": null, 
+    "type": "1", 
+    "workGroup": 2
   }
 },
 {
-  "pk": 16, 
-  "model": "system.employee", 
+  "pk": 4, 
+  "model": "system.terminal", 
   "fields": {
-    "status": "1", 
-    "tel": "1231231", 
-    "name": "\u5c713", 
-    "idCard": "1231231231", 
-    "cardNum2": "234324", 
-    "sex": "1", 
-    "cardNum1": "1213123", 
-    "num": "3", 
-    "remarks": "3243243", 
-    "joinTime": "2014-05-06T21:25:05", 
-    "type": "1"
+    "num": "4", 
+    "name": "\u8ba1\u6570\u7ec8\u7aef1", 
+    "ip2": null, 
+    "defaultProcess": 1, 
+    "ip1": "192.168.127.14", 
+    "defaultMaterial": 1, 
+    "remarks": null, 
+    "type": "2", 
+    "workGroup": 3
+  }
+},
+{
+  "pk": 20, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 1, 
+    "card": 1, 
+    "time": "2014-05-11T01:40:48"
+  }
+},
+{
+  "pk": 21, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T01:41:03"
+  }
+},
+{
+  "pk": 22, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 1, 
+    "card": 12, 
+    "time": "2014-05-11T01:41:33"
+  }
+},
+{
+  "pk": 23, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 12, 
+    "time": "2014-05-11T01:41:33"
+  }
+},
+{
+  "pk": 24, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 1, 
+    "card": 4, 
+    "time": "2014-05-11T01:41:51"
+  }
+},
+{
+  "pk": 25, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 1, 
+    "card": 9, 
+    "time": "2014-05-11T01:43:45"
+  }
+},
+{
+  "pk": 26, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 1, 
+    "card": 2, 
+    "time": "2014-05-11T01:49:42"
+  }
+},
+{
+  "pk": 27, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T01:50:54"
+  }
+},
+{
+  "pk": 28, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T10:26:53"
+  }
+},
+{
+  "pk": 29, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T10:30:17"
+  }
+},
+{
+  "pk": 30, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T10:35:37"
+  }
+},
+{
+  "pk": 31, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T10:38:33"
+  }
+},
+{
+  "pk": 32, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T10:41:39"
+  }
+},
+{
+  "pk": 33, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T10:44:50"
+  }
+},
+{
+  "pk": 34, 
+  "model": "system.workshift", 
+  "fields": {
+    "terminal": 2, 
+    "card": 1, 
+    "time": "2014-05-11T10:44:53"
   }
 },
 {
@@ -718,24 +1128,184 @@
 },
 {
   "pk": 1, 
-  "model": "system.salarycountconfig", 
+  "model": "system.production", 
   "fields": {
-    "process": 1, 
-    "price": "0.50", 
+    "count": "1.00", 
+    "process": 3, 
     "material": 1, 
-   
-    "remarks": "\u7b2c\u4e8c\u5b63\u5ea6\u9ec4\u82b1\u9c7c\u52a0\u5de5\u8ba1\u4ef6\u5de5\u8d44\u6c34\u5e73"
-   
-  
+    "terminal": 2, 
+    "time": "2014-05-11T01:44:30", 
+    "employee": 1, 
+    "card": 20
   }
 },
 {
-  "pk": 1, 
-  "model": "system.salarytimeconfig", 
+  "pk": 2, 
+  "model": "system.production", 
   "fields": {
-    "remarks": "2014\u5e74\u8ba1\u65f6\u5de5\u8d44\u5355\u4ef71", 
-    "price": "1.12"
-  
+    "count": "1.00", 
+    "process": 3, 
+    "material": 1, 
+    "terminal": 2, 
+    "time": "2014-05-11T10:26:56", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 3, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:35:47", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 4, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:35:50", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 5, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:39:01", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 6, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:39:10", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 7, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:39:13", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 8, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:39:19", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 9, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:39:25", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 10, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:41:48", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 11, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:41:51", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 12, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:41:54", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 13, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:45:03", 
+    "employee": 1, 
+    "card": 20
+  }
+},
+{
+  "pk": 14, 
+  "model": "system.production", 
+  "fields": {
+    "count": "-641.00", 
+    "process": 2, 
+    "material": 1, 
+    "terminal": 1, 
+    "time": "2014-05-11T10:45:06", 
+    "employee": 1, 
+    "card": 20
   }
 }
 ]

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*- 
 from django.views import generic
 from django.views.generic.edit import FormMixin
+from django import forms
+import json
+from django.http import HttpResponse
 
 # import the logging library
 import logging
@@ -16,6 +19,11 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         """Return the last five published polls."""
         return MaterialType.objects.order_by('id')[:5]
+
+
+
+
+ 
 
 
 class SystemListView(generic.ListView):
@@ -498,19 +506,28 @@ class CardListView(SystemListView, FormMixin):
     context_object_name = 'card_list'
     model = Card
     form_class = CardSearchForm
-    #paginate_by = 10
+    paginate_by = 10
     logger.info("system out test.")
     def get_context_data(self, **kwargs): 
         context = super(CardListView, self).get_context_data(**kwargs)  
-        form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
+        #form_class = self.get_form_class()
+        context['form'] = CardSearchForm({'num':self.request.GET.get('num'), 
+        'type':self.request.GET.get('type'), 
+        'assignd':self.request.GET.get('assignd') }) 
+        logger.info("form info %s ", context['form'])
         context['pageHeader'] = u"计件工资管理"
         context['title'] = u"计件工资管理"
-        context['sidebar'] = {'card':'active'}         
+        context['sidebar'] = {'card':'active'}
+        q = self.request.GET.copy() 
+        if q.__contains__('page'):
+            q.pop('page')
+        logger.info(" queryString = %s", q.urlencode())
+        context['queryString'] = q.urlencode()
         return context
     def get_queryset(self):
         type = self.request.GET.get('type')
         logger.info("request params type is %s", type)
+        return Card.objects.all()
        # logger.info("1111%request",  self.request) 
     def get_success_url(self):
         return reverse_lazy('card_list', kwargs={'pk': self.object.pk})
@@ -525,6 +542,23 @@ class CardDetailView(SystemDetailView):
         context['title'] = u"计时工资详细信息"
         context['sidebar'] = {'card':'active'} 
         return context
+        
+    def get(self,request,  *args, **kwargs):
+        #if request.is_ajax():
+            return self.render_to_json_response(request, *args, **kwargs)
+       # else:
+       #    return super(SystemDetailView, self).get(request, *args, **kwargs)
+            
+        
+    def render_to_json_response(self, context, **response_kwargs):
+        logger.info(self.get_object().__dict__)
+        data = self.get_object().__dict__
+        del data['_state'] 
+        data = json.dumps(data)
+        logger.info(data)
+        response_kwargs['content_type'] = 'application/json'
+        return HttpResponse(data, response_kwargs)
+    
 class CardCreateView(CreateView):
     form_class= CardForm
     model = Card
@@ -545,12 +579,23 @@ class CardUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(CardUpdateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
+        logger.info("card form: %s", form_class)
+        logger.info(self.get_object())
         context['form'] = self.get_form(form_class)
         context['pageHeader'] = u"修改计时工资信息"
         context['title'] = u"修改计时工资信息"
         context['sidebar'] = {'card':'active'} 
         return context
-    
+    def get_form(self,form_class):
+        form = super(CardUpdateView, self).get_form(form_class)
+        logger.info(" object: %s", self.get_object() )        
+        logger.info( u"form running times: %s   type : %s ", form, self.get_object().type ) 
+        self.update_type_field(form)
+        return form
+    def update_type_field(self, form):
+        obj = self.get_object()
+        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= Card.getTypeChoices(type=obj.type,owner_id=obj.owner_id) ), label="所有者")
+        
 class CardDeleteView(DeleteView):
     form_class= CardForm
     model = Card     
@@ -564,4 +609,3 @@ class CardDeleteView(DeleteView):
         context = super(CardDeleteView, self).get_context_data(**kwargs) 
         context['sidebar'] = {'card':'active'} 
         return context
-
