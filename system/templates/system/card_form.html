@@ -1,6 +1,15 @@
 {% extends "system/base_detail.html" %}
 {% load bootstrap3 %}
 {% block maincontent %}
+
+<script>
+    $(function(){
+        $('#id_type').on('change',function(){
+            $.getJSON('{% url %}')
+        });
+    });
+</script>
+
 <form action="" method="post"  class="form-horizontal" role="form">
     {% csrf_token %}
      {% bootstrap_form form layout='horizontal' %}

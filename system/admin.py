@@ -1,5 +1,5 @@
 from django.contrib import admin
-from system.models import MaterialType, Material,Employee, SalaryCountConfig, DictConfig, Card, WorkGroup
+from system.models import MaterialType, Material,Employee, SalaryCountConfig, DictConfig, Card, WorkGroup, Process
 
 # Register your models here.
 admin.site.register(MaterialType)
@@ -9,3 +9,4 @@ admin.site.register(SalaryCountConfig)
 admin.site.register(DictConfig)
 admin.site.register(Card)
 admin.site.register(WorkGroup)
+admin.site.register(Process)

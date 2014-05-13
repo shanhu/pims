@@ -41,7 +41,7 @@ class Card(models.Model):
         #managed = False
         db_table = 'card'
     def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} num {1}   remarks {2} ".format(self.id , self.num ,  self.remarks)
+        return  u"id {0} num {1} type {2}  remarks {3} ".format(self.id , self.num , self.type,  self.remarks)
     @staticmethod
     def getTypeChoices(**kwargs):
         return   [('', '--------')] + [(card.id, card.num) for card in Card.objects.filter(**kwargs)] 
@@ -57,11 +57,11 @@ class CardForm(forms.ModelForm):
         
 
 class CardSearchForm(forms.Form):
-    typeChoices = DictConfig.getTypeChoices(type="card_type")
+    typeChoices = DictConfig.getTypeChoices(type="card_type") 
     assignedChoices = DictConfig.getTypeChoices(type="card_assigned") 
     num = forms.CharField(max_length=20, label= u"", widget=forms.TextInput(attrs={'placeholder':'卡号'}), required = False )
-    type = forms.CharField(max_length=1, widget=forms.Select(choices=typeChoices, attrs={'placeholder':'卡号'}) , label= u"", required = False) # Field name made lowercase.   e 
-    assignd = forms.CharField(max_length=1, label = "",  widget=forms.Select( choices=assignedChoices), required = False)
+    type = forms.CharField(max_length=1, widget=forms.Select(choices= [('', '全部')] + typeChoices, attrs={'placeholder':'卡号'}) , label= u"", required = False) # Field name made lowercase.   e 
+    assignd = forms.CharField(max_length=1, label = "",  widget=forms.Select( choices= [('', '全部')] + assignedChoices), required = False)
         
     
         
@@ -82,8 +82,8 @@ class Employee(models.Model):
     joinTime = models.DateTimeField(db_column='JOIN_TIME' , )#verbose_name="入职时间"
     type = models.CharField(db_column='TYPE', max_length=1, verbose_name="员工类型",  choices=employeeTypeChoices) # Field name made lowercase.   
     status = models.CharField(db_column='STATUS', max_length=1, verbose_name="员工状态" , choices=statusChoices) # Field name made lowercase.
-    cardNum1 = models.CharField(db_column='CARD_NUM1', max_length=20, blank=True,verbose_name="工作卡号",    ) # Field name made lowercase.
-    cardNum2 = models.CharField(db_column='CARD_NUM2', max_length=20, blank=True,verbose_name="员工卡号",    ) # Field name made lowercase.
+    cardNum1 = models.CharField(db_column='CARD_NUM1', max_length=20,  null=True, blank=True,verbose_name="工作卡号",    ) # Field name made lowercase.
+    cardNum2 = models.CharField(db_column='CARD_NUM2', max_length=20,  null=True, blank=True,verbose_name="员工卡号",    ) # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True,verbose_name="备注") # Field name made lowercase.
      
     class Meta:
@@ -153,7 +153,7 @@ class Material(models.Model):
   
    # conver = models.IntegerField(db_column='CONVER', blank=True, null=True,  verbose_name="换算") # Field name made lowercase.
     status = models.CharField(db_column='STATUS', max_length=1, blank=True , choices=statuschoices) # Field name made lowercase.
-    card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True, verbose_name="物料卡编号") # Field name made lowercase.
+    card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True,   null=True, verbose_name="物料卡编号") # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True, verbose_name="备注") # Field name made lowercase.
     class Meta:
        # managed = False
@@ -184,7 +184,7 @@ class Process(models.Model):
     firstProcess = models.ForeignKey('self', db_column='FIRST_PROCESS_ID', blank=True, null=True, verbose_name="前工艺") # Field name made lowercase.
     isFirst = models.CharField(db_column='IS_FIRST', max_length=1, choices=processIsFirstchoices, verbose_name="是否前工艺"  ) # Field name made lowercase.    
     status = models.CharField(db_column='STATUS', max_length=1, choices=statuschoices, verbose_name="状态") # Field name made lowercase.
-    card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True, verbose_name="工艺卡号") # Field name made lowercase.
+    card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True, null=False, verbose_name="工艺卡号") # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True, verbose_name="备注") # Field name made lowercase.
     mode = models.CharField(db_column='MODE', max_length=1, blank=True ,  verbose_name="统计方式", choices=modechoices) # Field name made lowercase
     unit = models.CharField(db_column='UNIT', max_length=20, blank=True ,  verbose_name="单位") # Field name made lowercase..
@@ -212,7 +212,7 @@ class Terminal(models.Model):
     defaultMaterial = models.ForeignKey(Material, db_column='DEFAULT_MATERIAL_ID', blank=True, null=True) # Field name made lowercase.
     defaultProcess = models.ForeignKey(Process, db_column='DEFAULT_PROCESS_ID', blank=True, null=True) # Field name made lowercase.
     class Meta:
-       # managed = False
+        managed = False
         db_table = 'terminal'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
@@ -259,7 +259,7 @@ class WorkClass(models.Model):
     name = models.CharField(db_column='NAME', max_length=20, blank=True, verbose_name="名称",) # Field name made lowercase.
     type = models.CharField(db_column='TYPE', max_length=1, blank=True, verbose_name="类型",  choices=clasTypeChoices) # Field name made lowercase.   
     status = models.CharField(db_column='STATUS', max_length=1, blank=True, verbose_name="状态", choices=classStatusTypeChoices) # Field name made lowercase.
-    cardNum = models.CharField(db_column='CARD_NUM', max_length=20, verbose_name="班次卡号", blank=True) # Field name made lowercase. 
+    cardNum = models.CharField(db_column='CARD_NUM', max_length=20,  null=True, verbose_name="班次卡号", blank=True) # Field name made lowercase. 
     remarks = models.TextField(db_column='REMARKS', max_length=200, verbose_name="备注", blank=True) # Field name made lowercase.     
     class Meta:
        # managed = False

@@ -3,6 +3,7 @@ from django.views import generic
 from django.views.generic.edit import FormMixin
 from django import forms
 import json
+from django.db.models   import Q
 from django.http import HttpResponse
 
 # import the logging library
@@ -18,12 +19,7 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """Return the last five published polls."""
-        return MaterialType.objects.order_by('id')[:5]
-
-
-
-
- 
+        return MaterialType.objects.order_by('id')[:5] 
 
 
 class SystemListView(generic.ListView):
@@ -517,21 +513,34 @@ class CardListView(SystemListView, FormMixin):
         logger.info("form info %s ", context['form'])
         context['pageHeader'] = u"计件工资管理"
         context['title'] = u"计件工资管理"
-        context['sidebar'] = {'card':'active'}
-        q = self.request.GET.copy() 
-        if q.__contains__('page'):
-            q.pop('page')
-        logger.info(" queryString = %s", q.urlencode())
-        context['queryString'] = q.urlencode()
+        context['sidebar'] = {'card':'active'} 
+        context['queryString'] = self.get_query_string().urlencode()
         return context
     def get_queryset(self):
         type = self.request.GET.get('type')
         logger.info("request params type is %s", type)
-        return Card.objects.all()
+        q = self.get_query_string()
+        query = Card.objects.filter()
+        if q.get('type'):
+            query = query.filter(type=q.get('type'))
+        if q.get('assignd') == '0' :
+            query = query.filter(owner_id__isnull = True)
+        elif q.get('assignd') == '1' :
+            query = query.filter(owner_id__isnull = False)
+        if q.get('num'):
+            query = query.filter(num=q.get('num'))
+            
+        return query
        # logger.info("1111%request",  self.request) 
     def get_success_url(self):
         return reverse_lazy('card_list', kwargs={'pk': self.object.pk})
-
+    def get_query_string(self):
+        q = self.request.GET.copy() 
+        if q.__contains__('page'):
+            q.pop('page')
+        logger.info(" queryString = %s", q.urlencode())
+        return q
+        
 class CardDetailView(SystemDetailView): 
     template_name = 'system/card_detail.html'
     context_object_name = 'card'
@@ -543,21 +552,7 @@ class CardDetailView(SystemDetailView):
         context['sidebar'] = {'card':'active'} 
         return context
         
-    def get(self,request,  *args, **kwargs):
-        #if request.is_ajax():
-            return self.render_to_json_response(request, *args, **kwargs)
-       # else:
-       #    return super(SystemDetailView, self).get(request, *args, **kwargs)
-            
-        
-    def render_to_json_response(self, context, **response_kwargs):
-        logger.info(self.get_object().__dict__)
-        data = self.get_object().__dict__
-        del data['_state'] 
-        data = json.dumps(data)
-        logger.info(data)
-        response_kwargs['content_type'] = 'application/json'
-        return HttpResponse(data, response_kwargs)
+   
     
 class CardCreateView(CreateView):
     form_class= CardForm
@@ -571,6 +566,21 @@ class CardCreateView(CreateView):
         context['sidebar'] = {'card':'active'} 
         return context
     success_url =  reverse_lazy("card_list")
+    def get(self,request,  *args, **kwargs):
+        if request.is_ajax():
+            return self.render_to_json_response(request, *args, **kwargs)
+        else:
+           return super(SystemDetailView, self).get(request, *args, **kwargs)
+            
+        
+    def render_to_json_response(self, context, **response_kwargs):
+        logger.info(self.get_object().__dict__)
+        data = self.get_object().__dict__
+        del data['_state'] 
+        data = json.dumps(data)
+        logger.info(data)
+        #response_kwargs['content_type'] = 'application/json'
+        return HttpResponse(data, content_type='application/json')
         
 class CardUpdateView(UpdateView):
     form_class= CardForm
@@ -586,16 +596,60 @@ class CardUpdateView(UpdateView):
         context['title'] = u"修改计时工资信息"
         context['sidebar'] = {'card':'active'} 
         return context
+    def get(self,request,  *args, **kwargs):
+        if request.is_ajax():
+            return self.render_to_json_response(request, *args, **kwargs)
+        else:
+           return super(CardUpdateView, self).get(request, *args, **kwargs)
+            
+        
+    def render_to_json_response(self, context, **response_kwargs):
+        logger.info(self.get_object().__dict__)
+        data = self.get_object().__dict__
+        del data['_state'] 
+        data = json.dumps(data)
+        logger.info(data)
+        #response_kwargs['content_type'] = 'application/json'
+        return HttpResponse(data, content_type='application/json')
     def get_form(self,form_class):
         form = super(CardUpdateView, self).get_form(form_class)
         logger.info(" object: %s", self.get_object() )        
         logger.info( u"form running times: %s   type : %s ", form, self.get_object().type ) 
         self.update_type_field(form)
+        logger.info("%s", form)
         return form
+   
+    def getProcess(self, **kwargs):
+        process = [('', '---------')] + [ (process.id, process.name) for process in Process.objects.filter(Q(card_num__isnull=True) | Q(card_num='') )]
+        logger.info("process %s ", process)
+        return  process
+    def getEmployee(self, **kwargs):
+        query = Employee.objects.filter()
+        if kwargs['type'] == '5' :
+            query.filter(Q(card_num1__isnull=True) | Q(card_num1='') )
+        if kwargs['type'] == '6':
+            query.filter(Q(card_num2__isnull=True) | Q(card_num2='') )
+        return query
+    def getWorkClass(self, **kwargs):
+        query = WorkClass.objects.filter() 
+        if kwargs['type'] == '1' :
+            query.filter(Q(type='1'), Q(card_num__isnull=True) | Q(card_num=''))
+        if kwargs['type'] == '2':
+             query.filter(Q(type='1'), Q(card_num__isnull=True) | Q(card_num=''))
+        return query
+ 
+    def getMaterial(self, **kwargs):
+        return Material.objects.filter(card_num__isnull=True,)
     def update_type_field(self, form):
         obj = self.get_object()
-        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= Card.getTypeChoices(type=obj.type,owner_id=obj.owner_id) ), label="所有者")
-        
+        type = obj.type
+        logger.info("card:%s", obj)
+        choices_produce = {'1':self.getWorkClass, '2':self.getWorkClass, '3':self.getMaterial, '4':self.getProcess, '5':self.getEmployee, '6':self.getEmployee}
+        choices = choices_produce.get(type)(type=type)
+        logger.info(" choices: %s ", choices)
+        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= choices), label="所有者")
+        logger.info("form %s", form)
+        return form
 class CardDeleteView(DeleteView):
     form_class= CardForm
     model = Card     
