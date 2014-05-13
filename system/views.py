@@ -76,6 +76,7 @@ from django.shortcuts import redirect
 class EmployeeCreateView(CreateView):
     form_class= EmployeeForm
     model = Employee
+    success_url =  reverse_lazy("employee_list")
     def get_context_data(self, **kwargs):
         context = super(EmployeeCreateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
@@ -84,10 +85,18 @@ class EmployeeCreateView(CreateView):
         context['title'] = u"员工注册"
         context['sidebar'] = {'employee_add':'active'}
         return context
-        
+    def post(self, *args, **kwargs):
+        object = self.get_object()
+        logger.info('employee update: %s', object)
+        super(EmployeeCreateView, self).post(*args, **kwargs)
+        Card.objects.filter(type='5',num=object.card_num1).update(owner_id=object.id)
+        Card.objects.filter(type='6',num=object.card_num2).update(owner_id=object.id)
+        return redirect('employee_list')
+         
 class EmployeeUpdateView(UpdateView):
     form_class= EmployeeForm
-    model = Employee 
+    model = Employee
+   # success_url =  reverse_lazy("employee_list")
     def get_context_data(self, **kwargs):
         context = super(EmployeeUpdateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
@@ -96,6 +105,16 @@ class EmployeeUpdateView(UpdateView):
         context['title'] = u"员工修改"
         context['sidebar'] = {'employee_list':'active'}
         return context
+    def post(self, *args, **kwargs):
+        object = self.get_object()
+        logger.info('employee update: %s', object)
+       # logger.info('employee form %s', self.get_form())
+        super(EmployeeUpdateView, self).post(*args, **kwargs)
+        logger.info('employee update: %s', object)
+       # logger.info('employee form %s', self.get_form())
+        Card.objects.filter(type='5',num=object.card_num1).update(owner_id=object.id)
+        Card.objects.filter(type='6',num=object.card_num2).update(owner_id=object.id)
+        return redirect('employee_list')
     
 class EmployeeDeleteView(DeleteView):
     form_class= EmployeeForm
@@ -547,11 +566,11 @@ class CardDetailView(SystemDetailView):
     model = Card
     def get_context_data(self, **kwargs): 
         context = super(CardDetailView, self).get_context_data(**kwargs)  
-        context['pageHeader'] = u"计时工资详细信息"
-        context['title'] = u"计时工资详细信息"
+        context['pageHeader'] = u"卡详细信息"
+        context['title'] = u"卡详细信息"
         context['sidebar'] = {'card':'active'} 
         return context
-        
+    
    
     
 class CardCreateView(CreateView):
@@ -561,8 +580,8 @@ class CardCreateView(CreateView):
         context = super(CardCreateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
         context['form'] = self.get_form(form_class)
-        context['pageHeader'] = u"创建计时工资信息"
-        context['title'] = u"创建计时工资信息"
+        context['pageHeader'] = u"创建卡关联信息"
+        context['title'] = u"创建卡关联信息"
         context['sidebar'] = {'card':'active'} 
         return context
     success_url =  reverse_lazy("card_list")
@@ -592,8 +611,8 @@ class CardUpdateView(UpdateView):
         logger.info("card form: %s", form_class)
         logger.info(self.get_object())
         context['form'] = self.get_form(form_class)
-        context['pageHeader'] = u"修改计时工资信息"
-        context['title'] = u"修改计时工资信息"
+        context['pageHeader'] = u"修改卡关联信息"
+        context['title'] = u"修改卡关联信息"
         context['sidebar'] = {'card':'active'} 
         return context
     def get(self,request,  *args, **kwargs):
@@ -601,7 +620,22 @@ class CardUpdateView(UpdateView):
             return self.render_to_json_response(request, *args, **kwargs)
         else:
            return super(CardUpdateView, self).get(request, *args, **kwargs)
-            
+    def post(self,*args, **kwargs):
+        super(CardUpdateView, self).post(*args, **kwargs)
+        card = self.get_object(); 
+        #card.status = 0
+        owner_getter = {'1': WorkClass.objects, '2':WorkClass.objects, '3':Material.objects, '4':Process.objects, '5':Employee.objects, '6':Employee.objects}
+        owner = owner_getter.get(card.type).get(pk = card.owner_id)
+        if card.type == '5':
+            owner.card_num1 = card.num
+        elif card.type == '6':
+            owner.card_num2 = card.num
+        else:
+            owner.card_num = card.num
+        
+        owner.save()
+        card.save() 
+        return redirect('card_list');
         
     def render_to_json_response(self, context, **response_kwargs):
         logger.info(self.get_object().__dict__)
@@ -615,40 +649,46 @@ class CardUpdateView(UpdateView):
         form = super(CardUpdateView, self).get_form(form_class)
         logger.info(" object: %s", self.get_object() )        
         logger.info( u"form running times: %s   type : %s ", form, self.get_object().type ) 
-        self.update_type_field(form)
+        form = self.update_type_field(form)
         logger.info("%s", form)
         return form
    
-    def getProcess(self, **kwargs):
+    def getProcess(self,  form,  **kwargs):
         process = [('', '---------')] + [ (process.id, process.name) for process in Process.objects.filter(Q(card_num__isnull=True) | Q(card_num='') )]
         logger.info("process %s ", process)
-        return  process
-    def getEmployee(self, **kwargs):
+        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= process), label="工艺")
+        return  form
+    def getEmployee(self, form, **kwargs):
         query = Employee.objects.filter()
         if kwargs['type'] == '5' :
-            query.filter(Q(card_num1__isnull=True) | Q(card_num1='') )
+          query =  query.filter(Q(card_num1__isnull=True) | Q(card_num1='') )
         if kwargs['type'] == '6':
-            query.filter(Q(card_num2__isnull=True) | Q(card_num2='') )
-        return query
-    def getWorkClass(self, **kwargs):
+          query =  query.filter(Q(card_num2__isnull=True) | Q(card_num2='') )
+        employees = [('', '---------')] + [( employee.id, employee.name) for employee in query ]
+        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= employees), label="员工")
+        return form
+    def getWorkClass(self,form,  **kwargs):
         query = WorkClass.objects.filter() 
+        logger.info('type %r' ,  kwargs)
         if kwargs['type'] == '1' :
-            query.filter(Q(type='1'), Q(card_num__isnull=True) | Q(card_num=''))
+           query = query.filter(Q(type='0'), Q(card_num__isnull=True) | Q(card_num=''))
         if kwargs['type'] == '2':
-             query.filter(Q(type='1'), Q(card_num__isnull=True) | Q(card_num=''))
-        return query
+           query =  query.filter(Q(type='1'), Q(card_num__isnull=True)  | Q(card_num=''))
+        workclazz = [('', '---------')] + [(workclass.id, workclass.name )for workclass in query] 
+        logger.info('workclass %s', workclazz)
+        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= workclazz), label="班次")
+        return form
  
-    def getMaterial(self, **kwargs):
-        return Material.objects.filter(card_num__isnull=True,)
+    def getMaterial(self,form, **kwargs):
+        materials = [('', '---------')] + [(material.id, material.name) for material in Material.objects.filter(Q(card_num__isnull=True) | Q(card_num='') )]
+        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= materials), label="物料")
+        return form
     def update_type_field(self, form):
         obj = self.get_object()
         type = obj.type
         logger.info("card:%s", obj)
-        choices_produce = {'1':self.getWorkClass, '2':self.getWorkClass, '3':self.getMaterial, '4':self.getProcess, '5':self.getEmployee, '6':self.getEmployee}
-        choices = choices_produce.get(type)(type=type)
-        logger.info(" choices: %s ", choices)
-        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= choices), label="所有者")
-        logger.info("form %s", form)
+        form_updater = {'1':self.getWorkClass, '2':self.getWorkClass, '3':self.getMaterial, '4':self.getProcess, '5':self.getEmployee, '6':self.getEmployee}
+        form = form_updater.get(type)( form, type=type) 
         return form
 class CardDeleteView(DeleteView):
     form_class= CardForm
