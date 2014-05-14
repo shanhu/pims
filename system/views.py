@@ -122,7 +122,7 @@ class EmployeeDeleteView(DeleteView):
     success_url = reverse_lazy('employee_list')  
     def post(self,*args, **kwargs):
         employee = self.get_object();
-        if employee.cardNum1 != '' or employee.cardNum2 != '':
+        if employee.card_num1 != '' or employee.card_num2 != '':
             employee.status = 0
             employee.save()
         else:
