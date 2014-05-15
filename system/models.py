@@ -235,6 +235,7 @@ class EmployeeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EmployeeForm, self).__init__(*args, **kwargs)
         self.fields['sex'] = forms.ChoiceField(choices=DictConfig.getTypeChoices(type='sex'), label="性别", )
+       #TODO self.fields['card_num1'] = forms.ChoiceField(choices=)
     class Meta:
         model = Employee
         fields  = ['num', 'name', 'idCard','sex', 'tel','joinTime' , 'type', 'status', 'card_num1', 'card_num2', 'remarks',   ]
@@ -248,6 +249,15 @@ class EmployeeForm(forms.ModelForm):
         '%Y-%m-%d',              # '2006-10-25'
         ]
    # joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget(),  label="入职时间", )
+class EmployeeSearchForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = ['name', 'num']
+        labels = {'name':'','num':''}
+        widgets = {'name':forms.TextInput(attrs={'placeholder':'姓名'}),
+                   'num':forms.TextInput(attrs={'placeholder':'编号'})}
+    
+    
     
 
 

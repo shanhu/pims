@@ -45,16 +45,18 @@ class SystemDetailView(generic.DetailView):
         return context
 
 #--------------------------------------------------员工管理 界面定义------------------------------------------------------------------
-from system.models import Employee, EmployeeForm
+from system.models import Employee, EmployeeForm, EmployeeSearchForm
 class EmployeeListView(SystemListView): 
     template_name = 'system/employee_list.html'
     context_object_name = 'employee_list'
     model = Employee
+    #form_class = EmployeeSearchForm
     paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(EmployeeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"员工汇总"
         context['title'] = u"员工汇总"
+        context['form'] = EmployeeSearchForm()
         context['sidebar'] = {'employee_list':'active'}
         return context
     
@@ -74,7 +76,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 
 class EmployeeCreateView(CreateView):
-    form_class= EmployeeForm
+    form_class = EmployeeForm
     model = Employee
     success_url =  reverse_lazy("employee_list")
     def get_context_data(self, **kwargs):
@@ -85,13 +87,13 @@ class EmployeeCreateView(CreateView):
         context['title'] = u"员工注册"
         context['sidebar'] = {'employee_add':'active'}
         return context
-    def post(self, *args, **kwargs):
-        object = self.get_object()
-        logger.info('employee update: %s', object)
-        super(EmployeeCreateView, self).post(*args, **kwargs)
-        Card.objects.filter(type='5',num=object.card_num1).update(owner_id=object.id)
-        Card.objects.filter(type='6',num=object.card_num2).update(owner_id=object.id)
-        return redirect('employee_list')
+    def post(self, request, *args, **kwargs):  
+        result = super(EmployeeCreateView, self).post(request, *args, **kwargs)  
+        #object = self.get_object()
+        #logger.info('employee update: %s', object)
+        #Card.objects.filter(type='5',num=object.card_num1).update(owner_id=object.id)
+        #Card.objects.filter(type='6',num=object.card_num2).update(owner_id=object.id)
+        return result
          
 class EmployeeUpdateView(UpdateView):
     form_class= EmployeeForm
