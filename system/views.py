@@ -22,43 +22,54 @@ class IndexView(generic.ListView):
         return MaterialType.objects.order_by('id')[:5] 
 
 
-class SystemListView(generic.ListView):
+class SystemListView(generic.ListView, FormMixin):
     #template_name = 'system/base_list.html'
     #todo add dynamic menus here!
     def get_context_data(self, **kwargs): 
         context = super(SystemListView, self).get_context_data(**kwargs)  
         context['pageHeader'] =  u"列表页"
-
-
+        context['queryString'] = self.get_query_string().urlencode() 
+        context['form'] = self.get_form_class()(self.request.GET)
+        logger.info(self.request.GET.get('num'))
+       # context['form'] = CardSearchForm({'num':self.request.GET.get('num'), 
+       # 'type':self.request.GET.get('type'), 
+       # 'assignd':self.request.GET.get('assignd') }) 
         return context
-
+    def get_query_string(self):
+        q = self.request.GET.copy() 
+        logger.info(q)
+        logger.info(self.request.GET)
+        if q.__contains__('page'):
+            q.pop('page')
+        logger.info(" queryString = %s", q.urlencode())
+        return q
         
 class SystemDetailView(generic.DetailView):
     template_name = 'system/base_detail.html'
     #todo add dynamic menus here!
     def get_context_data(self, **kwargs): 
         context = super(SystemDetailView, self).get_context_data(**kwargs) 
-        context['menu_list'] = []
-
-
+        context['menu_list'] = [] 
         context['breadcrumb'] = []
         return context
 
 #--------------------------------------------------员工管理 界面定义------------------------------------------------------------------
-from system.models import Employee, EmployeeForm, EmployeeSearchForm
+from system.models import Employee, EmployeeForm,  NormalSearchForm
 class EmployeeListView(SystemListView): 
     template_name = 'system/employee_list.html'
     context_object_name = 'employee_list'
     model = Employee
-    #form_class = EmployeeSearchForm
+    form_class = NormalSearchForm
     paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(EmployeeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"员工汇总"
         context['title'] = u"员工汇总"
-        context['form'] = EmployeeSearchForm()
         context['sidebar'] = {'employee_list':'active'}
+        context['add_url'] = reverse_lazy('employee_add')
         return context
+    def get_queryset(self,**kwargs): 
+        return Employee.objects.filter(**{key : self.request.GET[key] for key in self.request.GET  if  self.request.GET[key] <> '' and  key <> 'page' })
     
 class EmployeeDetailView(SystemDetailView): 
     template_name = 'system/employee_detail.html'
@@ -87,12 +98,16 @@ class EmployeeCreateView(CreateView):
         context['title'] = u"员工注册"
         context['sidebar'] = {'employee_add':'active'}
         return context
-    def post(self, request, *args, **kwargs):  
+    def post(self, request, *args, **kwargs):
         result = super(EmployeeCreateView, self).post(request, *args, **kwargs)  
-        #object = self.get_object()
-        #logger.info('employee update: %s', object)
-        #Card.objects.filter(type='5',num=object.card_num1).update(owner_id=object.id)
-        #Card.objects.filter(type='6',num=object.card_num2).update(owner_id=object.id)
+        object = self.object
+        logger.info('employee update: %s', object)
+        if object.card_num1:
+            employee_card = Card.objects.get(pk=object.card_num1)
+            Card.objects.filter(num=employee_card.num).update(owner_id=object.id)
+        if object.card_num2:
+            work_card = Card.objects.get(pk=object.card_num2)
+            Card.objects.filter(num=work_card.num).update(owner_id=object.id)
         return result
          
 class EmployeeUpdateView(UpdateView):
@@ -102,21 +117,28 @@ class EmployeeUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(EmployeeUpdateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
+        form = self.get_form(form_class)
+        form.fields['card_num1'].choices += [(self.object.card_num1,self.object.card_num1 )]
+        form.fields['card_num2'].choices += [(self.object.card_num2,self.object.card_num2 )]
+        context['form'] = form
         context['pageHeader'] = u"员工修改"
         context['title'] = u"员工修改"
         context['sidebar'] = {'employee_list':'active'}
         return context
-    def post(self, *args, **kwargs):
+    def post(self, request,  *args, **kwargs):
         object = self.get_object()
-        logger.info('employee update: %s', object)
-       # logger.info('employee form %s', self.get_form())
-        super(EmployeeUpdateView, self).post(*args, **kwargs)
-        logger.info('employee update: %s', object)
-       # logger.info('employee form %s', self.get_form())
-        Card.objects.filter(type='5',num=object.card_num1).update(owner_id=object.id)
-        Card.objects.filter(type='6',num=object.card_num2).update(owner_id=object.id)
-        return redirect('employee_list')
+        if object.card_num1:
+            Card.objects.filter(num=object.card_num1).update(owner_id=None)
+        if object.card_num2:
+            Card.objects.filter(num=object.card_num2).update(owner_id=None)
+        logger.info('employee update: %s', object) 
+        result = super(EmployeeUpdateView, self).post(request, *args, **kwargs)
+        object = self.object
+        if object.card_num1: 
+            Card.objects.filter(num=object.card_num1).update(owner_id=object.id)
+        if object.card_num2:
+            Card.objects.filter(num=object.card_num2).update(owner_id=object.id)
+        return result #redirect('employee_list')
     
 class EmployeeDeleteView(DeleteView):
     form_class= EmployeeForm
@@ -142,12 +164,14 @@ class MaterialTypeListView(SystemListView):
     template_name = 'system/materialType_list.html'
     context_object_name = 'materialType_list'
     model = MaterialType
+    form_class = NormalSearchForm
     paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(MaterialTypeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料类型管理"
         context['title'] = u"物料类型管理"
-        context['sidebar'] = {'material_type':'active'}        
+        context['sidebar'] = {'material_type':'active'}    
+        context['add_url'] = reverse_lazy('material_type_add')
         return context  
 
 class MaterialTypeDetailView(SystemDetailView): 
@@ -207,12 +231,14 @@ class MaterialListView(SystemListView):
     template_name = 'system/material_list.html'
     context_object_name = 'material_list'
     model = Material
+    form_class=NormalSearchForm
     paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(MaterialListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料管理"
         context['title'] = u"物料管理"  
-        context['sidebar'] = {'material':'active'}       
+        context['sidebar'] = {'material':'active'}  
+        context['add_url'] = reverse_lazy('material_add')  
         return context  
 
 class MaterialDetailView(SystemDetailView): 
@@ -236,6 +262,11 @@ class MaterialCreateView(CreateView):
         context['title'] = u"物料详细信息"
         context['sidebar'] = {'material':'active'} 
         return context
+    def post(self, request, **kwargs):
+        result = super(MaterialCreateView, self).post(request, **kwargs)
+        object = self.object
+        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        return result
     success_url =  reverse_lazy("material_list")
         
 class MaterialUpdateView(UpdateView):
@@ -245,11 +276,20 @@ class MaterialUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(MaterialUpdateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
+        form = self.get_form(form_class)
+        context['form'] = form
+        form.fields['card_num'].choices += [(self.object.card_num,self.object.card_num )]
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
         context['sidebar'] = {'material':'active'} 
         return context
+    def post(self, request, **kwargs):
+        object = self.get_object()
+        Card.objects.filter(num=object.card_num).update(owner_id=None)
+        result = super(MaterialUpdateView, self).post(request, **kwargs)
+        object = self.object
+        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        return result;
 class MaterialDeleteView(DeleteView):
     form_class= MaterialForm
     model = Material     
@@ -271,6 +311,7 @@ class ProcessListView(SystemListView):
     template_name = 'system/process_list.html'
     context_object_name = 'process_list'
     model = Process
+    form_class = NormalSearchForm
     paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(ProcessListView, self).get_context_data(**kwargs)  
@@ -384,18 +425,20 @@ class WorkClassDeleteView(DeleteView):
 
  
 #--------------------------------------------------计件工资参数管理 界面定义------------------------------------------------------------------   
-from system.models import SalaryCountConfig, SalaryCountConfigForm
+from system.models import SalaryCountConfig, SalaryCountConfigForm, SalaryCountSearchForm
 
 class SalaryCountConfigListView(SystemListView): 
     template_name = 'system/salarycountconfig_list.html'
     context_object_name = 'salarycountconfig_list'
     model = SalaryCountConfig
+    form_class = SalaryCountSearchForm
     paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(SalaryCountConfigListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"计件工资管理"
         context['title'] = u"计件工资管理"  
-        context['sidebar'] = {'salary_count_config':'active'}       
+        context['sidebar'] = {'salary_count_config':'active'}
+        context['add_url'] = reverse_lazy('salarycount_add')    
         return context  
 
 class SalaryCountConfigDetailView(SystemDetailView): 
@@ -456,12 +499,14 @@ class SalaryTimeConfigListView(SystemListView):
     template_name = 'system/salarytimeconfig_list.html'
     context_object_name = 'salarytimeconfig_list'
     model = SalaryTimeConfig
+    form_class = SalaryTimeConfigForm
     paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(SalaryTimeConfigListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"计件工资管理"
         context['title'] = u"计件工资管理"
-        context['sidebar'] = {'salary_time_config':'active'}         
+        context['sidebar'] = {'salary_time_config':'active'}
+        context['add_url'] = reverse_lazy('salarytime_add')        
         return context  
 
 class SalaryTimeConfigDetailView(SystemDetailView): 
@@ -518,7 +563,7 @@ class SalaryTimeConfigDeleteView(DeleteView):
 #--------------------------------------------------卡片管理 界面定义------------------------------------------------------------------   
 from system.models import Card, CardForm, CardSearchForm
 
-class CardListView(SystemListView, FormMixin): 
+class CardListView(SystemListView): 
     template_name = 'system/card_list.html'
     context_object_name = 'card_list'
     model = Card
@@ -528,39 +573,21 @@ class CardListView(SystemListView, FormMixin):
     def get_context_data(self, **kwargs): 
         context = super(CardListView, self).get_context_data(**kwargs)  
         #form_class = self.get_form_class()
-        context['form'] = CardSearchForm({'num':self.request.GET.get('num'), 
-        'type':self.request.GET.get('type'), 
-        'assignd':self.request.GET.get('assignd') }) 
         logger.info("form info %s ", context['form'])
-        context['pageHeader'] = u"计件工资管理"
-        context['title'] = u"计件工资管理"
-        context['sidebar'] = {'card':'active'} 
-        context['queryString'] = self.get_query_string().urlencode()
+        context['pageHeader'] = u"卡管理"
+        context['title'] = u"卡管理"
+        context['sidebar'] = {'card':'active'}
+        context['add_url'] = reverse_lazy('card_add')
+        context['is_display'] = "none"
         return context
     def get_queryset(self):
         type = self.request.GET.get('type')
         logger.info("request params type is %s", type)
         q = self.get_query_string()
-        query = Card.objects.filter()
-        if q.get('type'):
-            query = query.filter(type=q.get('type'))
-        if q.get('assignd') == '0' :
-            query = query.filter(owner_id__isnull = True)
-        elif q.get('assignd') == '1' :
-            query = query.filter(owner_id__isnull = False)
-        if q.get('num'):
-            query = query.filter(num=q.get('num'))
-            
-        return query
+        return Card.objects.searchCards(q)  
        # logger.info("1111%request",  self.request) 
     def get_success_url(self):
-        return reverse_lazy('card_list', kwargs={'pk': self.object.pk})
-    def get_query_string(self):
-        q = self.request.GET.copy() 
-        if q.__contains__('page'):
-            q.pop('page')
-        logger.info(" queryString = %s", q.urlencode())
-        return q
+        return reverse_lazy('card_list', kwargs={'pk': self.object.pk}) 
         
 class CardDetailView(SystemDetailView): 
     template_name = 'system/card_detail.html'
@@ -623,21 +650,36 @@ class CardUpdateView(UpdateView):
         else:
            return super(CardUpdateView, self).get(request, *args, **kwargs)
     def post(self,*args, **kwargs):
-        super(CardUpdateView, self).post(*args, **kwargs)
-        card = self.get_object(); 
-        #card.status = 0
+        card = self.get_object()
+        logger.info("owner id is %s" ,  card.owner_id )
+        owner_id = card.owner_id
+        result = super(CardUpdateView, self).post(*args, **kwargs)
+        self.update_card_owner(owner_id)
+        card = self.object
+       # logger.info(form)
+        return result #redirect('card_list');
+    def update_card_owner(self, owner_id):
+        card = self.object
         owner_getter = {'1': WorkClass.objects, '2':WorkClass.objects, '3':Material.objects, '4':Process.objects, '5':Employee.objects, '6':Employee.objects}
-        owner = owner_getter.get(card.type).get(pk = card.owner_id)
-        if card.type == '5':
-            owner.card_num1 = card.num
-        elif card.type == '6':
-            owner.card_num2 = card.num
-        else:
-            owner.card_num = card.num
         
-        owner.save()
-        card.save() 
-        return redirect('card_list');
+        if card.owner_id:
+            owner = owner_getter.get(card.type).get(pk = card.owner_id)
+            if card.type == '5':
+                owner.card_num1 = card.num
+            elif card.type == '6':
+                owner.card_num2 = card.num
+            else:
+                owner.card_num = card.num
+            owner.save()
+        elif owner_id:
+            owner = owner_getter.get(card.type).get(pk = owner_id)
+            if card.type == '5':
+                owner.card_num1 = ''
+            elif card.type == '6':
+                owner.card_num2 = ''
+            else:
+                owner.card_num = ''
+            owner.save()
         
     def render_to_json_response(self, context, **response_kwargs):
         logger.info(self.get_object().__dict__)
@@ -649,16 +691,16 @@ class CardUpdateView(UpdateView):
         return HttpResponse(data, content_type='application/json')
     def get_form(self,form_class):
         form = super(CardUpdateView, self).get_form(form_class)
-        logger.info(" object: %s", self.get_object() )        
-        logger.info( u"form running times: %s   type : %s ", form, self.get_object().type ) 
+      #  logger.info(" object: %s", self.get_object() )        
+      #  logger.info( u"form running times: %s   type : %s ", form, self.get_object().type ) 
         form = self.update_type_field(form)
-        logger.info("%s", form)
+      #  logger.info("%s", form)
         return form
    
     def getProcess(self,  form,  **kwargs):
-        process = [('', '---------')] + [ (process.id, process.name) for process in Process.objects.filter(Q(card_num__isnull=True) | Q(card_num='') )]
+        process = [(0, '---------')] + [ (process.id, u" 编号(%s)  名称(%s)  工艺卡号(%s)" % (process.num, process.name, process.card_num) ) for process in Process.objects.filter(Q(card_num__isnull=True) | Q(card_num='') | Q( pk = self.get_object().owner_id))]
         logger.info("process %s ", process)
-        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= process), label="工艺")
+        form.fields['owner_id'] = forms.IntegerField(widget=forms.Select( choices= process), label="工艺" , required=False)
         return  form
     def getEmployee(self, form, **kwargs):
         query = Employee.objects.filter()
@@ -666,24 +708,26 @@ class CardUpdateView(UpdateView):
           query =  query.filter(Q(card_num1__isnull=True) | Q(card_num1='') )
         if kwargs['type'] == '6':
           query =  query.filter(Q(card_num2__isnull=True) | Q(card_num2='') )
-        employees = [('', '---------')] + [( employee.id, employee.name) for employee in query ]
-        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= employees), label="员工")
+        employees = [(0, '---------')] + [( employee.id, u"编号:(%s) 姓名:(%s) 身份证:(%s) " % (employee.num , employee.name, employee.idCard) ) for employee in query ] + Employee.getTypeChoices(pk=self.object.owner_id)
+        form.fields['owner_id'] = forms.IntegerField(widget=forms.Select( choices= employees), label="员工" , required=False)
         return form
     def getWorkClass(self,form,  **kwargs):
         query = WorkClass.objects.filter() 
         logger.info('type %r' ,  kwargs)
         if kwargs['type'] == '1' :
-           query = query.filter(Q(type='0'), Q(card_num__isnull=True) | Q(card_num=''))
+           query = query.filter(Q(type='0'), Q(card_num__isnull=True) | Q(card_num='')) 
         if kwargs['type'] == '2':
            query =  query.filter(Q(type='1'), Q(card_num__isnull=True)  | Q(card_num=''))
-        workclazz = [('', '---------')] + [(workclass.id, workclass.name )for workclass in query] 
-        logger.info('workclass %s', workclazz)
-        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= workclazz), label="班次")
+        workclazz = [(0, '---------')] + [(workclass.id, workclass.name )for workclass in query] 
+        if self.object.owner_id:            
+            workclazz += WorkClass.getTypeChoices(pk = self.object.owner_id)
+        #logger.info('workclass %s', workclazz)
+        form.fields['owner_id'] = forms.IntegerField(widget=forms.Select( choices= workclazz), label="班次" , required=False)
         return form
  
     def getMaterial(self,form, **kwargs):
-        materials = [('', '---------')] + [(material.id, material.name) for material in Material.objects.filter(Q(card_num__isnull=True) | Q(card_num='') )]
-        form.fields['owner_id'] = forms.CharField(widget=forms.Select( choices= materials), label="物料")
+        materials = [(0, '---------')] + [(material.id, material.name) for material in Material.objects.filter(Q(card_num__isnull=True) | Q(card_num='') )]
+        form.fields['owner_id'] = forms.IntegerField(widget=forms.Select( choices= materials), label="物料" , required=False)
         return form
     def update_type_field(self, form):
         obj = self.get_object()
