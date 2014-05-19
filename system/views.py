@@ -43,6 +43,8 @@ class SystemListView(generic.ListView, FormMixin):
             q.pop('page')
         logger.info(" queryString = %s", q.urlencode())
         return q
+    def get_queryset(self,**kwargs): 
+        return self.model.objects.filter(**{key : self.request.GET[key] for key in self.request.GET  if  self.request.GET[key] <> '' and  key <> 'page' })
         
 class SystemDetailView(generic.DetailView):
     template_name = 'system/base_detail.html'
@@ -68,8 +70,7 @@ class EmployeeListView(SystemListView):
         context['sidebar'] = {'employee_list':'active'}
         context['add_url'] = reverse_lazy('employee_add')
         return context
-    def get_queryset(self,**kwargs): 
-        return Employee.objects.filter(**{key : self.request.GET[key] for key in self.request.GET  if  self.request.GET[key] <> '' and  key <> 'page' })
+    
     
 class EmployeeDetailView(SystemDetailView): 
     template_name = 'system/employee_detail.html'
@@ -101,13 +102,14 @@ class EmployeeCreateView(CreateView):
     def post(self, request, *args, **kwargs):
         result = super(EmployeeCreateView, self).post(request, *args, **kwargs)  
         object = self.object
-        logger.info('employee update: %s', object)
-        if object.card_num1:
-            employee_card = Card.objects.get(pk=object.card_num1)
-            Card.objects.filter(num=employee_card.num).update(owner_id=object.id)
-        if object.card_num2:
-            work_card = Card.objects.get(pk=object.card_num2)
-            Card.objects.filter(num=work_card.num).update(owner_id=object.id)
+        logger.info('employee create: %s', object)
+        if object:
+            if object.card_num1:
+                #employee_card = Card.objects.get(pk=object.card_num1)
+                Card.objects.filter(num=object.card_num1).update(owner_id=object.id)
+            if object.card_num2:
+               # work_card = Card.objects.get(pk=object.card_num2)
+                Card.objects.filter(num=object.card_num2).update(owner_id=object.id)
         return result
          
 class EmployeeUpdateView(UpdateView):
@@ -317,8 +319,9 @@ class ProcessListView(SystemListView):
         context = super(ProcessListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"工艺管理"
         context['title'] = u"工艺管理" 
-        context['sidebar'] = {'process':'active'}        
-        return context  
+        context['sidebar'] = {'process':'active'}    
+        context['add_url'] = reverse_lazy("process_add")
+        return context
 
 class ProcessDetailView(SystemDetailView): 
     template_name = 'system/process_detail.html'
@@ -341,6 +344,12 @@ class ProcessCreateView(CreateView):
         context['title'] = u"创建工艺信息"
         context['sidebar'] = {'process':'active'} 
         return context
+    def post(self, request, **kwargs):
+        result = super(ProcessCreateView, self).post(request, **kwargs)
+        object = self.object
+        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        return result
+    
     success_url =  reverse_lazy("process_list")
         
 class ProcessUpdateView(UpdateView):
@@ -350,11 +359,20 @@ class ProcessUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(ProcessUpdateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
+        form = self.get_form(form_class)
+        context['form'] = form
         context['pageHeader'] = u"修改工艺信息"
         context['title'] = u"修改工艺信息"
         context['sidebar'] = {'process':'active'} 
+        form.fields['card_num'].choices += [(self.object.card_num,self.object.card_num )]
         return context
+    def post(self, request, **kwargs):
+        object = self.get_object()
+        Card.objects.filter(num=object.card_num).update(owner_id=None)
+        result = super(ProcessUpdateView, self).post(request, **kwargs)
+        object = self.object
+        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        return result;
     
 class ProcessDeleteView(DeleteView):
     form_class= ProcessForm
