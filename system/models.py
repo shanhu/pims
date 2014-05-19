@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse 
 
 from django import forms
 from bootstrap3_datetime.widgets import DateTimePicker
+
+# import the logging library
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+
        
 class DictConfig(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.    
@@ -27,33 +34,83 @@ class DictConfig(models.Model):
        #     choices.append((t.typeCode, t.typeDesc)) 
         return choices 
 
+class CardManager(models.Manager): 
+    querySql = '''
+           SELECT ID,NUM,SERIAL_NUM, TYPE,OWNER_ID,STATUS,REMARKS FROM (
+                SELECT TMP.* ,
+                IF(TMP.NUM = @NUM, @RANK:=@RANK+1,@RANK:=1) RANK,
+                 @NUM := TMP.NUM   
+                FROM(
+                SELECT * FROM CARD C ORDER BY C.NUM ASC, C.SERIAL_NUM DESC
+                ) TMP  ,(SELECT @RANK,@ROWNUM,@NUM:= NULL ) T
+            ) CD
+            WHERE CD.RANK = 1     
+        '''
+    def searchCards(self, qdict = None,  **kwargs):
+        #logger.info(qdict)
+        query = self.querySql
+        #logger.info('type' in qdict and qdict.get('type') <> '')
+        if  'type' in qdict and qdict.get('type') <> '':
+            query += " AND TYPE =  %s " % qdict.get('type')
+            #logger.info(qdict.get('type'))
+            #logger.info(self.querySql)  
+        if 'assignd' in  qdict:
+            if qdict.get('assignd') == '0':
+              query  += " AND (OWNER_ID IS NULL  OR OWNER_ID = 0 )"
+            if qdict.get('assignd') == '1':
+               query += " AND  OWNER_ID IS NOT NULL  AND  OWNER_ID <>  0  "
+           # logger.info(self.querySql)
+        
+        if  'num' in qdict and qdict.get('num') <> '' : 
+              query += " AND  NUM = %s  " % qdict.get('num')
+            #logger.info(self.querySql)
+        logger.info(  query )
+        return [card for card in Card.objects.raw(  query)]
+
 class Card(models.Model):
+    objects = CardManager()
     cardTypeChoices = DictConfig.getTypeChoices(type="card_type")
     cardStatusChoices = DictConfig.getTypeChoices(type="card_status")
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    num = models.CharField(db_column='NUM', max_length=20 , verbose_name="卡号") # Field name made lowercase.
-    serial_num = models.CharField(db_column='SERIAL_NUM' , max_length=20, ) # Field name made lowercase.
-    type = models.CharField(db_column='TYPE', max_length=1, choices=cardTypeChoices, verbose_name="卡类型") # Field name made lowercase.
-    owner_id = models.IntegerField(db_column='OWNER_ID', blank=True, null=True, verbose_name="所有者") # Field name made lowercase.
-    status = models.CharField(db_column='STATUS', max_length=1, choices=cardStatusChoices, verbose_name="状态") # Field name made lowercase.
-    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True, verbose_name="备注") # Field name made lowercase.
+    num = models.CharField(db_column='NUM', max_length=20 , verbose_name="卡号", editable = False) # Field name made lowercase.
+    serial_num = models.CharField(db_column='SERIAL_NUM' , max_length=20,   editable = False ) # Field name made lowercase.
+    type = models.CharField(db_column='TYPE', max_length=1, choices=cardTypeChoices , editable = False,  verbose_name="卡类型") # Field name made lowercase.
+    owner_id = models.IntegerField(db_column='OWNER_ID' ,    blank=True, null=True, verbose_name="所有者") # Field name made lowercase.
+    status = models.CharField(db_column='STATUS', max_length=1 , choices=cardStatusChoices, verbose_name="状态") # Field name made lowercase.
+    remarks = models.TextField(db_column='REMARKS', max_length=200 , editable = False, blank=True, verbose_name="备注") # Field name made lowercase.
     class Meta:
         #managed = False
         db_table = 'card'
     def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} num {1} type {2}  remarks {3} ".format(self.id , self.num , self.type,  self.remarks)
+        return  u"卡号：({0})".format(self.num  )
     @staticmethod
     def getTypeChoices(**kwargs):
-        return   [('', '--------')] + [(card.id, card.num) for card in Card.objects.filter(**kwargs)] 
-
+        choices = [(card.num,  card.num) for card in Card.objects.filter(**kwargs)] 
+        logger.info("cards : %s ", choices)
+        return  choices
+    @staticmethod
+    def getCardChoices(**kwargs):
+      return   [(card.num, card.num   ) for card in
+       Card.objects.raw('''
+           SELECT ID,NUM,SERIAL_NUM, TYPE,OWNER_ID,STATUS,REMARKS FROM (
+                SELECT TMP.* ,
+                IF(TMP.NUM = @NUM, @RANK:=@RANK+1,@RANK:=1) RANK,
+                 @NUM := TMP.NUM   
+                FROM(
+                SELECT * FROM CARD C ORDER BY C.NUM ASC, C.SERIAL_NUM DESC
+                ) TMP  ,(SELECT @RANK,@ROWNUM,@NUM:= NULL ) T
+            ) CD
+            WHERE CD.RANK = 1  AND  (OWNER_ID = 0  OR OWNER_ID IS NULL)  AND TYPE = %s  
+        ''', [kwargs['type']])] 
+        
 
 class CardForm(forms.ModelForm): 
     def __init__(self, *args, **kwargs):
-        super(CardForm, self).__init__(*args, **kwargs)         
-        self.fields['serial_num'] = forms.CharField(label="", widget=forms.HiddenInput())
+        super(CardForm, self).__init__(*args, **kwargs) 
     class Meta:
-        model = Card
-        fields  = '__all__'
+        model = Card  
+        fields = '__all__'
+      
         
 
 class CardSearchForm(forms.Form):
@@ -69,10 +126,10 @@ class Employee(models.Model):
     
     sexChoices = DictConfig.getTypeChoices(type="sex")
     employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
-    statusChoices = DictConfig.getTypeChoices(type="employee_status")
-    
-   # employeeCardChoices = Card.objects.filter()
-    
+    statusChoices = DictConfig.getTypeChoices(type="employee_status") 
+    card_num1_choices =  Card.getTypeChoices(type='5' )
+    card_num2_choices =  Card.getTypeChoices(type='6' )
+ 
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
     num = models.CharField(db_column='NUM', max_length=20, verbose_name="员工号",  unique=True) # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, verbose_name="姓名") # Field name made lowercase.
@@ -82,18 +139,24 @@ class Employee(models.Model):
     joinTime = models.DateTimeField(db_column='JOIN_TIME' , )#verbose_name="入职时间"
     type = models.CharField(db_column='TYPE', max_length=1, verbose_name="员工类型",  choices=employeeTypeChoices) # Field name made lowercase.   
     status = models.CharField(db_column='STATUS', max_length=1, verbose_name="员工状态" , choices=statusChoices) # Field name made lowercase.
-    cardNum1 = models.CharField(db_column='CARD_NUM1', max_length=20,  null=True, blank=True,verbose_name="工作卡号",    ) # Field name made lowercase.
-    cardNum2 = models.CharField(db_column='CARD_NUM2', max_length=20,  null=True, blank=True,verbose_name="员工卡号",    ) # Field name made lowercase.
+    card_num1 = models.CharField(db_column='CARD_NUM1', max_length=20,  null=True, blank=True,verbose_name="工作卡号", choices = card_num1_choices  ) # Field name made lowercase.
+    card_num2 = models.CharField(db_column='CARD_NUM2', max_length=20,  null=True, blank=True,verbose_name="员工卡号", choices = card_num2_choices    ) # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True,verbose_name="备注") # Field name made lowercase.
-     
+    #card_num1 = models.ForeignKey(Card, db_column='CARD_NUM1', blank=True, null=True , related_name="employ_card_employee")
+    #card_num2 = models.ForeignKey(Card, db_column='CARD_NUM2', blank=True, null=True, related_name="work_card_employee")
     class Meta:
        # managed = False
         db_table = 'employee'
     def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} num {1} name {2}  remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
+        return  u"id {0} num {1} name {2} card_num1{4},card_num2{5} remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks, self.card_num1, self.card_num2)
     def get_absolute_url(self):
         return reverse('employee_detail', kwargs={'pk': self.pk})
-
+    @staticmethod
+    def getTypeChoices(**kwargs):
+        choices = [(employee.id, u"编号:(%s) 姓名:(%s) 身份证:(%s) " % (employee.num , employee.name, employee.idCard) ) for employee in Employee.objects.filter(**kwargs)] 
+        logger.info("cards : %s ", choices)
+        return  choices
+        
 
         
 
@@ -130,15 +193,19 @@ class MaterialType(models.Model):
      #   managed = False
         db_table = 'material_type'
     def __unicode__(self):  # Python 3: def __str__(self):
-        return  u" {0} ".format(self.num, )
+        return  u" 编号：({0}) 名称:({1}) ".format(self.num,self.name )
         
 class MaterialTypeForm(forms.ModelForm): 
     statusChoices =  DictConfig.getTypeChoices(type="material_type_status")
     class Meta:
         model = MaterialType
-        fields  = ['num', 'status', 'parent',   ]   
+        fields  = ['num','name' ,'status', 'parent',   ]   
     status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="物料类型状态" ) # Field name made lowercase.                
-
+   # joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget(),  label="入职时间", )
+class NormalSearchForm(forms.Form):
+    num = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'编号'}),   label="",  required = False ) # Field name made lowercase.   
+    name = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'名称'}), label="", required = False ) # Field name made lowercase.  
+ 
 
 
 class Material(models.Model):
@@ -153,7 +220,7 @@ class Material(models.Model):
   
    # conver = models.IntegerField(db_column='CONVER', blank=True, null=True,  verbose_name="换算") # Field name made lowercase.
     status = models.CharField(db_column='STATUS', max_length=1, blank=True , choices=statuschoices) # Field name made lowercase.
-    card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True,   null=True, verbose_name="物料卡编号") # Field name made lowercase.
+    card_num = models.CharField(db_column='CARD_NUM', max_length=20,  blank=True, choices=  Card.getTypeChoices(type='3'),    null=True, verbose_name="物料卡编号") # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True, verbose_name="备注") # Field name made lowercase.
     class Meta:
        # managed = False
@@ -165,12 +232,18 @@ class Material(models.Model):
 class MaterialForm(forms.ModelForm): 
     statusChoices =  DictConfig.getTypeChoices(type="material_status")
     modeChoices =  DictConfig.getTypeChoices(type="material_mode")
+    def __init__(self, *args, **kwargs):
+        super(MaterialForm, self).__init__(*args, **kwargs)
+        cardTypeChoices = [('', '------')] + Card.getCardChoices(type="3")
+        logger.info("material card type choices: %s", cardTypeChoices )
+        self.fields['card_num'] = forms.ChoiceField(   choices=cardTypeChoices ,  label="工作卡号", required=False )
     class Meta:
         model = Material
         fields  = '__all__'
     status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="物料状态" ) # Field name made lowercase. 
-    mode = forms.CharField( max_length=1, widget=forms.Select(choices=modeChoices) , label="统计方式" ) # Field name made lowercase.                
-
+    mode = forms.CharField( max_length=1, widget=forms.Select(choices=modeChoices) , label="统计方式" ) # Field name made lowercase.  
+   # card_num =  forms.ChoiceField(choices= [('', '------')] + Card.getCardChoices(type='3'),  label="工作卡号", required=False )    
+   
 
  
 class Process(models.Model):
@@ -235,9 +308,12 @@ class EmployeeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EmployeeForm, self).__init__(*args, **kwargs)
         self.fields['sex'] = forms.ChoiceField(choices=DictConfig.getTypeChoices(type='sex'), label="性别", )
+        self.fields['card_num1'] = forms.ChoiceField(choices= [('', '------')] + Card.getCardChoices(type='5'),  label="工作卡号", required=False )
+        self.fields['card_num2'] = forms.ChoiceField(choices= [('', '------')] + Card.getCardChoices(type='6'),   label="员工卡号", required=False )
     class Meta:
         model = Employee
-        fields  = ['num', 'name', 'idCard','sex', 'tel','joinTime' , 'type', 'status', 'cardNum1', 'cardNum2', 'remarks',   ]
+        fields  = ['num', 'name', 'idCard','sex', 'tel','joinTime' , 'type', 'status', 'card_num1', 'card_num2', 'remarks',   ]
+       
     #sex = forms.CharField(max_length=1 ,  label="性别") # Field name made lowercase.    
     type = forms.CharField(max_length=1, widget=forms.Select(choices=employeeTypeChoices) , label="员工类型", ) # Field name made lowercase.   
     status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="员工状态" ) # Field name made lowercase.    
@@ -248,6 +324,12 @@ class EmployeeForm(forms.ModelForm):
         '%Y-%m-%d',              # '2006-10-25'
         ]
    # joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget(),  label="入职时间", )
+class EmployeeSearchForm(forms.Form):
+    num = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.   
+    name = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
+ 
+    
+    
     
 
 
@@ -259,13 +341,18 @@ class WorkClass(models.Model):
     name = models.CharField(db_column='NAME', max_length=20, blank=True, verbose_name="名称",) # Field name made lowercase.
     type = models.CharField(db_column='TYPE', max_length=1, blank=True, verbose_name="类型",  choices=clasTypeChoices) # Field name made lowercase.   
     status = models.CharField(db_column='STATUS', max_length=1, blank=True, verbose_name="状态", choices=classStatusTypeChoices) # Field name made lowercase.
-    cardNum = models.CharField(db_column='CARD_NUM', max_length=20,  null=True, verbose_name="班次卡号", blank=True) # Field name made lowercase. 
+    card_num = models.CharField(db_column='CARD_NUM', max_length=20,  null=True, verbose_name="班次卡号", blank=True) # Field name made lowercase. 
     remarks = models.TextField(db_column='REMARKS', max_length=200, verbose_name="备注", blank=True) # Field name made lowercase.     
     class Meta:
        # managed = False
         db_table = 'work_class'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
+    @staticmethod
+    def getTypeChoices(**kwargs): 
+        choices = [(clz.id, u"编号:(%s) 名称:(%s) " % (clz.num , clz.name) ) for clz in WorkClass.objects.filter(**kwargs)] 
+        logger.info("cards : %s ", choices)
+        return  choices    
 
 
 class WorkClassForm(forms.ModelForm):  
@@ -290,8 +377,8 @@ class Attendance(models.Model):
 class SalaryCountConfig(models.Model): 
     iddefaultsChoices = DictConfig.getTypeChoices(type="salary_count_default")
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    material = models.ForeignKey(Material, db_column='MATERIAL_ID',verbose_name="物料" ,  ) # Field name made lowercase.
-    process = models.ForeignKey(Process, db_column='PROCESS_ID',verbose_name="工艺" ,  ) # Field name made lowercase.
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID',verbose_name="物料" , null = True ,  blank=True,  ) # Field name made lowercase.
+    process = models.ForeignKey(Process, db_column='PROCESS_ID',verbose_name="工艺" , null = True,   blank=True, ) # Field name made lowercase.
     price = models.DecimalField(db_column='PRICE', max_digits=10, decimal_places=2,verbose_name="单价" ) # Field name made lowercase.
    # isDefault = models.CharField(db_column='IS_DEFAULT', max_length=1, blank=True,verbose_name="是否默认", choices=iddefaultsChoices ) # Field name made lowercase.
    # startTime = models.DateTimeField(db_column='START_TIME',  blank=True,verbose_name="开始时间"  ) # Field name made lowercase.
@@ -310,6 +397,14 @@ class SalaryCountConfigForm(forms.ModelForm):
     class Meta:
         model = SalaryCountConfig
         fields  = '__all__'
+class SalaryCountSearchForm(forms.ModelForm): 
+   # startTime = forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="开始时间" )
+   # endTime =  forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="结束时间" )
+    class Meta:
+        model = SalaryCountConfig
+        fields  = ['material', 'process']
+        labels = {'material':'', 'process':''}
+
 
 class SalaryTimeConfig(models.Model): 
   #  iddefaultsChoices = DictConfig.getTypeChoices(type="salary_time_default")

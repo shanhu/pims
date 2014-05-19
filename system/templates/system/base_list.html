@@ -1,5 +1,5 @@
 {% extends "system/base.html" %}
-
+{% load bootstrap3 %}
 {% block title %}{{title}}{% endblock title %}
 
 
@@ -14,6 +14,27 @@
 
 
  {% endblock breadcrumb %}
+ 
+ {% block search_condition %}
+ 
+ <nav class="navbar navbar-default" role="navigation">
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+   
+        <form  role="form" class="navbar-form navbar-left" role="search"    > {#% csrf_token %#}
+          {% bootstrap_form form  %}  
+        <div class="form-group">
+             <button type="submit" class="btn btn-primary"><i class="fa fa-search" ></i>&nbsp;&nbsp;查询</button>
+        </div> 
+        <div class="form-group" display="{{is_display}}">
+            <a   class="btn btn-primary " href="{{add_url}}"><i class="fa fa-plus-square"></i>&nbsp;&nbsp;新增</a>
+         </div> 
+        </form>
+      
+   </div>
+</nav>
+ 
+ {% endblock search_condition%}
  
  {% block paginator %} 
  
