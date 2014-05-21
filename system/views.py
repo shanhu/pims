@@ -5,6 +5,10 @@ from django import forms
 import json
 from django.db.models   import Q
 from django.http import HttpResponse
+from django.contrib import messages
+from django.db import IntegrityError
+
+
 
 # import the logging library
 import logging
@@ -43,8 +47,10 @@ class SystemListView(generic.ListView, FormMixin):
             q.pop('page')
         logger.info(" queryString = %s", q.urlencode())
         return q
-    def get_queryset(self,**kwargs): 
-        return self.model.objects.filter(**{key : self.request.GET[key] for key in self.request.GET  if  self.request.GET[key] <> '' and  key <> 'page' })
+    def get_queryset(self,**kwargs):
+        if self.model:
+            return self.model.objects.filter(**{key : self.request.GET[key] for key in self.request.GET  if  self.request.GET[key] <> '' and  key <> 'page' })
+        
         
 class SystemDetailView(generic.DetailView):
     template_name = 'system/base_detail.html'
@@ -56,13 +62,14 @@ class SystemDetailView(generic.DetailView):
         return context
 
 #--------------------------------------------------员工管理 界面定义------------------------------------------------------------------
-from system.models import Employee, EmployeeForm,  NormalSearchForm
+from system.models import Employee, EmployeeForm,  NormalSearchForm, EmployeeSearchForm
 class EmployeeListView(SystemListView): 
     template_name = 'system/employee_list.html'
     context_object_name = 'employee_list'
     model = Employee
-    form_class = NormalSearchForm
+    form_class = EmployeeSearchForm
     paginate_by = 10
+    
     def get_context_data(self, **kwargs): 
         context = super(EmployeeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"员工汇总"
@@ -110,6 +117,8 @@ class EmployeeCreateView(CreateView):
             if object.card_num2:
                # work_card = Card.objects.get(pk=object.card_num2)
                 Card.objects.filter(num=object.card_num2).update(owner_id=object.id)
+            if object.status == '0': 
+                messages.warning(request,u'已分配卡片将被收回.')
         return result
          
 class EmployeeUpdateView(UpdateView):
@@ -135,7 +144,9 @@ class EmployeeUpdateView(UpdateView):
             Card.objects.filter(num=object.card_num2).update(owner_id=None)
         logger.info('employee update: %s', object) 
         result = super(EmployeeUpdateView, self).post(request, *args, **kwargs)
-        object = self.object
+        object = self.object 
+        if object.status == '0': 
+            messages.info(request,u'已分配卡片将被收回.')
         if object.card_num1: 
             Card.objects.filter(num=object.card_num1).update(owner_id=object.id)
         if object.card_num2:
@@ -146,13 +157,13 @@ class EmployeeDeleteView(DeleteView):
     form_class= EmployeeForm
     model = Employee     
     success_url = reverse_lazy('employee_list')  
-    def post(self,*args, **kwargs):
+    def post(self,request, *args, **kwargs):  
         employee = self.get_object();
         if employee.card_num1 != '' or employee.card_num2 != '':
             employee.status = 0
             employee.save()
         else:
-            employee.delete()
+            return super(EmployeeDeleteView, self).post(request, *args, **kwargs) 
         return redirect('employee_list');
     def get_context_data(self, **kwargs):
         context = super(EmployeeDeleteView, self).get_context_data(**kwargs)   
@@ -215,12 +226,18 @@ class MaterialTypeUpdateView(UpdateView):
 class MaterialTypeDeleteView(DeleteView):
     form_class= MaterialTypeForm
     model = MaterialType     
-    #success_url = reverse_lazy('material_type_list')  
-    def post(self,*args, **kwargs):
-        materialType = self.get_object(); 
-        materialType.status = 0
-        materialType.save() 
-        return redirect('material_type_list');
+    success_url = reverse_lazy('material_type_list') 
+    def post(self,request, *args, **kwargs):
+        try:
+             return super(MaterialTypeDeleteView, self).post(request, *args, **kwargs)
+        except(IntegrityError):
+            messages.error(request, u"物料类型已被使用，不能删除") 
+        else:
+            materialType = self.get_object()
+            materialType.status = 0
+            materialType.save() 
+        return redirect('material_type_list')
+        
     def get_context_data(self, **kwargs):
         context = super(MaterialTypeDeleteView, self).get_context_data(**kwargs)  
         context['sidebar'] = {'material_type':'active'}   
@@ -295,11 +312,16 @@ class MaterialUpdateView(UpdateView):
 class MaterialDeleteView(DeleteView):
     form_class= MaterialForm
     model = Material     
-    #success_url = reverse_lazy('material_type_list')  
-    def post(self,*args, **kwargs):
-        material = self.get_object(); 
-        material.status = 0
-        material.save() 
+    success_url = reverse_lazy('material_list')  
+    def post(self,request, *args, **kwargs):
+        try:
+            return super(MaterialDeleteView, self).post(request, *args, **kwargs)
+        except(IntegrityError):
+            messages.error(request, u"物料已被使用，不能删除") 
+        else:
+            material = self.get_object(); 
+            material.status = 0
+            material.save() 
         return redirect('material_list');
     def get_context_data(self, **kwargs):
         context = super(MaterialDeleteView, self).get_context_data(**kwargs) 
@@ -596,7 +618,7 @@ class CardListView(SystemListView):
         context['title'] = u"卡管理"
         context['sidebar'] = {'card':'active'}
         context['add_url'] = reverse_lazy('card_add')
-        context['is_display'] = "none"
+        context['is_display'] = 'none'
         return context
     def get_queryset(self):
         type = self.request.GET.get('type')
@@ -630,13 +652,14 @@ class CardCreateView(CreateView):
         context['pageHeader'] = u"创建卡关联信息"
         context['title'] = u"创建卡关联信息"
         context['sidebar'] = {'card':'active'} 
+     
         return context
     success_url =  reverse_lazy("card_list")
     def get(self,request,  *args, **kwargs):
         if request.is_ajax():
             return self.render_to_json_response(request, *args, **kwargs)
         else:
-           return super(SystemDetailView, self).get(request, *args, **kwargs)
+           return super(CreateView, self).get(request, *args, **kwargs)
             
         
     def render_to_json_response(self, context, **response_kwargs):
@@ -761,9 +784,18 @@ class CardDeleteView(DeleteView):
     def post(self,*args, **kwargs):
         card = self.get_object(); 
         card.status = 0
-        card.save() 
+        
         return redirect('card_list');
     def get_context_data(self, **kwargs):
         context = super(CardDeleteView, self).get_context_data(**kwargs) 
         context['sidebar'] = {'card':'active'} 
         return context
+
+
+#--------------------------------------------------实时数据 界面定义------------------------------------------------------------------   
+
+class ProductionListView(generic.TemplateView): 
+       template_name = 'system/developing.html'
+       pass
+    
+ 

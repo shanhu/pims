@@ -66,4 +66,6 @@ urlpatterns = patterns('',
     url(r'^card/(?P<pk>\d+)/delete$', views.CardDeleteView.as_view(), name="card_delete"),
     url(r'^cards/(?P<pk>\d+)$', views.CardDetailView.as_view(), name="card_detail"),
     
+    url(r'^data/$', views.ProductionListView.as_view(), name="data_live"),
+    
 )

@@ -81,6 +81,7 @@ class Card(models.Model):
     owner_id = models.IntegerField(db_column='OWNER_ID' ,    blank=True, null=True, verbose_name="所有者") # Field name made lowercase.
     status = models.CharField(db_column='STATUS', max_length=1 , choices=cardStatusChoices, verbose_name="状态") # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200 , editable = False, blank=True, verbose_name="备注") # Field name made lowercase.
+    color =  models.CharField(db_column='COLOR', max_length=20 , verbose_name="颜色"   ) # Field name made lowercase.
     class Meta:
         #managed = False
         db_table = 'card'
@@ -139,7 +140,7 @@ class Employee(models.Model):
     sex = models.CharField(db_column='SEX', max_length=1, verbose_name="性别" , choices=sexChoices  ) # Field name made lowercase.
     idCard = models.CharField(db_column='IDCARD', max_length=20,verbose_name="身份证") # Field name made lowercase.
     tel = models.CharField(db_column='TEL', max_length=20, blank=True,  verbose_name="联系方式") # Field name made lowercase.
-    joinTime = models.DateTimeField(db_column='JOIN_TIME' , )#verbose_name="入职时间"
+    joinTime = models.DateTimeField(db_column='JOIN_TIME'   )#verbose_name="入职时间"
     type = models.CharField(db_column='TYPE', max_length=1, verbose_name="员工类型",  choices=employeeTypeChoices) # Field name made lowercase.   
     status = models.CharField(db_column='STATUS', max_length=1, verbose_name="员工状态" , choices=statusChoices) # Field name made lowercase.
     card_num1 = models.CharField(db_column='CARD_NUM1', max_length=20,  null=True, blank=True,verbose_name="工作卡号", choices = card_num1_choices  ) # Field name made lowercase.
@@ -202,7 +203,7 @@ class MaterialTypeForm(forms.ModelForm):
     statusChoices =  DictConfig.getTypeChoices(type="material_type_status")
     class Meta:
         model = MaterialType
-        fields  = ['num','name' ,'status', 'parent',   ]   
+        fields  = [ 'parent','num','name' ,'status',    ]   
     status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="物料类型状态" ) # Field name made lowercase.                
    # joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget(),  label="入职时间", )
 class NormalSearchForm(forms.Form):
@@ -228,6 +229,9 @@ class Material(models.Model):
         db_table = 'material'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u" 编号({0}) 名称({1}) 物料卡号({2})".format(  self.num ,  self.name  , self.card_num )
+    @staticmethod
+    def getMaterialChoices( **kwargs):
+        return [(material.id, material) for material in Material.objects.filter(**kwargs)]
 
    
 class MaterialForm(forms.ModelForm): 
@@ -268,6 +272,9 @@ class Process(models.Model):
         db_table = 'process'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u" 编号({0})  名称({1})  工艺卡号({2})".format( self.num ,  self.name ,   self.card_num)
+    @staticmethod
+    def getProcessChoices( **kwargs):
+        return [(process.id, process ) for process in Process.objects.filter(**kwargs)]
     @staticmethod
     def getUnitChoices():
        return  [(unit.unit, unit.unit  ) for unit in
@@ -334,7 +341,7 @@ class EmployeeForm(forms.ModelForm):
     #sexChoices = DictConfig.getTypeChoices(type="sex") 
     employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
     statusChoices = DictConfig.getTypeChoices(type="employee_status")
-    joinTime = forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="入职时间" )
+    joinTime = forms.DateTimeField(  widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickSeconds": False}),label="入职时间" )
     def __init__(self, *args, **kwargs):
         super(EmployeeForm, self).__init__(*args, **kwargs)
         self.fields['sex'] = forms.ChoiceField(choices=DictConfig.getTypeChoices(type='sex'), label="性别", )
@@ -353,12 +360,14 @@ class EmployeeForm(forms.ModelForm):
         '%Y-%m-%d %H:%M',        # '2006-10-25 14:30'
         '%Y-%m-%d',              # '2006-10-25'
         ]
-   # joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget(),  label="入职时间", )
+   
 class EmployeeSearchForm(forms.Form):
     num = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.   
     name = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
- 
-    
+    def __init__(self, *args, **kwargs):
+        super(EmployeeSearchForm,self).__init__(*args, **kwargs)
+        statusChoices = DictConfig.getTypeChoices(type="employee_status") 
+        self.fields['status'] = forms.CharField(widget=forms.Select(attrs={'placeholder':'状态'}, choices=statusChoices),   label="",  required = False ) # Field name made lowercase.   
     
     
 
@@ -407,14 +416,14 @@ class Attendance(models.Model):
 class SalaryCountConfig(models.Model): 
     iddefaultsChoices = DictConfig.getTypeChoices(type="salary_count_default")
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    material = models.ForeignKey(Material, db_column='MATERIAL_ID',verbose_name="物料" , null = True ,  blank=True,  ) # Field name made lowercase.
-    process = models.ForeignKey(Process, db_column='PROCESS_ID',verbose_name="工艺" , null = True,   blank=True, ) # Field name made lowercase.
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID',verbose_name="物料"   ) # Field name made lowercase.
+    process = models.ForeignKey(Process, db_column='PROCESS_ID',verbose_name="工艺"  ) # Field name made lowercase.
     price = models.DecimalField(db_column='PRICE', max_digits=10, decimal_places=2,verbose_name="单价" ) # Field name made lowercase.
    # isDefault = models.CharField(db_column='IS_DEFAULT', max_length=1, blank=True,verbose_name="是否默认", choices=iddefaultsChoices ) # Field name made lowercase.
    # startTime = models.DateTimeField(db_column='START_TIME',  blank=True,verbose_name="开始时间"  ) # Field name made lowercase.
    # endTime = models.DateTimeField( db_column='END_TIME',  blank=True,verbose_name="结束时间" ) # Field name made lowercase. 
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True,verbose_name="备注" ) # Field name made lowercase. 
-    unit = models.CharField(db_column='UNIT', max_length=20, blank=True)
+    #unit = models.CharField(db_column='UNIT', max_length=20, blank=True)
     class Meta:
        # managed = False
         db_table = 'salary_count_config'
@@ -430,15 +439,17 @@ class SalaryCountConfigForm(forms.ModelForm):
         fields  = '__all__'
     def __init__(self, *args,  **kwargs):
         super(SalaryCountConfigForm, self).__init__(*args, **kwargs)
-        self.fields['unit'] = forms.ChoiceField( required = False, label ='单位' , choices= Process.getUnitChoices())
+        #self.fields['unit'] = forms.ChoiceField( required = False, label ='单位' , choices= Process.getUnitChoices())
         
-class SalaryCountSearchForm(forms.ModelForm): 
-   # startTime = forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="开始时间" )
-   # endTime =  forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="结束时间" )
-    class Meta:
-        model = SalaryCountConfig
-        fields  = ['material', 'process']
-        labels = {'material':'', 'process':''}
+class SalaryCountSearchForm(forms.Form): 
+    #num = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.   
+    #name = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
+       
+   
+    def __init__(self, *args, **kwargs):
+        super(SalaryCountSearchForm, self).__init__(*args, **kwargs)
+        self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
+        self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="")
 
 
 class SalaryTimeConfig(models.Model): 

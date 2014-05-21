@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+from django.contrib import messages
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -25,6 +25,8 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 
 
 # Application definition
@@ -92,8 +94,12 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
-
-
+MESSAGE_TAGS = {
+    messages.DEBUG: 'debug',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',}
 
 
 LOGGING = {
