@@ -59,17 +59,17 @@
 							<li class="nav-header">
                                 <i class='fa fa-bar-chart-o'></i> 数据中心
                             </li>
-                            <li class="{{sidebar.employee_add}}">
-                                <a href="{% url 'employee_add' %}">实时数据</a>
+                            <li class="{{sidebar.data_live}}">
+                                <a href="{% url 'data_live' %}">实时数据</a>
                             </li>
-                            <li class="{{sidebar.employee_list}}">
-                                <a href="{% url 'employee_list' %}">员工汇总</a>
+                            <li class="{{sidebar.data_live}}">
+                                <a href="{% url 'data_live' %}">员工汇总</a>
                             </li>
-							 <li class="{{sidebar.employee_list}}">
-                                <a href="{% url 'employee_list' %}">生产线汇总</a>
+							 <li class="{{sidebar.data_live}}">
+                                <a href="{% url 'data_live' %}">生产线汇总</a>
                             </li>
-							 <li class="{{sidebar.employee_list}}">
-                                <a href="{% url 'employee_list' %}">班次汇总</a>
+							 <li class="{{sidebar.data_live}}">
+                                <a href="{% url 'data_live' %}">班次汇总</a>
                             </li> 
 
                             <li class="nav-header">
@@ -85,8 +85,8 @@
                             <li class="nav-header">
                                  <i class='fa fa-money'></i>  工资管理
                             </li>
-							  <li class="{{sidebar.salary_count_config}}" >
-                                <a href="{% url 'salarycount_list' %}">工资汇总</a>
+							  <li class="{{sidebar.data_live}}" >
+                                <a href="{% url 'data_live' %}">工资汇总</a>
                             </li>
                             <li class="{{sidebar.salary_count_config}}" >
                                 <a href="{% url 'salarycount_list' %}">计件工资参数</a>
@@ -250,6 +250,32 @@
 		{% endblock paginator %}
 
         </div>  <!-- end of main content -->
+
+
+		
+					
+
+				{% if messages %}
+					
+								<ul class="list-unstyled">
+									{% for message in messages %}
+									<li>
+									<div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}  alert-dismissable">
+										{{ message }}
+									</div>
+									</li>
+									{% endfor %}
+								</ul>
+					
+				{% endif %}
+
+					
+		 
+		 
+			
+		 
+
+
 		</div>
 	</div>
 </div>

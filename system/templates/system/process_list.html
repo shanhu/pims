@@ -21,7 +21,13 @@
 						</th> 
                         <th>
                             工艺卡编号
-						</th>                        
+						</th>  
+                         <th>
+                            统计方式
+						</th>  
+                        <th>
+                            单位
+						</th>      
                          <th>
                             状态
 						</th>
@@ -45,8 +51,14 @@
                          <td>
 							{{process.firstProcess.name}}
 						</td> 
-                          <td>
+                        <td>
 							{{process.card_num}}
+						</td>
+                        <td>
+							{{process.get_mode_display}}
+						</td>
+                        <td>
+							{{process.unit}}
 						</td>
                         <td>
 							{{process.get_status_display}}

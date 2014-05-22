@@ -1,6 +1,10 @@
 {% extends "system/base_detail.html" %}
 {% load bootstrap3 %}
 {% block maincontent %}
+
+
+
+
 <form action="" method="post"  class="form-horizontal" role="form">
     {% csrf_token %}
      {% bootstrap_form form layout='horizontal' %}
@@ -17,5 +21,11 @@
     {% endbuttons %}
 </form>
 
+
+<script>
+    $("#id_parent").on("change",function(){ 
+            $("#id_num").val(this.value + '.');  
+    });
+</script>
 
 {% endblock maincontent %}          

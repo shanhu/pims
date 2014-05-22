@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2014/5/10 18:52:59                           */
+/* Created on:     2014/5/20 16:50:36                           */
 /*==============================================================*/
 
 
@@ -46,7 +46,7 @@ create user pims;
 /*==============================================================*/
 create table pims.attendance
 (
-   ID                   int(11) not null,
+   ID                   int(11) not null auto_increment,
    TERMINAL_ID          int(11) not null,
    EMPLOYEE_ID          int(11) not null,
    CARD_ID              int(11) not null,
@@ -61,8 +61,9 @@ create table pims.card
 (
    ID                   int(11) not null auto_increment,
    NUM                  national varchar(20) not null,
-   SERIAL_NUM           int(11) not null,
+   SERIAL_NUM           varchar(20) not null,
    TYPE                 varchar(1) not null,
+   COLOR                varchar(20) not null,
    OWNER_ID             int(11),
    STATUS               national varchar(1) not null,
    REMARKS              national varchar(200),
@@ -157,7 +158,7 @@ create table pims.production
 /*==============================================================*/
 create table pims.report_class
 (
-   ID                   int(11) not null,
+   ID                   int(11) not null auto_increment,
    STARTTIME            datetime not null,
    ENDTIME              datetime not null,
    MATERIAL_ID          int(11) not null,
@@ -174,7 +175,7 @@ create table pims.report_class
 /*==============================================================*/
 create table pims.report_employee
 (
-   ID                   int(11) not null,
+   ID                   int(11) not null auto_increment,
    STARTTIME            datetime not null,
    ENDTIME              datetime not null,
    EMPLOYEE_ID          int(11) not null,
@@ -261,7 +262,7 @@ create table pims.workgroup
 /*==============================================================*/
 create table pims.workshift
 (
-   ID                   int(11) not null,
+   ID                   int(11) not null auto_increment,
    TERMINAL_ID          int(11) not null,
    CARD_ID              int(11) not null,
    TIME                 datetime not null,
@@ -289,13 +290,13 @@ alter table pims.attendance add constraint FK_Reference_33 foreign key (CARD_ID)
       references pims.card (ID) on delete restrict on update restrict;
 
 alter table pims.material add constraint MATERIAL_TYPE_ID_refs_ID_7fb616e2 foreign key (MATERIAL_TYPE_ID)
-      references pims.material_type (ID);
+      references pims.material_type (ID) on delete restrict on update restrict;
 
 alter table pims.material_type add constraint PARENT_ID_refs_ID_06b0f457 foreign key (PARENT_ID)
-      references pims.material_type (ID);
+      references pims.material_type (ID) on delete restrict on update restrict;
 
 alter table pims.process add constraint FIRST_PROCESS_ID_refs_ID_21876686 foreign key (FIRST_PROCESS_ID)
-      references pims.process (ID);
+      references pims.process (ID) on delete restrict on update restrict;
 
 alter table pims.production add constraint FK_Reference_20 foreign key (CARD_ID)
       references pims.card (ID) on delete restrict on update restrict;
@@ -334,22 +335,22 @@ alter table pims.report_employee add constraint FK_Reference_29 foreign key (EMP
       references pims.employee (ID) on delete restrict on update restrict;
 
 alter table pims.salary_count_config add constraint MATERIAL_ID_refs_ID_fe6621a2 foreign key (MATERIAL_ID)
-      references pims.material (ID);
+      references pims.material (ID) on delete restrict on update restrict;
 
 alter table pims.salary_count_config add constraint PROCESS_ID_refs_ID_ec5e2c1d foreign key (PROCESS_ID)
-      references pims.process (ID);
+      references pims.process (ID) on delete restrict on update restrict;
 
 alter table pims.terminal add constraint DEFAULT_MATERIAL_ID_refs_ID_9b2a4116 foreign key (DEFAULT_MATERIAL_ID)
-      references pims.material (ID);
+      references pims.material (ID) on delete restrict on update restrict;
 
 alter table pims.terminal add constraint DEFAULT_PROCESS_ID_refs_ID_cc1d86de foreign key (DEFAULT_PROCESS_ID)
-      references pims.process (ID);
+      references pims.process (ID) on delete restrict on update restrict;
 
 alter table pims.terminal add constraint WORKGROUP_ID_refs_ID_23839f25 foreign key (WORKGROUP_ID)
-      references pims.workgroup (ID);
+      references pims.workgroup (ID) on delete restrict on update restrict;
 
 alter table pims.workgroup add constraint WORKSHOP_ID_refs_ID_3cd5cf8b foreign key (WORKSHOP_ID)
-      references pims.workshop (ID);
+      references pims.workshop (ID) on delete restrict on update restrict;
 
 alter table pims.workshift add constraint FK_Reference_16 foreign key (TERMINAL_ID)
       references pims.terminal (ID) on delete restrict on update restrict;
