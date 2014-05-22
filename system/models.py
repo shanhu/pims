@@ -304,7 +304,7 @@ class EmployeeForm(forms.ModelForm):
     #sexChoices = DictConfig.getTypeChoices(type="sex") 
     employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
     statusChoices = DictConfig.getTypeChoices(type="employee_status")
-    joinTime = forms.DateTimeField( required=False,widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm","pickSeconds": False}),label="入职时间" )
+    joinTime = forms.DateTimeField( widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickSeconds": False}),label="入职时间" )
     def __init__(self, *args, **kwargs):
         super(EmployeeForm, self).__init__(*args, **kwargs)
         self.fields['sex'] = forms.ChoiceField(choices=DictConfig.getTypeChoices(type='sex'), label="性别", )
