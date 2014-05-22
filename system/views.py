@@ -793,9 +793,49 @@ class CardDeleteView(DeleteView):
 
 
 #--------------------------------------------------实时数据 界面定义------------------------------------------------------------------   
-
-class ProductionListView(generic.TemplateView): 
-       template_name = 'system/developing.html'
-       pass
-    
+from system.models import Production, ProductionSearchForm
+class ProductionListView(SystemListView):
+    template_name = 'system/production_list.html'
+    context_object_name = 'production_list'
+    model = Production
+    form_class = ProductionSearchForm
+    paginate_by = 10
+    logger.info("system out test.") 
+    def get_queryset(self):
+        querySql = '''
+            SELECT ROWNUM ID,PROCESS_ID,MATERIAL_ID,EMPLOYEE_NUM, EMPLOYEE_NAME, MATERIAL_NUM, MATERIAL_NAME, START_COUNT, STARTTIME, END_COUNT, ENDTIME, OUT_RATE FROM (
+                    SELECT TMP.* ,
+                    IF(TMP.FPD_ID = @FPD_ID, @RANK:=@RANK+1,@RANK:=1) RANK,
+                     @FPD_ID := TMP.FPD_ID,
+                     @ROWNUM := @ROWNUM + 1 ROWNUM
+                    FROM (
+                    SELECT FPD.PROCESS_ID PROCESS_ID, FPD.MATERIAL_ID MATERIAL_ID, FPD.ID FPD_ID , E.NUM EMPLOYEE_NUM ,E.NAME EMPLOYEE_NAME ,M.NUM MATERIAL_NUM ,M.NAME MATERIAL_NAME ,FPD.COUNT START_COUNT ,FPD.TIME STARTTIME ,IFNULL(SPD.COUNT,FPD.COUNT) END_COUNT,IFNULL(SPD.TIME,FPD.TIME) ENDTIME , ROUND(IFNULL(SPD.COUNT,FPD.COUNT) / FPD.COUNT * 100,2) OUT_RATE
+                      FROM PRODUCTION FPD
+                      JOIN EMPLOYEE E ON FPD.EMPLOYEE_ID = E.ID
+                      JOIN MATERIAL M ON FPD.MATERIAL_ID = M.ID
+                      JOIN PROCESS FPS ON FPD.PROCESS_ID = FPS.ID AND  FPS.IS_FIRST = 1
+                      LEFT JOIN PROCESS SPS ON  SPS.FIRST_PROCESS_ID = FPS.ID  AND  SPS.IS_FIRST = 0 
+                      LEFT JOIN PRODUCTION SPD ON SPD.PROCESS_ID = SPS.ID 
+                    WHERE FPD.TIME < IFNULL(SPD.TIME,NOW())  
+                    ORDER BY FPD.TIME , SPD.TIME ) TMP,(SELECT @RANK,@ROWNUM:=0,@FPD_ID:= NULL ) T
+                ) PD
+                WHERE PD.RANK = 1
+        '''
+        if "employee_num" in self.request.GET:
+            employee_num =  self.request.GET['employee_num']
+            if employee_num:
+                querySql += "and PD.EMPLOYEE_NUM = %s " % employee_num
+        if "employee_name" in self.request.GET:
+            employee_name =  self.request.GET['employee_name']
+            if employee_name:
+                querySql += "and PD.EMPLOYEE_NAME = '%s' " % employee_name
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and PD.PROCESS_ID = %s " % process
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and PD.MATERIAL_ID = '%s' " % material
+        return list(Production.objects.raw(querySql))
  

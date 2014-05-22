@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric5 project file for project pims -->
-<!-- Saved: 2014-05-21, 00:47:57 -->
+<!-- Saved: 2014-05-23, 01:43:02 -->
 <!-- Copyright (C) 2014 shanhu, shanhu.cn@gmail.com -->
 <Project version="5.1">
   <Language></Language>
@@ -31,6 +31,7 @@
   </Sources>
   <Forms>
     <Form>system/templates/system/developing.html</Form>
+    <Form>system/templates/system/production_list.html</Form>
   </Forms>
   <Translations/>
   <Resources/>
