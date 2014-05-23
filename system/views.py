@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
  
     
 class IndexView(generic.ListView):
-    template_name = 'system/index.html'
+    template_name = 'system/developing.html'
     context_object_name = 'latest_materialType_list'
 
     def get_queryset(self):
@@ -800,7 +800,16 @@ class ProductionListView(SystemListView):
     model = Production
     form_class = ProductionSearchForm
     paginate_by = 10
-    logger.info("system out test.") 
+    logger.info("system out test.")
+    def get_context_data(self, **kwargs):
+        context = super(ProductionListView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        logger.info(form)
+        context['form'] = form
+        context['sidebar'] = {'data_live':'active'}
+        context['is_display'] = 'none' 
+        return context
     def get_queryset(self):
         querySql = '''
             SELECT ROWNUM ID,PROCESS_ID,MATERIAL_ID,EMPLOYEE_NUM, EMPLOYEE_NAME, MATERIAL_NUM, MATERIAL_NAME, START_COUNT, STARTTIME, END_COUNT, ENDTIME, OUT_RATE FROM (
