@@ -479,7 +479,7 @@ class SalaryTimeConfigForm(forms.ModelForm):
 
 
 class Production(models.Model):
-    id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
+    id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
     terminal = models.ForeignKey('Terminal', db_column='TERMINAL_ID') # Field name made lowercase.
     card = models.ForeignKey(Card, db_column='CARD_ID') # Field name made lowercase.
     employee = models.ForeignKey(Employee, db_column='EMPLOYEE_ID') # Field name made lowercase.
@@ -488,8 +488,24 @@ class Production(models.Model):
     time = models.DateTimeField(db_column='TIME') # Field name made lowercase.
     count = models.DecimalField(db_column='COUNT', max_digits=10, decimal_places=2) # Field name made lowercase.
     class Meta:
-        managed = False
+        #managed = False
         db_table = 'production'
+
+class ProductionSearchForm(forms.Form): 
+    #employee_num = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.   
+    #employee_name = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
+    #material = forms.ChoiceField(required = False, choices= [('', ' 全部物料')]  ,  label="")
+    #process = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')]  ,  label="")
+    def __init__(self, *args, **kwargs): 
+        super(ProductionSearchForm, self).__init__(*args, **kwargs)
+        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.   
+        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
+        self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
+        self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(isFirst='1'),  label="")
+        
+
+
+
 
 class ReportClass(models.Model):
     id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
