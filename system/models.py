@@ -263,10 +263,10 @@ class Process(models.Model):
     firstProcess = models.ForeignKey('self', db_column='FIRST_PROCESS_ID', limit_choices_to={'isFirst' : '1'} ,  blank=True, null=True, verbose_name="前工艺") # Field name made lowercase.
     isFirst = models.CharField(db_column='IS_FIRST', max_length=1, choices=processIsFirstchoices, verbose_name="是否前工艺"  ) # Field name made lowercase.    
     status = models.CharField(db_column='STATUS', max_length=1, choices=statuschoices, verbose_name="状态") # Field name made lowercase.
-    card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True, null=False, verbose_name="工艺卡号",   choices=  Card.getTypeChoices(type='4'), ) # Field name made lowercase.    
+    card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True, null=False, verbose_name="工艺卡号",   choices=  Card.getTypeChoices(type='4'), ) # Field name made lowercase.
+    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True, verbose_name="备注") # Field name made lowercase.
     mode = models.CharField(db_column='MODE', max_length=1, blank=True ,  verbose_name="统计方式", choices=modechoices) # Field name made lowercase
     unit = models.CharField(db_column='UNIT', max_length=20, blank=True ,  verbose_name="单位"  ) # Field name made lowercase..
-    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True, verbose_name="备注") # Field name made lowercase.
     class Meta:
        # managed = False
         db_table = 'process'
@@ -490,8 +490,6 @@ class Production(models.Model):
     class Meta:
         #managed = False
         db_table = 'production'
-    def __unicode__(self):
-        return "terimnal:%s card: %s employee:%s material:%s process: %s,time:%s " % (self.terminal.name, self.card.num, self.employee.name, self.material.name, self.process.name, self.time)
 
 class ProductionSearchForm(forms.Form): 
     #employee_num = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.   
@@ -500,10 +498,11 @@ class ProductionSearchForm(forms.Form):
     #process = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')]  ,  label="")
     def __init__(self, *args, **kwargs): 
         super(ProductionSearchForm, self).__init__(*args, **kwargs)
-        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.   
-        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
-        self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(isFirst='0'),  label="")
+        self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(isFirst='1'),  label="")  
+        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
+        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
+        
         
 
 
