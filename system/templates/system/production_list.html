@@ -11,19 +11,25 @@
                         	<th>
 							员工姓名
 						</th>
-                        <th>
+                <!--        <th>
                             物料编号
-						</th>
+						</th> -->
                     
                         <th>
-                            物料姓名
-						</th>                        
+                            物料
+						</th>  
+                        <th>
+                            前工艺
+						</th>                         
                          <th>
                             领料数量
 						</th>
                          <th>
                             领料时间
 						</th>
+                         <th>
+                            后工艺
+						</th> 
                          <th>
                             交料数量
 						</th>
@@ -44,19 +50,25 @@
                         <td>
 							{{production.EMPLOYEE_NAME}}
 						</td> 
-                        <td>
+                        <!--          <td>
 							{{production.MATERIAL_NUM}}
-						</td>
+						</td> -->
                      
                           <td>
 							{{production.MATERIAL_NAME}}
 						</td>
+                         <td>
+							{{production.FIRST_PROCESS_NAME |default_if_none:""}}
+						</td>
                         <td>
-							{{production.START_COUNT}}
+							{{production.START_COUNT |default_if_none:"" }}
 						</td> 
                         <td>
 							{{production.STARTTIME | date:"Y-m-d H:i:s" }}
 						</td> 
+                        <td>
+							{{production.SECOND_PROCESS_NAME}}
+						</td>
                           <td>
 							{{production.END_COUNT}}
 						</td> 

@@ -29,6 +29,7 @@ class IndexView(generic.ListView):
 class SystemListView(generic.ListView, FormMixin):
     #template_name = 'system/base_list.html'
     #todo add dynamic menus here!
+    paginate_by = 2
     def get_context_data(self, **kwargs): 
         context = super(SystemListView, self).get_context_data(**kwargs)  
         context['pageHeader'] =  u"列表页"
@@ -68,7 +69,7 @@ class EmployeeListView(SystemListView):
     context_object_name = 'employee_list'
     model = Employee
     form_class = EmployeeSearchForm
-    paginate_by = 10
+    #paginate_by = 10
     
     def get_context_data(self, **kwargs): 
         context = super(EmployeeListView, self).get_context_data(**kwargs)  
@@ -178,7 +179,7 @@ class MaterialTypeListView(SystemListView):
     context_object_name = 'materialType_list'
     model = MaterialType
     form_class = NormalSearchForm
-    paginate_by = 10
+    #paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(MaterialTypeListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料类型管理"
@@ -251,7 +252,7 @@ class MaterialListView(SystemListView):
     context_object_name = 'material_list'
     model = Material
     form_class=NormalSearchForm
-    paginate_by = 10
+    #paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(MaterialListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"物料管理"
@@ -336,7 +337,7 @@ class ProcessListView(SystemListView):
     context_object_name = 'process_list'
     model = Process
     form_class = NormalSearchForm
-    paginate_by = 10
+    #paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(ProcessListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"工艺管理"
@@ -416,7 +417,7 @@ class WorkClassListView(SystemListView):
     template_name = 'system/workclass_list.html'
     context_object_name = 'workclass_list'
     model = WorkClass
-    paginate_by = 10
+    #paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(WorkClassListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"班次管理"
@@ -472,7 +473,7 @@ class SalaryCountConfigListView(SystemListView):
     context_object_name = 'salarycountconfig_list'
     model = SalaryCountConfig
     form_class = SalaryCountSearchForm
-    paginate_by = 10
+    #paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(SalaryCountConfigListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"计件工资管理"
@@ -540,7 +541,7 @@ class SalaryTimeConfigListView(SystemListView):
     context_object_name = 'salarytimeconfig_list'
     model = SalaryTimeConfig
     form_class = SalaryTimeConfigForm
-    paginate_by = 10
+    #paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(SalaryTimeConfigListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"计件工资管理"
@@ -608,7 +609,7 @@ class CardListView(SystemListView):
     context_object_name = 'card_list'
     model = Card
     form_class = CardSearchForm
-    paginate_by = 10
+    #paginate_by = 10
     logger.info("system out test.")
     def get_context_data(self, **kwargs): 
         context = super(CardListView, self).get_context_data(**kwargs)  
@@ -799,27 +800,34 @@ class ProductionListView(SystemListView):
     context_object_name = 'production_list'
     model = Production
     form_class = ProductionSearchForm
-    paginate_by = 10
+    #paginate_by = 10
     logger.info("system out test.") 
+    def get_context_data(self, *args, **kwargs):
+        context = super(ProductionListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"实时生产数据"
+        context['title'] = u"数据中心"
+        return context
     def get_queryset(self):
         querySql = '''
-            SELECT ROWNUM ID,PROCESS_ID,MATERIAL_ID,EMPLOYEE_NUM, EMPLOYEE_NAME, MATERIAL_NUM, MATERIAL_NAME, START_COUNT, STARTTIME, END_COUNT, ENDTIME, OUT_RATE FROM (
+            SELECT ROWNUM ID,PROCESS_ID,FIRST_PROCESS_NAME,SECOND_PROCESS_NAME,MATERIAL_ID,EMPLOYEE_NUM, EMPLOYEE_NAME, MATERIAL_NUM, MATERIAL_NAME, START_COUNT, STARTTIME, END_COUNT, ENDTIME, OUT_RATE FROM (
                     SELECT TMP.* ,
-                    IF(TMP.FPD_ID = @FPD_ID, @RANK:=@RANK+1,@RANK:=1) RANK,
-                     @FPD_ID := TMP.FPD_ID,
+                    IF(TMP.BPD_ID = @BPD_ID, @RANK:=@RANK+1,@RANK:=1) RANK,
+                     @BPD_ID := TMP.BPD_ID,
                      @ROWNUM := @ROWNUM + 1 ROWNUM
                     FROM (
-                    SELECT FPD.PROCESS_ID PROCESS_ID, FPD.MATERIAL_ID MATERIAL_ID, FPD.ID FPD_ID , E.NUM EMPLOYEE_NUM ,E.NAME EMPLOYEE_NAME ,M.NUM MATERIAL_NUM ,M.NAME MATERIAL_NAME ,FPD.COUNT START_COUNT ,FPD.TIME STARTTIME ,IFNULL(SPD.COUNT,FPD.COUNT) END_COUNT,IFNULL(SPD.TIME,FPD.TIME) ENDTIME , ROUND(IFNULL(SPD.COUNT,FPD.COUNT) / FPD.COUNT * 100,2) OUT_RATE
-                      FROM PRODUCTION FPD
-                      JOIN EMPLOYEE E ON FPD.EMPLOYEE_ID = E.ID
-                      JOIN MATERIAL M ON FPD.MATERIAL_ID = M.ID
-                      JOIN PROCESS FPS ON FPD.PROCESS_ID = FPS.ID AND  FPS.IS_FIRST = 1
-                      LEFT JOIN PROCESS SPS ON  SPS.FIRST_PROCESS_ID = FPS.ID  AND  SPS.IS_FIRST = 0 
-                      LEFT JOIN PRODUCTION SPD ON SPD.PROCESS_ID = SPS.ID 
-                    WHERE FPD.TIME < IFNULL(SPD.TIME,NOW())  
-                    ORDER BY FPD.TIME , SPD.TIME ) TMP,(SELECT @RANK,@ROWNUM:=0,@FPD_ID:= NULL ) T
+                    SELECT APD.PROCESS_ID PROCESS_ID,APD.EMPLOYEE_ID EMPLOYEE_ID,APD.CARD_ID CARD_ID, BPS.NAME FIRST_PROCESS_NAME,APS.NAME SECOND_PROCESS_NAME, APD.MATERIAL_ID MATERIAL_ID, BPD.ID BPD_ID , E.NUM EMPLOYEE_NUM ,E.NAME EMPLOYEE_NAME ,M.NUM MATERIAL_NUM ,M.NAME MATERIAL_NAME ,BPD.COUNT START_COUNT ,BPD.TIME STARTTIME ,IFNULL(APD.COUNT,BPD.COUNT) END_COUNT,IFNULL(APD.TIME,BPD.TIME) ENDTIME , ROUND(APD.COUNT  / IFNULL(BPD.COUNT,APD.COUNT) * 100,2) OUT_RATE
+                      FROM PRODUCTION APD
+                      JOIN EMPLOYEE E ON APD.EMPLOYEE_ID = E.ID
+                      JOIN MATERIAL M ON APD.MATERIAL_ID = M.ID
+                      JOIN PROCESS APS ON APD.PROCESS_ID = APS.ID AND  APS.IS_FIRST = 0
+                      LEFT JOIN PROCESS BPS ON  APS.FIRST_PROCESS_ID = BPS.ID  AND  BPS.IS_FIRST = 1 
+                      LEFT JOIN PRODUCTION BPD ON BPD.PROCESS_ID = BPS.ID  AND APD.MATERIAL_ID = BPD.MATERIAL_ID AND APD.EMPLOYEE_ID = BPD.EMPLOYEE_ID AND APD.CARD_ID = BPD.CARD_ID
+                    WHERE IFNULL(BPD.TIME,APD.TIME - 1) < APD.TIME  
+                    ORDER BY BPD.TIME , APD.TIME ) TMP,(SELECT @RANK,@ROWNUM:=0,@BPD_ID:= NULL ) T 
+                    #ORDER BY EMPLOYEE_ID,CARD_ID,MATERIAL_ID  DESC
                 ) PD
                 WHERE PD.RANK = 1
+               
         '''
         if "employee_num" in self.request.GET:
             employee_num =  self.request.GET['employee_num']
@@ -837,5 +845,5 @@ class ProductionListView(SystemListView):
             material = self.request.GET['material']
             if material:
                 querySql += "and PD.MATERIAL_ID = '%s' " % material
-        return list(Production.objects.raw(querySql))
+        return list(Production.objects.raw(querySql + " ORDER BY ENDTIME DESC "))
  
