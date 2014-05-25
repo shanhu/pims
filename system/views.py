@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
  
     
 class IndexView(generic.ListView):
-    template_name = 'system/index.html'
+    template_name = 'system/developing.html'
     context_object_name = 'latest_materialType_list'
 
     def get_queryset(self):
@@ -29,16 +29,14 @@ class IndexView(generic.ListView):
 class SystemListView(generic.ListView, FormMixin):
     #template_name = 'system/base_list.html'
     #todo add dynamic menus here!
-    paginate_by = 2
+    paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(SystemListView, self).get_context_data(**kwargs)  
         context['pageHeader'] =  u"列表页"
         context['queryString'] = self.get_query_string().urlencode() 
         context['form'] = self.get_form_class()(self.request.GET)
         logger.info(self.request.GET.get('num'))
-       # context['form'] = CardSearchForm({'num':self.request.GET.get('num'), 
-       # 'type':self.request.GET.get('type'), 
-       # 'assignd':self.request.GET.get('assignd') }) 
+       
         return context
     def get_query_string(self):
         q = self.request.GET.copy() 
@@ -125,7 +123,7 @@ class EmployeeCreateView(CreateView):
 class EmployeeUpdateView(UpdateView):
     form_class= EmployeeForm
     model = Employee
-   # success_url =  reverse_lazy("employee_list")
+    success_url =  reverse_lazy("employee_list")
     def get_context_data(self, **kwargs):
         context = super(EmployeeUpdateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
@@ -139,32 +137,40 @@ class EmployeeUpdateView(UpdateView):
         return context
     def post(self, request,  *args, **kwargs):
         object = self.get_object()
-        if object.card_num1:
-            Card.objects.filter(num=object.card_num1).update(owner_id=None)
-        if object.card_num2:
-            Card.objects.filter(num=object.card_num2).update(owner_id=None)
-        logger.info('employee update: %s', object) 
-        result = super(EmployeeUpdateView, self).post(request, *args, **kwargs)
+        Card.objects.retriveCards(num= object.card_num1)
+        Card.objects.retriveCards(num= object.card_num2)
+        result = super(EmployeeUpdateView, self).post(request, *args, **kwargs)        
         object = self.object 
         if object.status == '0': 
-            messages.info(request,u'已分配卡片将被收回.')
-        if object.card_num1: 
-            Card.objects.filter(num=object.card_num1).update(owner_id=object.id)
-        if object.card_num2:
-            Card.objects.filter(num=object.card_num2).update(owner_id=object.id)
+            messages.info(request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
+            Card.objects.retriveCards( num= object.card_num1)
+            Card.objects.retriveCards( num= object.card_num2)
+            object.card_num1 = ''
+            object.card_num2 = ''
+            object.save()
+        else:
+            Card.objects.grantCards(num= object.card_num1, owner_id = object.id)
+            Card.objects.grantCards(num= object.card_num2, owner_id = object.id)
+        
+        
         return result #redirect('employee_list')
     
 class EmployeeDeleteView(DeleteView):
     form_class= EmployeeForm
     model = Employee     
     success_url = reverse_lazy('employee_list')  
-    def post(self,request, *args, **kwargs):  
-        employee = self.get_object();
-        if employee.card_num1 != '' or employee.card_num2 != '':
-            employee.status = 0
-            employee.save()
-        else:
-            return super(EmployeeDeleteView, self).post(request, *args, **kwargs) 
+    def post(self,request, *args, **kwargs): 
+        try:
+            result =  super(EmployeeDeleteView, self).post(request, *args, **kwargs)
+            messages.info(request, u" %s 已被删除，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
+            employee = self.object; 
+            if employee.card_num1 != '' or employee.card_num2 != '':
+                Card.objects.retriveCards(num= employee.card_num1)
+                Card.objects.retriveCards(num= employee.card_num2)
+            return result
+        except(IntegrityError):
+            messages.error(request, u" %s 已被使用，不能删除" % self.object.name)  
+          
         return redirect('employee_list');
     def get_context_data(self, **kwargs):
         context = super(EmployeeDeleteView, self).get_context_data(**kwargs)   
@@ -285,7 +291,8 @@ class MaterialCreateView(CreateView):
     def post(self, request, **kwargs):
         result = super(MaterialCreateView, self).post(request, **kwargs)
         object = self.object
-        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        if object:
+            Card.objects.filter(num=object.card_num).update(owner_id=object.id)
         return result
     success_url =  reverse_lazy("material_list")
         
@@ -305,10 +312,18 @@ class MaterialUpdateView(UpdateView):
         return context
     def post(self, request, **kwargs):
         object = self.get_object()
-        Card.objects.filter(num=object.card_num).update(owner_id=None)
+        Card.objects.filter(num=object.card_num).update(owner_id='0')
         result = super(MaterialUpdateView, self).post(request, **kwargs)
         object = self.object
-        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        if object.status == '1':
+            Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+            messages.info(request, u" %s 可用，卡片 %s 已下发！" % (self.object.name, self.object.card_num) )
+        else:
+            messages.info(request, u" %s 已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
+            Card.objects.retriveCards(num=object.card_num)
+            object.card_num = ''
+            object.save()
+            
         return result;
 class MaterialDeleteView(DeleteView):
     form_class= MaterialForm
@@ -316,13 +331,12 @@ class MaterialDeleteView(DeleteView):
     success_url = reverse_lazy('material_list')  
     def post(self,request, *args, **kwargs):
         try:
-            return super(MaterialDeleteView, self).post(request, *args, **kwargs)
+            result = super(MaterialDeleteView, self).post(request, *args, **kwargs)
+            Card.objects.retriveCards(type='3', num=self.object.card_num)
+            messages.info(request, u"物料删除成功！") 
+            return result
         except(IntegrityError):
-            messages.error(request, u"物料已被使用，不能删除") 
-        else:
-            material = self.get_object(); 
-            material.status = 0
-            material.save() 
+            messages.error(request, u"物料已被使用，不能删除")  
         return redirect('material_list');
     def get_context_data(self, **kwargs):
         context = super(MaterialDeleteView, self).get_context_data(**kwargs) 
@@ -829,21 +843,31 @@ class ProductionListView(SystemListView):
                 WHERE PD.RANK = 1
                
         '''
+        
+        querySql = u'''         
+            select pd.id ID, e.NUM EMPLOYEE_NUM,e.NAME EMPLOYEE_NAME ,m.NAME MATERIAL_NAME ,if(ps.IS_FIRST,'前','后') IS_FIRST,  ps.name PROCESS_NAME ,pd.COUNT START_COUNT ,pd.TIME START_TIME from production pd
+            join process ps on pd.PROCESS_ID = ps.ID
+            join material m on m.id = pd.MATERIAL_ID
+            join employee e on e.ID = pd.EMPLOYEE_ID 
+            WHERE 1=1
+            
+        '''
+        
         if "employee_num" in self.request.GET:
             employee_num =  self.request.GET['employee_num']
             if employee_num:
-                querySql += "and PD.EMPLOYEE_NUM = %s " % employee_num
+                querySql += "and e.NUM = %s " % employee_num
         if "employee_name" in self.request.GET:
             employee_name =  self.request.GET['employee_name']
             if employee_name:
-                querySql += "and PD.EMPLOYEE_NAME = '%s' " % employee_name
+                querySql += "and e.NAME = '%s' " % employee_name
         if "process" in self.request.GET:
             process = self.request.GET['process']
             if process:
-                querySql += "and PD.PROCESS_ID = %s " % process
+                querySql += "and PD.PROCESS_ID = '%s' " % process
         if "material" in self.request.GET:
             material = self.request.GET['material']
             if material:
                 querySql += "and PD.MATERIAL_ID = '%s' " % material
-        return list(Production.objects.raw(querySql + " ORDER BY ENDTIME DESC "))
+        return list(Production.objects.raw(querySql   + "  order by   pd.time desc, pd.EMPLOYEE_ID ,pd.MATERIAL_ID "))
  

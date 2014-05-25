@@ -37,7 +37,7 @@
 						</td>
                      
                           <td>
-							{{material.card_num}}
+							{{material.card_num | default_if_none:''}}
 						</td>
                         <td>
 							{{material.get_status_display}}

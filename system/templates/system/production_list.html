@@ -19,26 +19,17 @@
                             物料
 						</th>  
                         <th>
-                            前工艺
-						</th>                         
+                        工艺名称
+						</th>  
+                        <th>
+                            工艺
+						</th>                        
                          <th>
-                            领料数量
+                            数量
 						</th>
                          <th>
-                            领料时间
-						</th>
-                         <th>
-                            后工艺
+                            时间
 						</th> 
-                         <th>
-                            交料数量
-						</th>
-                         <th>
-                            交料时间
-						</th>
-                         <th>
-                            出成率
-						</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -49,35 +40,23 @@
 						</td> 
                         <td>
 							{{production.EMPLOYEE_NAME}}
-						</td> 
-                        <!--          <td>
-							{{production.MATERIAL_NUM}}
-						</td> -->
+						</td>  
                      
                           <td>
 							{{production.MATERIAL_NAME}}
 						</td>
                          <td>
-							{{production.FIRST_PROCESS_NAME |default_if_none:""}}
+							{{production.PROCESS_NAME |default_if_none:""}}
 						</td>
-                        <td>
-							{{production.START_COUNT |default_if_none:"" }}
-						</td> 
-                        <td>
-							{{production.STARTTIME | date:"Y-m-d H:i:s" }}
-						</td> 
-                        <td>
-							{{production.SECOND_PROCESS_NAME}}
-						</td>
-                          <td>
-							{{production.END_COUNT}}
-						</td> 
-                        <td>
-							{{production.ENDTIME | date:"Y-m-d H:i:s"}}
-						</td> 
                          <td>
-							{{production.OUT_RATE}}
-						</td>
+							{{production.IS_FIRST}}
+						</td> 
+                        <td>
+							{{production.START_COUNT}}
+						</td> 
+                        <td>
+							{{production.START_TIME | date:"Y-m-d H:i:s" }}
+						</td>  
 					</tr> 
                     {% endfor %}
 				</tbody>

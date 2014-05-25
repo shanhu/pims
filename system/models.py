@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.db.models.deletion import PROTECT
 from django.core.urlresolvers import reverse 
 
 from django import forms
@@ -69,6 +70,10 @@ class CardManager(models.Manager):
             #logger.info(self.querySql)
         logger.info(  query )
         return [card for card in Card.objects.raw(  query)]
+    def retriveCards(self, **kwargs):
+        Card.objects.filter(**kwargs).update(owner_id='0')
+    def grantCards(self, owner_id, **kwargs):
+        Card.objects.filter(**kwargs).update(owner_id= owner_id)
 
 class Card(models.Model):
     objects = CardManager()
@@ -178,7 +183,7 @@ class WorkGroup(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, blank=True) # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase.
-    workshop = models.ForeignKey(Workshop, db_column='WORKSHOP_ID', blank=True, null=True) # Field name made lowercase.
+    workshop = models.ForeignKey(Workshop, db_column='WORKSHOP_ID', on_delete=PROTECT, blank=True, null=True) # Field name made lowercase.
     class Meta:
      #   managed = False
         db_table = 'work_group'
@@ -192,7 +197,7 @@ class MaterialType(models.Model):
     num = models.CharField(db_column='NUM', max_length=20,    unique=True , verbose_name="编号") # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20  , verbose_name="名称") # Field name made lowercase.
     status = models.CharField(db_column='STATUS', max_length=1, blank=True, verbose_name="状态", choices=choices) # Field name made lowercase.
-    parent = models.ForeignKey('self', db_column='PARENT_ID', blank=True, null=True, verbose_name="父类型") # Field name made lowercase.
+    parent = models.ForeignKey('self', db_column='PARENT_ID',   on_delete=PROTECT,  blank=True, null=True, verbose_name="父类型") # Field name made lowercase.
     class Meta:
      #   managed = False
         db_table = 'material_type'
@@ -214,10 +219,11 @@ class NormalSearchForm(forms.Form):
 
 class Material(models.Model):
     statuschoices = DictConfig.getTypeChoices(type = 'material_status') 
+    materialType = models.ForeignKey(MaterialType, db_column='MATERIAL_TYPE_ID', on_delete=PROTECT, blank=True, null=True, verbose_name="类型") # Field name made lowercase.
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
     num = models.CharField(db_column='NUM', max_length=20 , unique=True, verbose_name="编号") # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, verbose_name="名称") # Field name made lowercase.
-    materialType = models.ForeignKey(MaterialType, db_column='MATERIAL_TYPE_ID', blank=True, null=True, verbose_name="类型") # Field name made lowercase.
+    
     
   
    # conver = models.IntegerField(db_column='CONVER', blank=True, null=True,  verbose_name="换算") # Field name made lowercase.
@@ -260,7 +266,7 @@ class Process(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
     num = models.CharField(db_column='NUM', max_length=20, unique=True, verbose_name="编号") # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, verbose_name="名称") # Field name made lowercase.
-    firstProcess = models.ForeignKey('self', db_column='FIRST_PROCESS_ID', limit_choices_to={'isFirst' : '1'} ,  blank=True, null=True, verbose_name="前工艺") # Field name made lowercase.
+    firstProcess = models.ForeignKey('self', db_column='FIRST_PROCESS_ID', on_delete=PROTECT, limit_choices_to={'isFirst' : '1'} ,  blank=True, null=True, verbose_name="前工艺") # Field name made lowercase.
     isFirst = models.CharField(db_column='IS_FIRST', max_length=1, choices=processIsFirstchoices, verbose_name="是否前工艺"  ) # Field name made lowercase.    
     status = models.CharField(db_column='STATUS', max_length=1, choices=statuschoices, verbose_name="状态") # Field name made lowercase.
     card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True, null=False, verbose_name="工艺卡号",   choices=  Card.getTypeChoices(type='4'), ) # Field name made lowercase.
@@ -315,12 +321,12 @@ class Terminal(models.Model):
     num = models.CharField(db_column='NUM', max_length=20, blank=True) # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, blank=True) # Field name made lowercase.
     type = models.CharField(db_column='TYPE', max_length=1, blank=True) # Field name made lowercase.
-    workGroup = models.ForeignKey(WorkGroup, db_column='WORKGROUP_ID', blank=True, null=True) # Field name made lowercase.
+    workGroup = models.ForeignKey(WorkGroup, db_column='WORKGROUP_ID', on_delete=PROTECT, blank=True, null=True) # Field name made lowercase.
     ip1 = models.CharField(db_column='IP1', max_length=20, blank=True) # Field name made lowercase.
     ip2 = models.CharField(db_column='IP2', max_length=20, blank=True) # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase.
-    defaultMaterial = models.ForeignKey(Material, db_column='DEFAULT_MATERIAL_ID', blank=True, null=True) # Field name made lowercase.
-    defaultProcess = models.ForeignKey(Process, db_column='DEFAULT_PROCESS_ID', blank=True, null=True) # Field name made lowercase.
+    defaultMaterial = models.ForeignKey(Material, db_column='DEFAULT_MATERIAL_ID', on_delete=PROTECT, blank=True, null=True) # Field name made lowercase.
+    defaultProcess = models.ForeignKey(Process, db_column='DEFAULT_PROCESS_ID', on_delete=PROTECT, blank=True, null=True) # Field name made lowercase.
     class Meta:
         managed = False
         db_table = 'terminal'
@@ -330,8 +336,8 @@ class Terminal(models.Model):
 
 class Workshift(models.Model):
     id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
-    terminal = models.ForeignKey(Terminal, db_column='TERMINAL_ID') # Field name made lowercase.
-    card = models.ForeignKey(Card, db_column='CARD_ID') # Field name made lowercase.
+    terminal = models.ForeignKey(Terminal, db_column='TERMINAL_ID' , on_delete=PROTECT,) # Field name made lowercase.
+    card = models.ForeignKey(Card, db_column='CARD_ID' , on_delete=PROTECT,) # Field name made lowercase.
     time = models.DateTimeField(db_column='TIME') # Field name made lowercase.
     class Meta:
         managed = False
@@ -403,9 +409,9 @@ class WorkClassForm(forms.ModelForm):
 
 class Attendance(models.Model):
     id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
-    terminal = models.ForeignKey('Terminal', db_column='TERMINAL_ID') # Field name made lowercase.
-    employee = models.ForeignKey('Employee', db_column='EMPLOYEE_ID') # Field name made lowercase.
-    card = models.ForeignKey('Card', db_column='CARD_ID') # Field name made lowercase.
+    terminal = models.ForeignKey('Terminal', db_column='TERMINAL_ID', on_delete=PROTECT,) # Field name made lowercase.
+    employee = models.ForeignKey('Employee', db_column='EMPLOYEE_ID', on_delete=PROTECT,) # Field name made lowercase.
+    card = models.ForeignKey('Card', db_column='CARD_ID', on_delete=PROTECT,) # Field name made lowercase.
     time = models.DateTimeField(db_column='TIME') # Field name made lowercase.
     class Meta:
         #managed = False
@@ -416,8 +422,8 @@ class Attendance(models.Model):
 class SalaryCountConfig(models.Model): 
     iddefaultsChoices = DictConfig.getTypeChoices(type="salary_count_default")
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    material = models.ForeignKey(Material, db_column='MATERIAL_ID',verbose_name="物料"   ) # Field name made lowercase.
-    process = models.ForeignKey(Process, db_column='PROCESS_ID',verbose_name="工艺"  ) # Field name made lowercase.
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID',verbose_name="物料" , on_delete=PROTECT,  ) # Field name made lowercase.
+    process = models.ForeignKey(Process, db_column='PROCESS_ID',verbose_name="工艺", on_delete=PROTECT,  ) # Field name made lowercase.
     price = models.DecimalField(db_column='PRICE', max_digits=10, decimal_places=2,verbose_name="单价" ) # Field name made lowercase.
    # isDefault = models.CharField(db_column='IS_DEFAULT', max_length=1, blank=True,verbose_name="是否默认", choices=iddefaultsChoices ) # Field name made lowercase.
    # startTime = models.DateTimeField(db_column='START_TIME',  blank=True,verbose_name="开始时间"  ) # Field name made lowercase.
@@ -480,11 +486,11 @@ class SalaryTimeConfigForm(forms.ModelForm):
 
 class Production(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
-    terminal = models.ForeignKey('Terminal', db_column='TERMINAL_ID') # Field name made lowercase.
-    card = models.ForeignKey(Card, db_column='CARD_ID') # Field name made lowercase.
-    employee = models.ForeignKey(Employee, db_column='EMPLOYEE_ID') # Field name made lowercase.
-    material = models.ForeignKey(Material, db_column='MATERIAL_ID') # Field name made lowercase.
-    process = models.ForeignKey(Process, db_column='PROCESS_ID') # Field name made lowercase.
+    terminal = models.ForeignKey('Terminal', db_column='TERMINAL_ID' , on_delete=PROTECT) # Field name made lowercase.
+    card = models.ForeignKey(Card, db_column='CARD_ID' , on_delete=PROTECT) # Field name made lowercase.
+    employee = models.ForeignKey(Employee, db_column='EMPLOYEE_ID' , on_delete=PROTECT,) # Field name made lowercase.
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID' , on_delete=PROTECT) # Field name made lowercase.
+    process = models.ForeignKey(Process, db_column='PROCESS_ID' , on_delete=PROTECT) # Field name made lowercase.
     time = models.DateTimeField(db_column='TIME') # Field name made lowercase.
     count = models.DecimalField(db_column='COUNT', max_digits=10, decimal_places=2) # Field name made lowercase.
     class Meta:
@@ -499,7 +505,7 @@ class ProductionSearchForm(forms.Form):
     def __init__(self, *args, **kwargs): 
         super(ProductionSearchForm, self).__init__(*args, **kwargs)
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
-        self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(isFirst='1'),  label="")  
+        self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="")  
         self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
         self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
         
@@ -512,10 +518,10 @@ class ReportClass(models.Model):
     id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
     starttime = models.DateTimeField(db_column='STARTTIME') # Field name made lowercase.
     endtime = models.DateTimeField(db_column='ENDTIME') # Field name made lowercase.
-    material = models.ForeignKey(Material, db_column='MATERIAL_ID') # Field name made lowercase.
-    process_first = models.ForeignKey(Process,   related_name='+' ,  db_column='PROCESS_FIRST_ID', blank=True, null=True) # Field name made lowercase.
+    material = models.ForeignKey(Material, db_column='MATERIAL_ID' , on_delete=PROTECT) # Field name made lowercase.
+    process_first = models.ForeignKey(Process,   related_name='+' ,  on_delete=PROTECT, db_column='PROCESS_FIRST_ID', blank=True, null=True) # Field name made lowercase.
     get_count = models.DecimalField(db_column='GET_COUNT', max_digits=10, decimal_places=2, blank=True, null=True) # Field name made lowercase.
-    process_last = models.ForeignKey(Process,   related_name='+' ,  db_column='PROCESS_LAST_ID') # Field name made lowercase.
+    process_last = models.ForeignKey(Process,   related_name='+' , on_delete=PROTECT,  db_column='PROCESS_LAST_ID') # Field name made lowercase.
     put_count = models.DecimalField(db_column='PUT_COUNT', max_digits=10, decimal_places=2) # Field name made lowercase.
     average_rate = models.DecimalField(db_column='AVERAGE_RATE', max_digits=10, decimal_places=2) # Field name made lowercase.
     class Meta:
@@ -528,11 +534,11 @@ class ReportEmployee(models.Model):
     id = models.IntegerField(db_column='ID', primary_key=True) # Field name made lowercase.
     starttime = models.DateTimeField(db_column='STARTTIME') # Field name made lowercase.
     endtime = models.DateTimeField(db_column='ENDTIME') # Field name made lowercase.
-    employee = models.ForeignKey(Employee, db_column='EMPLOYEE_ID') # Field name made lowercase.
-    material = models.ForeignKey(Material, db_column='MATERIAL_ID') # Field name made lowercase.
-    process_first = models.ForeignKey(Process,  related_name='+'  , db_column='PROCESS_FIRST_ID', blank=True, null=True , ) # Field name made lowercase.
+    employee = models.ForeignKey(Employee, on_delete=PROTECT, db_column='EMPLOYEE_ID') # Field name made lowercase.
+    material = models.ForeignKey(Material, on_delete=PROTECT, db_column='MATERIAL_ID') # Field name made lowercase.
+    process_first = models.ForeignKey(Process, on_delete=PROTECT,  related_name='+'  , db_column='PROCESS_FIRST_ID', blank=True, null=True , ) # Field name made lowercase.
     get_count = models.DecimalField(db_column='GET_COUNT', max_digits=10, decimal_places=2, blank=True, null=True ) # Field name made lowercase.
-    process_last = models.ForeignKey(Process, related_name='+', db_column='PROCESS_LAST_ID' ,  ) # Field name made lowercase.
+    process_last = models.ForeignKey(Process, on_delete=PROTECT, related_name='+', db_column='PROCESS_LAST_ID' ,  ) # Field name made lowercase.
     put_count = models.DecimalField(db_column='PUT_COUNT', max_digits=10, decimal_places=2) # Field name made lowercase.
     average_rate = models.DecimalField(db_column='AVERAGE_RATE', max_digits=10, decimal_places=2) # Field name made lowercase.
     class Meta:
@@ -545,11 +551,13 @@ def make_material_type_num(sender, instance, raw, **kwargs):
     logger.info("%s", instance.parent)
     if instance.id is None:        
         if instance.parent:
-            instance.num =   instance.parent.num  +  '.' +   instance.num 
+            #instance.num =   instance.parent.num  +  '.' +   instance.num
+            pass 
 
 @receiver(pre_save, sender=Material)
 def make_material_num(sender, instance, raw, **kwargs):
     logger.info("%s", instance.materialType)
     if instance.id is None:        
         if instance.materialType:
-            instance.num =   instance.materialType.num  +  '.' +   instance.num 
+            #instance.num =   instance.materialType.num  +  '.' +   instance.num 
+            pass

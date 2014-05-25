@@ -52,13 +52,13 @@
 							{{process.firstProcess.name}}
 						</td> 
                         <td>
-							{{process.card_num}}
+							{{process.card_num | default_if_none:'' }}
 						</td>
                         <td>
 							{{process.get_mode_display}}
 						</td>
                         <td>
-							{{process.unit}}
+							{{process.unit }}
 						</td>
                         <td>
 							{{process.get_status_display}}

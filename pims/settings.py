@@ -68,8 +68,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pims',
-        'USER': 'root', 
-        'PASSWORD': '123456', 
+        'USER': 'pims', 
+        'PASSWORD': 'admin', 
         'HOST': '127.0.0.1', 
         'port': '3306', 
     }
@@ -116,7 +116,7 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/tmp/django/pims-debug.log',
             'formatter': 'verbose'
         },
@@ -136,18 +136,23 @@ LOGGING = {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
-        },
+        }, 
+        'django.request':{
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     },
 }
 
 
 
 BOOTSTRAP3 = {
-    'jquery_url': '//code.jquery.com/jquery.min.js',
-    'base_url': '//netdna.bootstrapcdn.com/bootstrap/3.1.1/',
-    'css_url': None,
-    'theme_url': None,
-    'javascript_url': None,
+    'jquery_url': '//cdn.bootcss.com/jquery/2.1.1/jquery.min.js',
+    'base_url': '//cdn.bootcss.com/bootstrap/3.1.1/',
+    'css_url': '//cdn.bootcss.com/bootstrap/3.1.1/css/bootstrap.css',
+    'theme_url': '//cdn.bootcss.com/bootstrap/3.1.1/css/bootstrap-theme.css',
+    'javascript_url': '//cdn.bootcss.com/bootstrap/3.1.1/js/bootstrap.min.js',
     'javascript_in_head': False,
     'include_jquery': False,
     'horizontal_label_class': 'col-md-2',
@@ -162,4 +167,7 @@ BOOTSTRAP3 = {
         'default': 'bootstrap3.renderers.FieldRenderer',
         'inline': 'bootstrap3.renderers.InlineFieldRenderer',
     },
+    
+
+
 }
