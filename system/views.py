@@ -142,7 +142,7 @@ class EmployeeUpdateView(UpdateView):
         result = super(EmployeeUpdateView, self).post(request, *args, **kwargs)        
         object = self.object 
         if object.status == '0': 
-            messages.info(request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
+            messages.sucess(request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
             Card.objects.retriveCards( num= object.card_num1)
             Card.objects.retriveCards( num= object.card_num2)
             object.card_num1 = ''
@@ -162,7 +162,7 @@ class EmployeeDeleteView(DeleteView):
     def post(self,request, *args, **kwargs): 
         try:
             result =  super(EmployeeDeleteView, self).post(request, *args, **kwargs)
-            messages.info(request, u" %s 已被删除，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
+            messages.success(request, u" %s 已被删除，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
             employee = self.object; 
             if employee.card_num1 != '' or employee.card_num2 != '':
                 Card.objects.retriveCards(num= employee.card_num1)
@@ -236,7 +236,9 @@ class MaterialTypeDeleteView(DeleteView):
     success_url = reverse_lazy('material_type_list') 
     def post(self,request, *args, **kwargs):
         try:
-             return super(MaterialTypeDeleteView, self).post(request, *args, **kwargs)
+             result = super(MaterialTypeDeleteView, self).post(request, *args, **kwargs)
+             messages.success(request, u"物料类型已被成功删除！" )
+             return result
         except(IntegrityError):
             messages.error(request, u"物料类型已被使用，不能删除") 
         else:
@@ -283,7 +285,11 @@ class MaterialCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super(MaterialCreateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
+        form = self.get_form(form_class)
+        context['form'] = form
+        cardTypeChoices =  Card.getCardChoices(type="3")
+        logger.info("material card type choices: %s", cardTypeChoices )
+        form.fields['card_num'] = forms.ChoiceField(   choices=cardTypeChoices ,  label="物料卡编号", required=False )
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
         context['sidebar'] = {'material':'active'} 
@@ -305,7 +311,9 @@ class MaterialUpdateView(UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context['form'] = form
-        form.fields['card_num'].choices += [(self.object.card_num,self.object.card_num )]
+        cardTypeChoices = [(self.object.card_num,self.object.card_num )]  + Card.getCardChoices(type="3") + [('', '-------')]
+        logger.info("material card type choices: %s", cardTypeChoices )
+        form.fields['card_num'] = forms.ChoiceField(   choices=cardTypeChoices ,  label="物料卡编号", required=False )
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
         context['sidebar'] = {'material':'active'} 
@@ -317,9 +325,9 @@ class MaterialUpdateView(UpdateView):
         object = self.object
         if object.status == '1':
             Card.objects.filter(num=object.card_num).update(owner_id=object.id)
-            messages.info(request, u" %s 可用，卡片 %s 已下发！" % (self.object.name, self.object.card_num) )
+            messages.success(request, u" %s 可用，卡片 %s 已下发！" % (self.object.name, self.object.card_num) )
         else:
-            messages.info(request, u" %s 已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
+            messages.success(request, u" %s 已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
             Card.objects.retriveCards(num=object.card_num)
             object.card_num = ''
             object.save()
@@ -333,7 +341,7 @@ class MaterialDeleteView(DeleteView):
         try:
             result = super(MaterialDeleteView, self).post(request, *args, **kwargs)
             Card.objects.retriveCards(type='3', num=self.object.card_num)
-            messages.info(request, u"物料删除成功！") 
+            messages.success(request, u"物料删除成功！") 
             return result
         except(IntegrityError):
             messages.error(request, u"物料已被使用，不能删除")  
@@ -373,6 +381,7 @@ class ProcessDetailView(SystemDetailView):
 class ProcessCreateView(CreateView):
     form_class= ProcessForm
     model = Process
+    success_url =  reverse_lazy("process_list")
     def get_context_data(self, **kwargs):
         context = super(ProcessCreateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
@@ -385,9 +394,8 @@ class ProcessCreateView(CreateView):
         result = super(ProcessCreateView, self).post(request, **kwargs)
         object = self.object
         Card.objects.filter(num=object.card_num).update(owner_id=object.id)
-        return result
+        return result 
     
-    success_url =  reverse_lazy("process_list")
         
 class ProcessUpdateView(UpdateView):
     form_class= ProcessForm
@@ -405,20 +413,29 @@ class ProcessUpdateView(UpdateView):
         return context
     def post(self, request, **kwargs):
         object = self.get_object()
-        Card.objects.filter(num=object.card_num).update(owner_id=None)
+        Card.objects.retriveCards(num=object.card_num)
         result = super(ProcessUpdateView, self).post(request, **kwargs)
         object = self.object
-        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        if object.status == '0':
+            messages.success(request, u" %s 流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
+        else:
+            Card.objects.grantCards(num=object.card_num,owner_id=object.owner_id)
+            messages.success(request, u"新卡片 %s 已被分配！" % (self.object.name, self.object.card_num) )
         return result;
     
 class ProcessDeleteView(DeleteView):
     form_class= ProcessForm
     model = Process     
-    #success_url = reverse_lazy('material_type_list')  
-    def post(self,*args, **kwargs):
-        process = self.get_object(); 
-        process.status = 0
-        process.save() 
+    success_url = reverse_lazy('process_list')  
+    def post(self,request, *args, **kwargs):
+        try:
+            result = super(ProcessDeleteView, self).post(request, *args, **kwargs)
+            object = self.object
+            Card.objects.retriveCards(num=object.card_num)
+            messages.success(request, u"工艺已被成功删除！")  
+            return result
+        except(IntegrityError):
+            messages.error(request, u"工艺已被使用，不能删除！")  
         return redirect('process_list');
     def get_context_data(self, **kwargs):
         context = super(ProcessDeleteView, self).get_context_data(**kwargs) 

@@ -13,8 +13,14 @@
                         <th>
                         类型
 						</th>
+                         <th>
+                        拥有者
+						</th>
                         <th>
                         颜色
+						</th>
+                         <th>
+                        数量
 						</th>
                         <th>
                         状态
@@ -35,7 +41,13 @@
 							{{card.get_type_display}}
 						</td>
                         <td>
+                            {{card.NAME | default:''}}
+                        </td>
+                        <td>
 							{{card.color}}
+						</td> 
+                         <td>
+							{{card.CARD_COUNT}}
 						</td> 
                         <td>
 							{{card.get_status_display}}

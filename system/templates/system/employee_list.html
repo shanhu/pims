@@ -22,6 +22,9 @@
                             身份证
 						</th>
                         <th>
+                            工作卡
+						</th>
+                        <th>
                             类型
 						</th>
                         <th>
@@ -48,6 +51,9 @@
 						<td>
 							{{employee.idCard}}
 						</td>
+                        <td>
+                            {{employee.card_num1 | default:''}}
+                        </td>
                         <td>
 							{{employee.get_type_display}}
 						</td>

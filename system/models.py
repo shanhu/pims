@@ -7,6 +7,7 @@ from django import forms
 from bootstrap3_datetime.widgets import DateTimePicker
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from datetime import datetime
 
 
 # import the logging library
@@ -40,15 +41,23 @@ class DictConfig(models.Model):
 
 class CardManager(models.Manager): 
     querySql = '''
-           SELECT ID,NUM,SERIAL_NUM, TYPE,OWNER_ID,STATUS,REMARKS FROM (
-                SELECT TMP.* ,
-                IF(TMP.NUM = @NUM, @RANK:=@RANK+1,@RANK:=1) RANK,
-                 @NUM := TMP.NUM   
-                FROM(
-                SELECT * FROM CARD C ORDER BY C.NUM ASC, C.SERIAL_NUM DESC
-                ) TMP  ,(SELECT @RANK,@ROWNUM,@NUM:= NULL ) T
-            ) CD
-            WHERE CD.RANK = 1     
+            SELECT CD.ID ID, CD.NUM NUM ,CD.SERIAL_NUM SERIAL_NUM , CD.TYPE TYPE ,CD.OWNER_ID OWNER_ID,CD.STATUS STATUS,CD.REMARKS REMARKS,
+                IFNULL(IFNULL( IFNULL(PS.NAME,WC.NAME),M.NAME),E.NAME) NAME ,COUNT(C1.SERIAL_NUM) CARD_COUNT
+                    FROM (
+                                SELECT TMP.* ,
+                                IF(TMP.NUM = @NUM, @RANK:=@RANK+1,@RANK:=1) RANK,
+                                 @NUM := TMP.NUM   
+                                FROM(
+                                SELECT * FROM CARD C ORDER BY C.NUM ASC, C.SERIAL_NUM DESC
+                                ) TMP  ,(SELECT @RANK,@ROWNUM,@NUM:= NULL ) T
+                            ) CD
+                    LEFT JOIN PROCESS PS ON PS.ID = CD.OWNER_ID AND CD.TYPE = '4'
+                    LEFT JOIN WORKCLASS WC ON WC.ID = CD.OWNER_ID AND CD.TYPE IN ('1','2')
+                    LEFT JOIN MATERIAL M  ON M.ID = CD.OWNER_ID AND CD.TYPE = '3'
+                    LEFT JOIN EMPLOYEE E  ON E.ID = CD.OWNER_ID AND CD.TYPE IN ('5','6')
+                    LEFT JOIN CARD C1 ON CD.NUM = C1.NUM 
+                    WHERE CD.RANK = 1
+                      
         '''
     def searchCards(self, qdict = None,  **kwargs):
         #logger.info(qdict)
@@ -67,9 +76,9 @@ class CardManager(models.Manager):
         
         if  'num' in qdict and qdict.get('num') <> '' : 
               query += " AND  NUM = %s  " % qdict.get('num')
-            #logger.info(self.querySql)
-        logger.info(  query )
-        return [card for card in Card.objects.raw(  query)]
+        query += "   GROUP BY CD.NUM "
+        logger.info(query )
+        return  list(Card.objects.raw(query))
     def retriveCards(self, **kwargs):
         Card.objects.filter(**kwargs).update(owner_id='0')
     def grantCards(self, owner_id, **kwargs):
@@ -242,17 +251,12 @@ class Material(models.Model):
    
 class MaterialForm(forms.ModelForm): 
     statusChoices =  DictConfig.getTypeChoices(type="material_status")
-    modeChoices =  DictConfig.getTypeChoices(type="material_mode")
-    def __init__(self, *args, **kwargs):
-        super(MaterialForm, self).__init__(*args, **kwargs)
-        cardTypeChoices = [('', '------')] + Card.getCardChoices(type="3")
-        logger.info("material card type choices: %s", cardTypeChoices )
-        self.fields['card_num'] = forms.ChoiceField(   choices=cardTypeChoices ,  label="工作卡号", required=False )
+    modeChoices =  DictConfig.getTypeChoices(type="material_mode") 
     class Meta:
         model = Material
         fields  = '__all__'
     status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="物料状态" ) # Field name made lowercase. 
-    mode = forms.CharField( max_length=1, widget=forms.Select(choices=modeChoices) , label="统计方式" ) # Field name made lowercase.  
+    #mode = forms.CharField( max_length=1, widget=forms.Select(choices=modeChoices) , label="统计方式" ) # Field name made lowercase.  
    # card_num =  forms.ChoiceField(choices= [('', '------')] + Card.getCardChoices(type='3'),  label="工作卡号", required=False )    
    
 
@@ -270,9 +274,10 @@ class Process(models.Model):
     isFirst = models.CharField(db_column='IS_FIRST', max_length=1, choices=processIsFirstchoices, verbose_name="是否前工艺"  ) # Field name made lowercase.    
     status = models.CharField(db_column='STATUS', max_length=1, choices=statuschoices, verbose_name="状态") # Field name made lowercase.
     card_num = models.CharField(db_column='CARD_NUM', max_length=20, blank=True, null=False, verbose_name="工艺卡号",   choices=  Card.getTypeChoices(type='4'), ) # Field name made lowercase.
-    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True, verbose_name="备注") # Field name made lowercase.
     mode = models.CharField(db_column='MODE', max_length=1, blank=True ,  verbose_name="统计方式", choices=modechoices) # Field name made lowercase
     unit = models.CharField(db_column='UNIT', max_length=20, blank=True ,  verbose_name="单位"  ) # Field name made lowercase..
+    remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True, verbose_name="备注") # Field name made lowercase.
+   
     class Meta:
        # managed = False
         db_table = 'process'
@@ -299,7 +304,7 @@ class ProcessForm(forms.ModelForm):
         fields  = '__all__'
     def __init__(self, *args, **kwargs):
         super(ProcessForm, self).__init__(*args, **kwargs)
-        self.fields['card_num'] = forms.ChoiceField(   choices=[('', '------')] + Card.getCardChoices(type="4") ,  label="工作卡号", required=False )
+        self.fields['card_num'] = forms.ChoiceField(   choices=[('', '---------')] + Card.getCardChoices(type="4") ,  label="工作卡号", required=False )
         
     def clean(self):
         cleand_data = super(ProcessForm, self).clean()
@@ -370,10 +375,11 @@ class EmployeeForm(forms.ModelForm):
 class EmployeeSearchForm(forms.Form):
     num = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.   
     name = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
+    card_num1 = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工作卡号'}), label="", required = False ) # Field name made lowercase.  
     def __init__(self, *args, **kwargs):
         super(EmployeeSearchForm,self).__init__(*args, **kwargs)
         statusChoices = DictConfig.getTypeChoices(type="employee_status") 
-        self.fields['status'] = forms.CharField(widget=forms.Select(attrs={'placeholder':'状态'}, choices=statusChoices),   label="",  required = False ) # Field name made lowercase.   
+        self.fields['status'] = forms.CharField(widget=forms.Select(attrs={'placeholder':'状态'}, choices=[('', '全部')] + statusChoices),   label="",  required = False ) # Field name made lowercase.   
     
     
 
@@ -502,12 +508,17 @@ class ProductionSearchForm(forms.Form):
     #employee_name = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
     #material = forms.ChoiceField(required = False, choices= [('', ' 全部物料')]  ,  label="")
     #process = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')]  ,  label="")
+    
     def __init__(self, *args, **kwargs): 
         super(ProductionSearchForm, self).__init__(*args, **kwargs)
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
-        self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="")  
-        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
-        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={'placeholder':'姓名'}), label="", required = False ) # Field name made lowercase.  
+        self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="") 
+        self.fields['count'] = forms.DecimalField( required = False,max_digits=10, decimal_places=2, label="",  widget=forms.NumberInput(attrs={ 'size':'35','placeholder':'领料/交料'}), )
+        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'30','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
+        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'30','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
+        
+        self.fields['start_time'] = forms.DateTimeField( required = False,    widget=DateTimePicker( div_attrs={'class':'input-group date '},  attrs={ 'value':'2014-02-13 12:12:12',  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD HH:mm:ss","pickSeconds": True}),label="" )
+        self.fields['end_time'] = forms.DateTimeField( required = False  ,   widget=DateTimePicker( div_attrs={'class':'input-group date '}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d %H:%M:%S'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD HH:mm:ss","pickSeconds": True}),label="" )
         
         
 
