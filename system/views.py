@@ -142,7 +142,7 @@ class EmployeeUpdateView(UpdateView):
         result = super(EmployeeUpdateView, self).post(request, *args, **kwargs)        
         object = self.object 
         if object.status == '0': 
-            messages.sucess(request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
+            messages.success(request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
             Card.objects.retriveCards( num= object.card_num1)
             Card.objects.retriveCards( num= object.card_num2)
             object.card_num1 = ''
@@ -311,7 +311,10 @@ class MaterialUpdateView(UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context['form'] = form
-        cardTypeChoices = [(self.object.card_num,self.object.card_num )]  + Card.getCardChoices(type="3") + [('', '-------')]
+        if self.object.card_num:
+            cardTypeChoices = [(self.object.card_num,self.object.card_num  ) ]  + Card.getCardChoices(type="3") + [('', '-------')]
+        else:
+            cardTypeChoices = Card.getCardChoices(type="3") + [('', '-------')]
         logger.info("material card type choices: %s", cardTypeChoices )
         form.fields['card_num'] = forms.ChoiceField(   choices=cardTypeChoices ,  label="物料卡编号", required=False )
         context['pageHeader'] = u"物料详细信息"
@@ -322,10 +325,13 @@ class MaterialUpdateView(UpdateView):
         object = self.get_object()
         Card.objects.filter(num=object.card_num).update(owner_id='0')
         result = super(MaterialUpdateView, self).post(request, **kwargs)
-        object = self.object
-        if object.status == '1':
-            Card.objects.filter(num=object.card_num).update(owner_id=object.id)
-            messages.success(request, u" %s 可用，卡片 %s 已下发！" % (self.object.name, self.object.card_num) )
+        
+        if self.object.status == '1':
+            Card.objects.filter(num=self.object.card_num).update(owner_id=self.object.id)
+            if self.object.card_num:
+                messages.success(request, u" %s 可用，卡片 %s 已下发！" % (self.object.name, self.object.card_num) )
+            else:
+                messages.success(request, u" %s 可用，卡片 %s 已被收回！" % (self.object.name, object.card_num) )
         else:
             messages.success(request, u" %s 已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
             Card.objects.retriveCards(num=object.card_num)
@@ -419,7 +425,7 @@ class ProcessUpdateView(UpdateView):
         if object.status == '0':
             messages.success(request, u" %s 流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
         else:
-            Card.objects.grantCards(num=object.card_num,owner_id=object.owner_id)
+            Card.objects.grantCards(num=object.card_num,owner_id=object.id)
             messages.success(request, u"新卡片 %s 已被分配！" % (self.object.name, self.object.card_num) )
         return result;
     

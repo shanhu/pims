@@ -217,7 +217,7 @@ class MaterialTypeForm(forms.ModelForm):
     statusChoices =  DictConfig.getTypeChoices(type="material_type_status")
     class Meta:
         model = MaterialType
-        fields  = [ 'parent','num','name' ,'status',    ]   
+        fields  = [ 'parent','num','name' ,'status',]   
     status = forms.CharField( max_length=1, widget=forms.Select(choices=statusChoices) , label="物料类型状态" ) # Field name made lowercase.                
    # joinTime = forms.DateTimeField(input_formats=input_formats, widget=widgets.SelectDateWidget(),  label="入职时间", )
 class NormalSearchForm(forms.Form):
