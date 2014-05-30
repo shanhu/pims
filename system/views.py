@@ -289,7 +289,7 @@ class MaterialCreateView(CreateView):
         context['form'] = form
         cardTypeChoices =  Card.getCardChoices(type="3")
         logger.info("material card type choices: %s", cardTypeChoices )
-        form.fields['card_num'] = forms.ChoiceField(   choices=cardTypeChoices ,  label="物料卡编号", required=False )
+        form.fields['card_num'] = forms.ChoiceField(   choices= [('', '-------')] + cardTypeChoices ,  label="物料卡编号", required=False )
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
         context['sidebar'] = {'material':'active'} 
@@ -312,9 +312,9 @@ class MaterialUpdateView(UpdateView):
         form = self.get_form(form_class)
         context['form'] = form
         if self.object.card_num:
-            cardTypeChoices = [(self.object.card_num,self.object.card_num  ) ]  + Card.getCardChoices(type="3") + [('', '-------')]
+            cardTypeChoices = [('', '-------')]+ [(self.object.card_num,self.object.card_num  ) ]  + Card.getCardChoices(type="3") 
         else:
-            cardTypeChoices = Card.getCardChoices(type="3") + [('', '-------')]
+            cardTypeChoices = [('', '-------')]+ Card.getCardChoices(type="3") 
         logger.info("material card type choices: %s", cardTypeChoices )
         form.fields['card_num'] = forms.ChoiceField(   choices=cardTypeChoices ,  label="物料卡编号", required=False )
         context['pageHeader'] = u"物料详细信息"
@@ -415,19 +415,24 @@ class ProcessUpdateView(UpdateView):
         context['pageHeader'] = u"修改工艺信息"
         context['title'] = u"修改工艺信息"
         context['sidebar'] = {'process':'active'} 
-        form.fields['card_num'].choices += [(self.object.card_num,self.object.card_num )]
+        if self.object.card_num:
+            form.fields['card_num'].choices += [(self.object.card_num,self.object.card_num )]
         return context
-    def post(self, request, **kwargs):
-        object = self.get_object()
-        Card.objects.retriveCards(num=object.card_num)
-        result = super(ProcessUpdateView, self).post(request, **kwargs)
+    def form_valid(self, form):
+        response = super(ProcessUpdateView, self).form_valid(form)
+        object = self.get_object() 
+        Card.objects.retriveCards(num=object.card_num) 
         object = self.object
         if object.status == '0':
-            messages.success(request, u" %s 流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
+            messages.success(self.request, u" %s流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
         else:
-            Card.objects.grantCards(num=object.card_num,owner_id=object.id)
-            messages.success(request, u"新卡片 %s 已被分配！" % (self.object.name, self.object.card_num) )
-        return result;
+            if object.card_num:
+                Card.objects.grantCards(num=object.card_num,owner_id=object.id)
+                messages.success(self.request, u"%s流程，新卡片 %s 已被分配！" % (self.object.name, self.object.card_num) )
+            else:
+                messages.warning(self.request, u"%s流程，未分配卡片！" % (self.object.name) )
+        return response;
+        
     
 class ProcessDeleteView(DeleteView):
     form_class= ProcessForm
@@ -729,12 +734,11 @@ class CardUpdateView(UpdateView):
         else:
            return super(CardUpdateView, self).get(request, *args, **kwargs)
     def post(self,*args, **kwargs):
-        card = self.get_object()
-        logger.info("owner id is %s" ,  card.owner_id )
-        owner_id = card.owner_id
+        owner_id = self.get_object().owner_id
         result = super(CardUpdateView, self).post(*args, **kwargs)
         self.update_card_owner(owner_id)
         card = self.object
+        Card.objects.filter(num=card.num).update(owner_id=card.owner_id)
        # logger.info(form)
         return result #redirect('card_list');
     def update_card_owner(self, owner_id):
@@ -868,7 +872,7 @@ class ProductionListView(SystemListView):
         '''
         
         querySql = u'''         
-            select pd.id ID, e.NUM EMPLOYEE_NUM,e.NAME EMPLOYEE_NAME ,m.NAME MATERIAL_NAME ,if(ps.IS_FIRST,'前','后') IS_FIRST,  ps.name PROCESS_NAME ,pd.COUNT START_COUNT ,pd.TIME START_TIME from production pd
+            select pd.id ID, e.NUM EMPLOYEE_NUM,e.NAME EMPLOYEE_NAME ,m.NAME MATERIAL_NAME ,if(ps.IS_FIRST,'领料','交料') IS_FIRST,  ps.name PROCESS_NAME ,pd.COUNT START_COUNT ,pd.TIME START_TIME from production pd
             join process ps on pd.PROCESS_ID = ps.ID
             join material m on m.id = pd.MATERIAL_ID
             join employee e on e.ID = pd.EMPLOYEE_ID 

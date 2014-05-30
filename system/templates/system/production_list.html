@@ -6,10 +6,10 @@
 				<thead>
 					<tr>
 						<th>
-							员工编号
+							工号
 						</th>
                         	<th>
-							员工姓名
+							姓名
 						</th>
                 <!--        <th>
                             物料编号
@@ -20,13 +20,13 @@
 						</th>  
                         <th>
                         工艺
-						</th>  
-                        <th>
-                            工艺类型
-						</th>                        
+						</th>                
                          <th>
                             领料/交料
 						</th>
+                         <th>
+                            数量
+						</th> 
                          <th>
                             时间
 						</th> 
@@ -47,8 +47,8 @@
 						</td>
                          <td>
 							{{production.PROCESS_NAME |default_if_none:""}}
-						</td>
-                         <td>
+						</td> 
+                        <td>
 							{{production.IS_FIRST}}
 						</td> 
                         <td>

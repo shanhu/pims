@@ -20,9 +20,12 @@
 
 
 <script>
-    $("#id_materialType").on("change",function(){ 
-            $("#id_num").val(this.value + '.');  
+    $("#id_materialType").on("change",function(){  
+            text = $(this).children("option:selected").text(); 
+            $("#id_num").val(text.substring(text.indexOf("(") + 1,text.indexOf(")")) + '.');  
     });
 </script>
+
+ 
 
 {% endblock maincontent %}          

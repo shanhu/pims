@@ -64,18 +64,18 @@ class CardManager(models.Manager):
         query = self.querySql
         #logger.info('type' in qdict and qdict.get('type') <> '')
         if  'type' in qdict and qdict.get('type') <> '':
-            query += " AND TYPE =  %s " % qdict.get('type')
+            query += " AND CD.TYPE =  %s " % qdict.get('type')
             #logger.info(qdict.get('type'))
             #logger.info(self.querySql)  
         if 'assignd' in  qdict:
             if qdict.get('assignd') == '0':
-              query  += " AND (OWNER_ID IS NULL  OR OWNER_ID = 0 )"
+              query  += " AND ( CD.OWNER_ID IS NULL  OR CD.OWNER_ID = 0 )"
             if qdict.get('assignd') == '1':
-               query += " AND  OWNER_ID IS NOT NULL  AND  OWNER_ID <>  0  "
+               query += " AND  CD.OWNER_ID IS NOT NULL  AND  CD.OWNER_ID <>  0  "
            # logger.info(self.querySql)
         
         if  'num' in qdict and qdict.get('num') <> '' : 
-              query += " AND  NUM = %s  " % qdict.get('num')
+              query += " AND  CD.NUM = %s  " % qdict.get('num')
         query += "   GROUP BY CD.NUM "
         logger.info(query )
         return  list(Card.objects.raw(query))
@@ -304,7 +304,7 @@ class ProcessForm(forms.ModelForm):
         fields  = '__all__'
     def __init__(self, *args, **kwargs):
         super(ProcessForm, self).__init__(*args, **kwargs)
-        self.fields['card_num'] = forms.ChoiceField(   choices=[('', '---------')] + Card.getCardChoices(type="4") ,  label="工作卡号", required=False )
+        self.fields['card_num'] = forms.ChoiceField(   choices=[('', '---------')] + Card.getCardChoices(type="4") ,  label="工艺卡号", required=False )
         
     def clean(self):
         cleand_data = super(ProcessForm, self).clean()
@@ -312,11 +312,14 @@ class ProcessForm(forms.ModelForm):
         firstProcess = cleand_data.get("firstProcess")
         mode = cleand_data.get("mode")
         if isFirst == '1' and firstProcess:
-            self._errors["firstProcess"] = self.error_class([u"只有后工艺类型可以选择前工艺！"])               
+            self._errors["firstProcess"] = self.error_class([u"只有后工艺类型可以选择前工艺！"])
+            del cleand_data['firstProcess']
+            raise forms.ValidationError("Did not send for 'help' in "
+                        "the subject despite CC'ing yourself.")
         if isFirst == '0' and firstProcess and mode <> firstProcess.mode:
-            self._errors["mode"] = self.error_class([u"后工艺统计方式必须与前工艺保持一致！"])               
-            
-           
+            logger.info(u"firstProcess:%s mode:%s firstProcess.mode:%s", firstProcess, mode, firstProcess.mode)
+            self._errors["mode"] = self.error_class([u"后工艺统计方式必须与前工艺保持一致！"])
+            del cleand_data['mode'] 
                 
         return cleand_data
 
