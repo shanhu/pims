@@ -17,6 +17,9 @@
                         拥有者
 						</th>
                         <th>
+                        显示号
+                        </th>
+                        <th>
                         颜色
 						</th>
                          <th>
@@ -43,6 +46,9 @@
                         <td>
                             {{card.NAME | default:''}}
                         </td>
+                         <td>
+                            {{card.show_num | default:''}}
+                        </td>
                         <td>
 							{{card.color}}
 						</td> 
@@ -54,7 +60,7 @@
 						</td> 
                        
                         <td>
-                            <a class="btn btn-primary btn-xs" href="{% url 'card_detail'  card.id %}"><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a> 
+                            <a class="btn btn-primary btn-xs" href="{% url 'card_detail'  card.id %} "><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a> 
 						</td>  
 					</tr> 
                     {% endfor %}

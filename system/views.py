@@ -100,13 +100,16 @@ class EmployeeCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super(EmployeeCreateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
+        form = self.get_form(form_class) 
+        form.fields['card_num1'].choices =   [('', '------')] + Card.getCardChoices(type='5')  
+        form.fields['card_num2'].choices =   [('', '------')] + Card.getCardChoices(type='6')  
+        context['form'] = form    
         context['pageHeader'] = u"员工注册"
         context['title'] = u"员工注册"
         context['sidebar'] = {'employee_add':'active'}
         return context
-    def post(self, request, *args, **kwargs):
-        result = super(EmployeeCreateView, self).post(request, *args, **kwargs)  
+    def form_valid(self, form):
+        response = super(EmployeeCreateView, self).form_valid(form)
         object = self.object
         logger.info('employee create: %s', object)
         if object:
@@ -117,8 +120,8 @@ class EmployeeCreateView(CreateView):
                # work_card = Card.objects.get(pk=object.card_num2)
                 Card.objects.filter(num=object.card_num2).update(owner_id=object.id)
             if object.status == '0': 
-                messages.warning(request,u'已分配卡片将被收回.')
-        return result
+                messages.warning(self.request,u'已分配卡片将被收回.')
+        return response 
          
 class EmployeeUpdateView(UpdateView):
     form_class= EmployeeForm
@@ -128,32 +131,50 @@ class EmployeeUpdateView(UpdateView):
         context = super(EmployeeUpdateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        form.fields['card_num1'].choices += [(self.object.card_num1,self.object.card_num1 )]
-        form.fields['card_num2'].choices += [(self.object.card_num2,self.object.card_num2 )]
+        self.form = form 
+        if self.object.card_num1: 
+            form.fields['card_num1'].choices  += [(self.object.card_num1,self.object.card_num1 )]
+        if self.object.card_num2:
+           form.fields['card_num2'].choices += [(self.object.card_num2,self.object.card_num2 )]
         context['form'] = form
         context['pageHeader'] = u"员工修改"
         context['title'] = u"员工修改"
         context['sidebar'] = {'employee_list':'active'}
         return context
-    def post(self, request,  *args, **kwargs):
+    
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object() 
+        form = self.get_form(self.get_form_class()) 
+        if self.object.card_num1: 
+            form.fields['card_num1'].choices += [(self.object.card_num1,self.object.card_num1 )]
+        if self.object.card_num2:
+            form.fields['card_num2'].choices += [(self.object.card_num2,self.object.card_num2 )] 
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+    def form_valid(self, form): 
         object = self.get_object()
-        Card.objects.retriveCards(num= object.card_num1)
-        Card.objects.retriveCards(num= object.card_num2)
-        result = super(EmployeeUpdateView, self).post(request, *args, **kwargs)        
+        logger.info(self.get_object())
+        Card.objects.retriveCards(owner_id= object.id) 
         object = self.object 
+        logger.info(self.object)
         if object.status == '0': 
-            messages.success(request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
-            Card.objects.retriveCards( num= object.card_num1)
-            Card.objects.retriveCards( num= object.card_num2)
+            messages.success(self.request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
+            Card.objects.retriveCards(owner_id= object.id)
             object.card_num1 = ''
             object.card_num2 = ''
             object.save()
         else:
             Card.objects.grantCards(num= object.card_num1, owner_id = object.id)
-            Card.objects.grantCards(num= object.card_num2, owner_id = object.id)
+            Card.objects.grantCards(num= object.card_num2, owner_id = object.id) 
+        return super(EmployeeUpdateView, self).form_valid(form)
+    def form_invalid(self, form):
+        logger.info("invalid %s",  form.is_valid())
+        logger.info( u"is bound %s ,  not bool error: %s" , form.is_bound,  not bool(form.errors)) 
+        logger.info(u"%s", form.errors) 
+        return super(EmployeeUpdateView, self).form_invalid(form)
         
-        
-        return result #redirect('employee_list')
     
 class EmployeeDeleteView(DeleteView):
     form_class= EmployeeForm
@@ -311,34 +332,40 @@ class MaterialUpdateView(UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context['form'] = form
+        cardTypeChoices = [('', '-------')]+ Card.getCardChoices(type="3")  
         if self.object.card_num:
-            cardTypeChoices = [('', '-------')]+ [(self.object.card_num,self.object.card_num  ) ]  + Card.getCardChoices(type="3") 
-        else:
-            cardTypeChoices = [('', '-------')]+ Card.getCardChoices(type="3") 
-        logger.info("material card type choices: %s", cardTypeChoices )
-        form.fields['card_num'] = forms.ChoiceField(   choices=cardTypeChoices ,  label="物料卡编号", required=False )
+            cardTypeChoices += [(self.object.card_num,self.object.card_num ) ]  
+        form.fields['card_num'].choices =  cardTypeChoices #forms.ChoiceField(   choices=cardTypeChoices ,  label="物料卡编号", required=False )
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
         context['sidebar'] = {'material':'active'} 
         return context
-    def post(self, request, **kwargs):
-        object = self.get_object()
-        Card.objects.filter(num=object.card_num).update(owner_id='0')
-        result = super(MaterialUpdateView, self).post(request, **kwargs)
-        
+    def form_invalid(self, form):
+        logger.info(u'%s', form.errors)
+        return super(MaterialUpdateView, self).form_invalid(form)
+    def form_valid(self, form):
+        Card.objects.retriveCards(type='3', owner_id=self.object.id)
         if self.object.status == '1':
-            Card.objects.filter(num=self.object.card_num).update(owner_id=self.object.id)
+            Card.objects.grantCards(owner_id=self.object.id, num=self.object.card_num)
             if self.object.card_num:
-                messages.success(request, u" %s 可用，卡片 %s 已下发！" % (self.object.name, self.object.card_num) )
+                messages.success(self.request, u" %s 可用，卡片 %s 已下发！" % (self.object.name, self.object.card_num) )
             else:
-                messages.success(request, u" %s 可用，卡片 %s 已被收回！" % (self.object.name, object.card_num) )
+                messages.success(self.request, u" %s 可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
         else:
-            messages.success(request, u" %s 已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
-            Card.objects.retriveCards(num=object.card_num)
-            object.card_num = ''
-            object.save()
-            
-        return result;
+            messages.success(self.request, u" %s 已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) ) 
+        return super(MaterialUpdateView, self).form_valid(form)
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)  
+        cardTypeChoices = [('', '-------')]+ Card.getCardChoices(type="3")  
+        if self.object.card_num:
+            cardTypeChoices += [(self.object.card_num,self.object.card_num ) ]  
+        form.fields['card_num'].choices = cardTypeChoices
+        if form.is_valid(): 
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 class MaterialDeleteView(DeleteView):
     form_class= MaterialForm
     model = Material     
@@ -396,9 +423,10 @@ class ProcessCreateView(CreateView):
         context['title'] = u"创建工艺信息"
         context['sidebar'] = {'process':'active'} 
         return context
-    def post(self, request, **kwargs):
-        result = super(ProcessCreateView, self).post(request, **kwargs)
+    def form_valid(self,form):
+        result = super(ProcessCreateView, self).form_valid(form)
         object = self.object
+        logger.info(u'%s', self.object)
         Card.objects.filter(num=object.card_num).update(owner_id=object.id)
         return result 
     
@@ -418,10 +446,20 @@ class ProcessUpdateView(UpdateView):
         if self.object.card_num:
             form.fields['card_num'].choices += [(self.object.card_num,self.object.card_num )]
         return context
-    def form_valid(self, form):
-        response = super(ProcessUpdateView, self).form_valid(form)
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form(self.get_form_class())
+        form.fields['card_num']._set_choices( [('', '------')] + Card.getCardChoices(type='4')) 
+        if self.object.card_num: 
+            form.fields['card_num'].choices += [(self.object.card_num,self.object.card_num )] 
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+        
+    def form_valid(self, form): 
         object = self.get_object() 
-        Card.objects.retriveCards(num=object.card_num) 
+        Card.objects.retriveCards(type='4', owner_id=object.id) 
         object = self.object
         if object.status == '0':
             messages.success(self.request, u" %s流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
@@ -431,7 +469,11 @@ class ProcessUpdateView(UpdateView):
                 messages.success(self.request, u"%s流程，新卡片 %s 已被分配！" % (self.object.name, self.object.card_num) )
             else:
                 messages.warning(self.request, u"%s流程，未分配卡片！" % (self.object.name) )
-        return response;
+        return super(ProcessUpdateView, self).form_valid(form)
+    def form_invalid(self, form):
+        #logger.info(form.is_valid())
+        logger.info(u'%s', form.errors)
+        return super(ProcessUpdateView, self).form_invalid(form)
         
     
 class ProcessDeleteView(DeleteView):
@@ -563,12 +605,7 @@ class SalaryCountConfigUpdateView(UpdateView):
 class SalaryCountConfigDeleteView(DeleteView):
     form_class= SalaryCountConfigForm
     model = SalaryCountConfig     
-    #success_url = reverse_lazy('material_type_list')  
-    def post(self,*args, **kwargs):
-        salarycountconfig = self.get_object(); 
-        salarycountconfig.status = 0
-        salarycountconfig.save() 
-        return redirect('salarycount_list');
+    success_url = reverse_lazy('salarycount_list')
     def get_context_data(self, **kwargs):
         context = super(SalaryCountConfigDeleteView, self).get_context_data(**kwargs) 
         context['sidebar'] = {'salary_count_config':'active'}   
@@ -631,12 +668,7 @@ class SalaryTimeConfigUpdateView(UpdateView):
 class SalaryTimeConfigDeleteView(DeleteView):
     form_class= SalaryTimeConfigForm
     model = SalaryTimeConfig     
-    #success_url = reverse_lazy('material_type_list')  
-    def post(self,*args, **kwargs):
-        salarytimeconfig = self.get_object(); 
-        salarytimeconfig.status = 0
-        salarytimeconfig.save() 
-        return redirect('salarytime_list');
+    success_url = reverse_lazy('salarytime_list')
     def get_context_data(self, **kwargs):
         context = super(SalaryTimeConfigDeleteView, self).get_context_data(**kwargs) 
         context['sidebar'] = {'salary_time_config':'active'} 
@@ -656,7 +688,7 @@ class CardListView(SystemListView):
     def get_context_data(self, **kwargs): 
         context = super(CardListView, self).get_context_data(**kwargs)  
         #form_class = self.get_form_class()
-        logger.info("form info %s ", context['form'])
+        #logger.info("form info %s ", context['form'])
         context['pageHeader'] = u"卡管理"
         context['title'] = u"卡管理"
         context['sidebar'] = {'card':'active'}
@@ -664,8 +696,8 @@ class CardListView(SystemListView):
         context['is_display'] = 'none'
         return context
     def get_queryset(self):
-        type = self.request.GET.get('type')
-        logger.info("request params type is %s", type)
+        #type = self.request.GET.get('type')
+        #logger.info("request params type is %s", type)
         q = self.get_query_string()
         return Card.objects.searchCards(q)  
        # logger.info("1111%request",  self.request) 
@@ -721,8 +753,8 @@ class CardUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(CardUpdateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
-        logger.info("card form: %s", form_class)
-        logger.info(self.get_object())
+        #logger.info("card form: %s", form_class)
+        #logger.info(self.get_object())
         context['form'] = self.get_form(form_class)
         context['pageHeader'] = u"修改卡关联信息"
         context['title'] = u"修改卡关联信息"
@@ -733,18 +765,17 @@ class CardUpdateView(UpdateView):
             return self.render_to_json_response(request, *args, **kwargs)
         else:
            return super(CardUpdateView, self).get(request, *args, **kwargs)
-    def post(self,*args, **kwargs):
-        owner_id = self.get_object().owner_id
-        result = super(CardUpdateView, self).post(*args, **kwargs)
+    def form_valid(self, form): 
+        owner_id = self.get_object().owner_id 
         self.update_card_owner(owner_id)
         card = self.object
-        Card.objects.filter(num=card.num).update(owner_id=card.owner_id)
-       # logger.info(form)
-        return result #redirect('card_list');
+        Card.objects.filter(num=card.num).update(owner_id=card.owner_id, status=card.status)
+        return super(CardUpdateView, self).form_valid(form)
+       
     def update_card_owner(self, owner_id):
         card = self.object
         owner_getter = {'1': WorkClass.objects, '2':WorkClass.objects, '3':Material.objects, '4':Process.objects, '5':Employee.objects, '6':Employee.objects}
-        
+        logger.info("owner_id:%s card.owner_id:%s", owner_id, card.owner_id)
         if card.owner_id:
             owner = owner_getter.get(card.type).get(pk = card.owner_id)
             if card.type == '5':
@@ -753,14 +784,18 @@ class CardUpdateView(UpdateView):
                 owner.card_num2 = card.num
             else:
                 owner.card_num = card.num
+            logger.info("owner: %s", owner)
             owner.save()
-        elif owner_id:
+        if owner_id:
+            logger.info("card type %s owner_id:%s", card.type, owner_id)
             owner = owner_getter.get(card.type).get(pk = owner_id)
+            logger.info("owner: %s", owner)
             if card.type == '5':
                 owner.card_num1 = ''
             elif card.type == '6':
                 owner.card_num2 = ''
             else:
+                logger.info("set owner card_num to None")
                 owner.card_num = ''
             owner.save()
         
@@ -809,7 +844,10 @@ class CardUpdateView(UpdateView):
         return form
  
     def getMaterial(self,form, **kwargs):
+        obj = self.get_object()
         materials = [(0, '---------')] + [(material.id, material.name) for material in Material.objects.filter(Q(card_num__isnull=True) | Q(card_num='') )]
+        if obj.owner_id <> 0l:
+            materials += [(material.id, material.name) for material in  Material.objects.filter(pk=obj.owner_id)]
         form.fields['owner_id'] = forms.IntegerField(widget=forms.Select( choices= materials), label="物料" , required=False)
         return form
     def update_type_field(self, form):

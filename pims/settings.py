@@ -42,7 +42,7 @@ INSTALLED_APPS = (
     'bootstrap3',
     'system', 
     'bootstrap3_datetime', 
-    
+    #'debug_toolbar',    
 )
 
 MIDDLEWARE_CLASSES = (
@@ -107,7 +107,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(pathname)s %(funcName)s %(process)d [%(thread)d] - %(threadName)s %(message)s'
+            'format': '%(levelname)s %(asctime)s %(module)s %(pathname)s  [%(funcName)s:%(lineno)s] - %(process)d [%(thread)d - %(threadName)s] %(message)s'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
