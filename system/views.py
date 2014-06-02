@@ -164,7 +164,6 @@ class EmployeeUpdateView(UpdateView):
             Card.objects.retriveCards(owner_id= object.id)
             object.card_num1 = ''
             object.card_num2 = ''
-            object.save()
         else:
             Card.objects.grantCards(num= object.card_num1, owner_id = object.id)
             Card.objects.grantCards(num= object.card_num2, owner_id = object.id) 
@@ -354,6 +353,7 @@ class MaterialUpdateView(UpdateView):
             else:
                 messages.success(self.request, u" %s 可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
         else:
+            self.object.card_num = None
             messages.success(self.request, u" %s 已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) ) 
         return super(MaterialUpdateView, self).form_valid(form)
     def post(self, request, *args, **kwargs):
@@ -461,9 +461,10 @@ class ProcessUpdateView(UpdateView):
         
     def form_valid(self, form): 
         object = self.get_object() 
-        Card.objects.retriveCards(type='4', owner_id=object.id) 
+        Card.objects.retriveCards(type=4, owner_id=object.id) 
         object = self.object
         if object.status == '0':
+            object.card_num = None
             messages.success(self.request, u" %s流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
         else:
             if object.card_num:
