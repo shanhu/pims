@@ -463,9 +463,9 @@ class ProcessUpdateView(UpdateView):
         object = self.get_object() 
         Card.objects.retriveCards(type=4, owner_id=object.id) 
         object = self.object
-        if object.status == '0':
-            object.card_num = None
+        if object.status == '0': 
             messages.success(self.request, u" %s流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
+            object.card_num = None
         else:
             if object.card_num:
                 Card.objects.grantCards(num=object.card_num,owner_id=object.id)
