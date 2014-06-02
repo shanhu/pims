@@ -227,6 +227,7 @@ class MaterialTypeDetailView(SystemDetailView):
         return context
 class MaterialTypeCreateView(CreateView):
     form_class= MaterialTypeForm
+    template_name = 'system/materialType_form.html'
     model = MaterialType
     def get_context_data(self, **kwargs):
         context = super(MaterialTypeCreateView, self).get_context_data(**kwargs)
@@ -241,6 +242,7 @@ class MaterialTypeCreateView(CreateView):
 class MaterialTypeUpdateView(UpdateView):
     form_class= MaterialTypeForm
     model = MaterialType
+    template_name = 'system/materialType_form.html'
     success_url =  reverse_lazy("material_type_list")
     def get_context_data(self, **kwargs):
         context = super(MaterialTypeUpdateView, self).get_context_data(**kwargs)
