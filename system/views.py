@@ -498,18 +498,20 @@ class ProcessDeleteView(DeleteView):
         context['sidebar'] = {'process':'active'} 
         return context
 #--------------------------------------------------班次管理 界面定义------------------------------------------------------------------   
-from system.models import WorkClass, WorkClassForm
+from system.models import WorkClass, WorkClassForm, NormalSearchForm
 
 class WorkClassListView(SystemListView): 
     template_name = 'system/workclass_list.html'
     context_object_name = 'workclass_list'
     model = WorkClass
+    form_class = NormalSearchForm
     #paginate_by = 10
     def get_context_data(self, **kwargs): 
         context = super(WorkClassListView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"班次管理"
         context['title'] = u"班次管理" 
-        context['sidebar'] = {'process':'active'}        
+        context['sidebar'] = {'workclass':'active'} 
+        context['add_url'] = reverse_lazy("workclass_add")
         return context  
 
 class WorkClassDetailView(SystemDetailView): 
@@ -520,6 +522,7 @@ class WorkClassDetailView(SystemDetailView):
         context = super(WorkClassDetailView, self).get_context_data(**kwargs)  
         context['pageHeader'] = u"班次详细信息"
         context['title'] = u"班次详细信息"
+        context['sidebar'] = {'workclass':'active'}   
         return context
 
 class WorkClassCreateView(CreateView):
@@ -528,10 +531,19 @@ class WorkClassCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super(WorkClassCreateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
+        form = self.get_form(form_class) 
+        context['form'] = form
+        form.fields['card_num'].choices =   [('', '------')] + Card.getCardChoices(type=1) + Card.getCardChoices(type=2) 
         context['pageHeader'] = u"创建班次信息"
         context['title'] = u"创建班次信息"
+        context['sidebar'] = {'workclass':'active'}   
         return context
+    def form_valid(self, form):
+        response = super(WorkClassCreateView, self).form_valid(form) 
+        object = self.object
+        logger.info(object.card_num)
+        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        return response
     success_url =  reverse_lazy("workclass_list")
         
 class WorkClassUpdateView(UpdateView):
@@ -810,13 +822,13 @@ class CardUpdateView(UpdateView):
         logger.info(data)
         #response_kwargs['content_type'] = 'application/json'
         return HttpResponse(data, content_type='application/json')
-    def get_form(self,form_class):
-        form = super(CardUpdateView, self).get_form(form_class)
+        #def get_form(self,form_class):  不需要编辑拥有着功能因此注释掉 2014.06.04 /shanhu
+     #   form = super(CardUpdateView, self).get_form(form_class)
       #  logger.info(" object: %s", self.get_object() )        
       #  logger.info( u"form running times: %s   type : %s ", form, self.get_object().type ) 
-        form = self.update_type_field(form)
+    #    form = self.update_type_field(form)
       #  logger.info("%s", form)
-        return form
+    #    return form
    
     def getProcess(self,  form,  **kwargs):
         process = [(0, '---------')] + [ (process.id, u" 编号(%s)  名称(%s)  工艺卡号(%s)" % (process.num, process.name, process.card_num) ) for process in Process.objects.filter(Q(card_num__isnull=True) | Q(card_num='') | Q( pk = self.get_object().owner_id))]

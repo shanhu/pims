@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
-from system.models import EmployeeForm
-from system.formpreview import EmployeeFormPreview
+ 
+
 from system import views
 
 urlpatterns = patterns('',
@@ -12,7 +12,6 @@ urlpatterns = patterns('',
     url(r'^employee/(?P<pk>\d+)/$', views.EmployeeUpdateView.as_view(), name='employee_update'), 
     url(r'^employee/(?P<pk>\d+)/delete/$', views.EmployeeDeleteView.as_view(), name='employee_delete'), 
     
-    url(r'^employee/form/employeeFormPreview$', EmployeeFormPreview(EmployeeForm)),
     
     
     url(r'^materialType/$', views.MaterialTypeListView.as_view(), name="material_type_list"),

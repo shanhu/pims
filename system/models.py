@@ -96,7 +96,7 @@ class Card(models.Model):
     num = models.CharField(db_column='NUM', max_length=20 , verbose_name="卡号"  , editable = False) # Field name made lowercase.
     serial_num = models.CharField(db_column='SERIAL_NUM' , max_length=20,   editable = False ) # Field name made lowercase.
     type = models.CharField(db_column='TYPE', max_length=1, choices=cardTypeChoices , editable = False,  verbose_name="卡类型") # Field name made lowercase.
-    owner_id = models.IntegerField(db_column='OWNER_ID' ,    blank=True, null=True, verbose_name="所有者") # Field name made lowercase.
+    owner_id = models.IntegerField(db_column='OWNER_ID' ,    blank=True, null=True, verbose_name="所有者"  , editable = False) # Field name made lowercase.
     status = models.CharField(db_column='STATUS', max_length=1 , choices=cardStatusChoices, verbose_name="状态") # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200 , editable = False, blank=True, verbose_name="备注") # Field name made lowercase.
     color =  models.CharField(db_column='COLOR', max_length=20 , verbose_name="颜色",  editable = False   ) # Field name made lowercase.
@@ -193,7 +193,7 @@ class Workshop(models.Model):
      #   managed = False
         db_table = 'workshop'
     def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} name {1}  ".format(self.id ,  self.name )
+        return  u"名称：({0})  ".format(  self.name )
 
 class WorkGroup(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
@@ -424,15 +424,18 @@ class WorkClass(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
     num = models.CharField(db_column='NUM', max_length=20, unique=True, verbose_name="编号",) # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, blank=True, verbose_name="名称",) # Field name made lowercase.
+    workshop = models.ForeignKey(Workshop, db_column='WORKSHOP_ID' , on_delete=PROTECT,  verbose_name="车间",) # Field name made lowercase.
     type = models.CharField(db_column='TYPE', max_length=1, blank=True, verbose_name="类型",  choices=clasTypeChoices) # Field name made lowercase.   
     status = models.CharField(db_column='STATUS', max_length=1, blank=True, verbose_name="状态", choices=classStatusTypeChoices) # Field name made lowercase.
-    card_num = models.CharField(db_column='CARD_NUM', max_length=20,  null=True, verbose_name="班次卡号", blank=True) # Field name made lowercase. 
+    card_num = models.CharField(db_column='CARD_NUM', max_length=20,  null=True, verbose_name="班次卡号", blank=True, choices=[('','')]) # Field name made lowercase. 
     remarks = models.TextField(db_column='REMARKS', max_length=200, verbose_name="备注", blank=True) # Field name made lowercase.     
+    def clean_fields(self, exclude=None):
+        return super(WorkClass,self).clean_fields( exclude=['card_num'])
     class Meta:
        # managed = False
-        db_table = 'work_class'
+        db_table = 'workclass'
     def __unicode__(self):  # Python 3: def __str__(self):
-        return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
+        return  u"编号：{0} 类型：{1} 名称：{2}   remarks {3} ".format( self.num , self.get_type_display(), self.name)
     @staticmethod
     def getTypeChoices(**kwargs): 
         choices = [(clz.id, u"编号:(%s) 名称:(%s) " % (clz.num , clz.name) ) for clz in WorkClass.objects.filter(**kwargs)] 
@@ -444,6 +447,11 @@ class WorkClassForm(forms.ModelForm):
     class Meta:
         model = WorkClass
         fields  = '__all__'
+    def __init__(self, *args, **kwargs):
+        super(WorkClassForm, self).__init__(*args, **kwargs)
+        self.fields['card_num']  = forms.ChoiceField( choices= [('', '------')] + Card.getCardChoices(type=1) + Card.getCardChoices(type=2),  label="班次卡", required=False )
+       
+        
  
 
 
