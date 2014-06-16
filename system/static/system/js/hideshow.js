@@ -11,10 +11,24 @@ var hideText='[ - ]';
 var is_visible = false;
 
 // append show/hide links to the element directly preceding the element with a class of "toggle"
-$('.toggle').prev().append(' <a href="#" class="toggleLink">'+hideText+'</a>');
+$('.toggle').prev().append(' <a href="#" class="toggleLink">'+showText+'</a>');
 
 // hide all of the elements with a class of 'toggle'
-$('.toggle').show();
+$('.toggle').hide();
+    
+$('.active').each(function(){
+ $(this).parent().show();
+  $(this).parent().prev().children('a').each(function(){
+      if ($(this).text()==showText) {
+            $(this).text(hideText); 
+            }
+            else {
+            $(this).text(showText); 
+        }
+  }); 
+});
+    
+
 
 // capture clicks on the toggle links
 $('a.toggleLink').click(function() {
@@ -39,3 +53,6 @@ return false;
 
 });
 });
+
+
+

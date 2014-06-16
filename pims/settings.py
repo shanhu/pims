@@ -165,7 +165,8 @@ BOOTSTRAP3 = {
     },
     'field_renderers': {
         'default': 'bootstrap3.renderers.FieldRenderer',
-        'inline': 'bootstrap3.renderers.InlineFieldRenderer',
+        #'inline': 'bootstrap3.renderers.InlineFieldRenderer',
+        #'default': 'bootstrap3.renderers.InlineFieldRenderer',
     },
     
 

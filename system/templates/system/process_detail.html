@@ -59,8 +59,12 @@
                                       <dd>{{process.firstProcess.get_status_display}}</dd>
                                     </dl> 
                                      <dl class="dl-horizontal">
-                                      <dt>工艺卡号：</dt>
-                                      <dd>{{process.card_num}}</dd>
+                                      <dt>卡表号：</dt>
+                                      <dd>
+                                      {%if process.cardprt %}
+                                      {{process.cardprt.show_num}}({{process.cardprt.color}})
+                                      {%endif %}
+                                      </dd>
                                     </dl> 
                                     <dl class="dl-horizontal">
                                       <dt>工艺单位：</dt>

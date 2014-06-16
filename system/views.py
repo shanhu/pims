@@ -36,7 +36,6 @@ class SystemListView(generic.ListView, FormMixin):
         context['queryString'] = self.get_query_string().urlencode() 
         context['form'] = self.get_form_class()(self.request.GET)
         logger.info(self.request.GET.get('num'))
-       
         return context
     def get_query_string(self):
         q = self.request.GET.copy() 
@@ -101,8 +100,8 @@ class EmployeeCreateView(CreateView):
         context = super(EmployeeCreateView, self).get_context_data(**kwargs)
         form_class = self.get_form_class()
         form = self.get_form(form_class) 
-        form.fields['card_num1'].choices =   [('', '------')] + Card.getCardChoices(type='5')  
-        form.fields['card_num2'].choices =   [('', '------')] + Card.getCardChoices(type='6')  
+        #form.fields['cardprt1'].choices =   Card.getCardChoices(type='5')  
+        #form.fields['cardprt2'].choices =   Card.getCardChoices(type='6')  
         context['form'] = form    
         context['pageHeader'] = u"员工注册"
         context['title'] = u"员工注册"
@@ -112,6 +111,7 @@ class EmployeeCreateView(CreateView):
         response = super(EmployeeCreateView, self).form_valid(form)
         object = self.object
         logger.info('employee create: %s', object)
+        ''' 外键关联方式，不需要额外验证。2014-06-08
         if object:
             if object.card_num1:
                 #employee_card = Card.objects.get(pk=object.card_num1)
@@ -120,7 +120,16 @@ class EmployeeCreateView(CreateView):
                # work_card = Card.objects.get(pk=object.card_num2)
                 Card.objects.filter(num=object.card_num2).update(owner_id=object.id)
             if object.status == '0': 
+                Card.objects.filter(num=object.card_num1).update(owner_id=None)
+                Card.objects.filter(num=object.card_num2).update(owner_id=None)
                 messages.warning(self.request,u'已分配卡片将被收回.')
+        '''
+        if object.cardprt1:
+            object.cardprt1.owner_id = object.id
+            object.cardprt1.save()
+        if object.cardprt2:
+            object.cardprt2.owner_id = object.id
+            object.cardprt2.save()
         return response 
          
 class EmployeeUpdateView(UpdateView):
@@ -132,16 +141,18 @@ class EmployeeUpdateView(UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         self.form = form 
+        '''
         if self.object.card_num1: 
             form.fields['card_num1'].choices  += [(self.object.card_num1,self.object.card_num1 )]
         if self.object.card_num2:
            form.fields['card_num2'].choices += [(self.object.card_num2,self.object.card_num2 )]
+        '''
         context['form'] = form
         context['pageHeader'] = u"员工修改"
         context['title'] = u"员工修改"
         context['sidebar'] = {'employee_list':'active'}
         return context
-    
+    '''
     def post(self, request, *args, **kwargs):
         self.object = self.get_object() 
         form = self.get_form(self.get_form_class()) 
@@ -153,20 +164,35 @@ class EmployeeUpdateView(UpdateView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+    '''
     def form_valid(self, form): 
         object = self.get_object()
         logger.info(self.get_object())
-        Card.objects.retriveCards(owner_id= object.id) 
+        Card.objects.retriveCards(owner_id= object.id, type='5') 
+        Card.objects.retriveCards(owner_id= object.id, type='6')
         object = self.object 
         logger.info(self.object)
         if object.status == '0': 
-            messages.success(self.request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
-            Card.objects.retriveCards(owner_id= object.id)
-            object.card_num1 = ''
-            object.card_num2 = ''
+            if object.cardprt1 and object.cardprt2:
+                messages.success(self.request, u" %s 已经离职，卡片 %s %s 已被收回！" % (self.object.name, self.object.cardprt1.show_num, self.object.cardprt2.show_num) )
+                object.cardprt1 = None
+                object.cardprt2 = None
+            elif object.cardprt1:
+                messages.success(self.request, u" %s 已经离职，卡片 %s 已被收回！" % (self.object.name, self.object.cardprt1.show_num) )
+                object.cardprt1 = None
+            elif object.cardprt2:
+                messages.success(self.request, u" %s 已经离职，卡片 %s 已被收回！" % (self.object.name, self.object.cardprt2.show_num) )
+                object.cardprt2 = None
+            else:
+                messages.success(self.request, u" %s 已经离职!" % (self.object.name) )
+           
         else:
-            Card.objects.grantCards(num= object.card_num1, owner_id = object.id)
-            Card.objects.grantCards(num= object.card_num2, owner_id = object.id) 
+            if object.cardprt1:
+                object.cardprt1.owner_id = object.id
+                object.cardprt1.save()
+            if object.cardprt2:
+                object.cardprt2.owner_id = object.id
+                object.cardprt2.save()
         return super(EmployeeUpdateView, self).form_valid(form)
     def form_invalid(self, form):
         logger.info("invalid %s",  form.is_valid())
@@ -178,19 +204,19 @@ class EmployeeUpdateView(UpdateView):
 class EmployeeDeleteView(DeleteView):
     form_class= EmployeeForm
     model = Employee     
-    success_url = reverse_lazy('employee_list')  
+    success_url = reverse_lazy('employee_list') 
     def post(self,request, *args, **kwargs): 
         try:
-            result =  super(EmployeeDeleteView, self).post(request, *args, **kwargs)
-            messages.success(request, u" %s 已被删除，卡片 %s %s 已被收回！" % (self.object.name, self.object.card_num1, self.object.card_num2) )
-            employee = self.object; 
-            if employee.card_num1 != '' or employee.card_num2 != '':
-                Card.objects.retriveCards(num= employee.card_num1)
-                Card.objects.retriveCards(num= employee.card_num2)
+            object = self.get_object()
+            result= super(EmployeeDeleteView, self).post(request, *args, **kwargs)
+            if object.cardprt1 and object.cardprt2:
+                messages.success(request, u" %s 已被删除，卡片 %s %s 已被收回！" % (object.name, object.cardprt1.show_num, object.cardprt2.show_num) )    
+            Card.objects.retriveCards(owner_id= object.id, type='5') 
+            Card.objects.retriveCards(owner_id= object.id, type='6')
             return result
-        except(IntegrityError):
-            messages.error(request, u" %s 已被使用，不能删除" % self.object.name)  
-          
+        except IntegrityError as e:
+            messages.error(request, u" %s 已被使用，不能删除" % self.object.name)
+            logger.error(e)
         return redirect('employee_list');
     def get_context_data(self, **kwargs):
         context = super(EmployeeDeleteView, self).get_context_data(**kwargs)   
@@ -237,6 +263,7 @@ class MaterialTypeCreateView(CreateView):
         context['sidebar'] = {'material_type':'active'}   
         return context
     success_url =  reverse_lazy("material_type_list")
+   
         
 class MaterialTypeUpdateView(UpdateView):
     form_class= MaterialTypeForm
@@ -289,7 +316,7 @@ class MaterialListView(SystemListView):
         context['title'] = u"物料管理"  
         context['sidebar'] = {'material':'active'}  
         context['add_url'] = reverse_lazy('material_add')  
-        return context  
+        return context
 
 class MaterialDetailView(SystemDetailView): 
     template_name = 'system/material_detail.html'
@@ -309,21 +336,29 @@ class MaterialCreateView(CreateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context['form'] = form
-        cardTypeChoices =  Card.getCardChoices(type="3")
-        logger.info("material card type choices: %s", cardTypeChoices )
-        form.fields['card_num'] = forms.ChoiceField(   choices= [('', '-------')] + cardTypeChoices ,  label="物料卡编号", required=False )
+       # cardTypeChoices =  Card.getCardChoices(type="3")
+       # logger.info("material card type choices: %s", cardTypeChoices )
+       # form.fields['card_num'] = forms.ChoiceField(   choices= [('', '-------')] + cardTypeChoices ,  label="物料卡编号", required=False )
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
         context['sidebar'] = {'material':'active'} 
         return context
+    '''
     def post(self, request, **kwargs):
         result = super(MaterialCreateView, self).post(request, **kwargs)
         object = self.object
         if object:
             Card.objects.filter(num=object.card_num).update(owner_id=object.id)
         return result
+    '''
+    def form_valid(self, form):
+        result = super(MaterialCreateView, self).form_valid(form)
+        if self.object.cardprt:
+            self.object.cardprt.owner_id = self.object.id
+            self.object.cardprt.save()
+        return result
     success_url =  reverse_lazy("material_list")
-        
+    
 class MaterialUpdateView(UpdateView):
     form_class= MaterialForm
     model = Material
@@ -333,10 +368,12 @@ class MaterialUpdateView(UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context['form'] = form
+        '''
         cardTypeChoices = [('', '-------')]+ Card.getCardChoices(type="3")  
         if self.object.card_num:
             cardTypeChoices += [(self.object.card_num,self.object.card_num ) ]  
         form.fields['card_num'].choices =  cardTypeChoices #forms.ChoiceField(   choices=cardTypeChoices ,  label="物料卡编号", required=False )
+        '''
         context['pageHeader'] = u"物料详细信息"
         context['title'] = u"物料详细信息"
         context['sidebar'] = {'material':'active'} 
@@ -345,7 +382,9 @@ class MaterialUpdateView(UpdateView):
         logger.info(u'%s', form.errors)
         return super(MaterialUpdateView, self).form_invalid(form)
     def form_valid(self, form):
+        object = self.object
         Card.objects.retriveCards(type='3', owner_id=self.object.id)
+        ''' 
         if self.object.status == '1':
             Card.objects.grantCards(owner_id=self.object.id, num=self.object.card_num)
             if self.object.card_num:
@@ -356,6 +395,20 @@ class MaterialUpdateView(UpdateView):
             self.object.card_num = None
             messages.success(self.request, u" %s 已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) ) 
         return super(MaterialUpdateView, self).form_valid(form)
+        '''
+        if object.status == '0':
+            if object.cardprt:
+                messages.success(self.request, u" %s 已不可用，卡片已被收回！" % (self.object.name) )
+                card = object.cardprt
+                object.cardprt = None
+                card.owner_id = 0
+                card.save()
+        else:
+            if object.cardprt:
+                object.cardprt.owner_id = object.id
+                object.cardprt.save()
+        return super(MaterialUpdateView, self).form_valid(form)
+    '''
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form_class = self.get_form_class()
@@ -368,18 +421,21 @@ class MaterialUpdateView(UpdateView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+    '''
 class MaterialDeleteView(DeleteView):
     form_class= MaterialForm
     model = Material     
     success_url = reverse_lazy('material_list')  
     def post(self,request, *args, **kwargs):
         try:
+            object = self.get_object()
             result = super(MaterialDeleteView, self).post(request, *args, **kwargs)
-            Card.objects.retriveCards(type='3', num=self.object.card_num)
+            Card.objects.retriveCards(type='3', owner_id=object.id)
             messages.success(request, u"物料删除成功！") 
             return result
-        except(IntegrityError):
+        except IntegrityError as e:
             messages.error(request, u"物料已被使用，不能删除")  
+            logger.error(e)
         return redirect('material_list');
     def get_context_data(self, **kwargs):
         context = super(MaterialDeleteView, self).get_context_data(**kwargs) 
@@ -429,7 +485,9 @@ class ProcessCreateView(CreateView):
         result = super(ProcessCreateView, self).form_valid(form)
         object = self.object
         logger.info(u'%s', self.object)
-        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        if object.cardprt:
+            object.cardprt.owner_id = object.id
+            object.cardprt.save()
         return result 
     
         
@@ -445,9 +503,12 @@ class ProcessUpdateView(UpdateView):
         context['pageHeader'] = u"修改工艺信息"
         context['title'] = u"修改工艺信息"
         context['sidebar'] = {'process':'active'} 
+        '''
         if self.object.card_num:
             form.fields['card_num'].choices += [(self.object.card_num,self.object.card_num )]
+        '''
         return context
+    '''
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form(self.get_form_class())
@@ -458,21 +519,25 @@ class ProcessUpdateView(UpdateView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
-        
-    def form_valid(self, form): 
+    '''    
+    def form_valid(self, form):
         object = self.get_object() 
-        Card.objects.retriveCards(type=4, owner_id=object.id) 
+        result = super(ProcessUpdateView, self).form_valid(form)  
+        Card.objects.retriveCards(type=4, owner_id=object.id)
         object = self.object
-        if object.status == '0': 
-            messages.success(self.request, u" %s流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.card_num) )
-            object.card_num = None
+        if object.status == '0':
+            if object.cardprt:
+                messages.success(self.request, u" %s流程已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.cardprt.show_num) )
+                object.cardprt = None
+                object.save()
         else:
-            if object.card_num:
-                Card.objects.grantCards(num=object.card_num,owner_id=object.id)
-                messages.success(self.request, u"%s流程，新卡片 %s 已被分配！" % (self.object.name, self.object.card_num) )
+            if object.cardprt:
+                object.cardprt.owner_id = object.id
+                object.cardprt.save()
+                messages.success(self.request, u"%s流程，新卡片 %s 已被分配！" % (self.object.name, self.object.cardprt.show_num) )
             else:
                 messages.warning(self.request, u"%s流程，未分配卡片！" % (self.object.name) )
-        return super(ProcessUpdateView, self).form_valid(form)
+        return result
     def form_invalid(self, form):
         #logger.info(form.is_valid())
         logger.info(u'%s', form.errors)
@@ -485,13 +550,14 @@ class ProcessDeleteView(DeleteView):
     success_url = reverse_lazy('process_list')  
     def post(self,request, *args, **kwargs):
         try:
-            result = super(ProcessDeleteView, self).post(request, *args, **kwargs)
-            object = self.object
-            Card.objects.retriveCards(num=object.card_num)
+            object = self.get_object()
+            result = super(ProcessDeleteView, self).post(request, *args, **kwargs) 
+            Card.objects.retriveCards(type=4, owner_id=object.id)
             messages.success(request, u"工艺已被成功删除！")  
             return result
-        except(IntegrityError):
-            messages.error(request, u"工艺已被使用，不能删除！")  
+        except IntegrityError as e:
+            messages.error(request, u"工艺已被使用，不能删除！") 
+            logger.error(e)
         return redirect('process_list');
     def get_context_data(self, **kwargs):
         context = super(ProcessDeleteView, self).get_context_data(**kwargs) 
@@ -533,7 +599,7 @@ class WorkClassCreateView(CreateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class) 
         context['form'] = form
-        form.fields['card_num'].choices =   [('', '------')] + Card.getCardChoices(type=1) + Card.getCardChoices(type=2) 
+        #form.fields['card_num'].choices =   [('', '------')] + Card.getCardChoices(type=1) + Card.getCardChoices(type=2) 
         context['pageHeader'] = u"创建班次信息"
         context['title'] = u"创建班次信息"
         context['sidebar'] = {'workclass':'active'}   
@@ -541,8 +607,10 @@ class WorkClassCreateView(CreateView):
     def form_valid(self, form):
         response = super(WorkClassCreateView, self).form_valid(form) 
         object = self.object
-        logger.info(object.card_num)
-        Card.objects.filter(num=object.card_num).update(owner_id=object.id)
+        object.cardprt.owner_id = object.id
+        object.cardprt.save()
+        #logger.info(object.card_num)
+        #Card.objects.filter(num=object.card_num).update(owner_id=object.id)
         return response
     success_url =  reverse_lazy("workclass_list")
         
@@ -550,16 +618,51 @@ class WorkClassUpdateView(UpdateView):
     form_class= WorkClassForm
     model = WorkClass
     success_url =  reverse_lazy("workclass_list")
+    def form_valid(self, form):
+        object = self.get_object() 
+        result = super(WorkClassUpdateView, self).form_valid(form)  
+        Card.objects.retriveCards(type=1, owner_id=object.id)
+        Card.objects.retriveCards(type=2, owner_id=object.id)
+        object = self.object
+        if object.status == '0':
+            if object.cardprt:
+                messages.success(self.request, u" %s班次已不可用，卡片 %s 已被收回！" % (self.object.name, self.object.cardprt.show_num) )
+                card = object.cardprt
+                object.cardprt = None
+                card.owner_id = 0
+                card.save()
+                object.save()
+        else:
+            if object.cardprt:
+                object.cardprt.owner_id = object.id
+                object.cardprt.save()
+                messages.success(self.request, u"%s班次，新卡片 %s 已被分配！" % (self.object.name, self.object.cardprt.show_num) )
+            else:
+                messages.warning(self.request, u"%s班次，未分配卡片！" % (self.object.name) )
+        return result
+    
     
 class WorkClassDeleteView(DeleteView):
     form_class= WorkClassForm
-    model = WorkClass     
-    #success_url = reverse_lazy('material_type_list')  
-    def post(self,*args, **kwargs):
-        workclass = self.get_object(); 
-        workclass.status = 0
-        workclass.save() 
-        return redirect('workclass_list');
+    model = WorkClass
+    success_url = reverse_lazy("workclass_list")
+    def post(self,request, *args, **kwargs):
+        try:
+            object = self.get_object()
+            result = super(WorkClassDeleteView, self).post(request, *args, **kwargs)
+            Card.objects.retriveCards(type='1', owner_id=object.id)
+            Card.objects.retriveCards(type='2', owner_id=object.id)
+            messages.success(request, u"班次删除成功！") 
+            return result
+        except IntegrityError as e:
+            messages.error(request, u"班次已被使用，不能删除")  
+            logger.error(e)
+            return redirect('workclass_list');
+    def get_context_data(self, **kwargs):
+        context = super(WorkClassDeleteView, self).get_context_data(**kwargs)
+        context['sidebar'] = {'workclass':'active'} 
+        return context
+    
 
 
 
@@ -710,12 +813,14 @@ class CardListView(SystemListView):
         context['add_url'] = reverse_lazy('card_add')
         context['is_display'] = 'none'
         return context
+   
     def get_queryset(self):
         #type = self.request.GET.get('type')
         #logger.info("request params type is %s", type)
         q = self.get_query_string()
-        return Card.objects.searchCards(q)  
-       # logger.info("1111%request",  self.request) 
+        return Card.objects.searchCards(q)
+      
+    
     def get_success_url(self):
         return reverse_lazy('card_list', kwargs={'pk': self.object.pk}) 
         
@@ -781,16 +886,37 @@ class CardUpdateView(UpdateView):
         else:
            return super(CardUpdateView, self).get(request, *args, **kwargs)
     def form_valid(self, form): 
-        owner_id = self.get_object().owner_id 
-        self.update_card_owner(owner_id)
+        response = super(CardUpdateView, self).form_valid(form)
         card = self.object
-        Card.objects.filter(num=card.num).update(owner_id=card.owner_id, status=card.status)
-        return super(CardUpdateView, self).form_valid(form)
-       
-    def update_card_owner(self, owner_id):
+        if card.status == '0':
+            if card.type == '4' and card.owner_id <> 0 :
+                process = card.process
+                process.cardprt = None
+                process.save()                
+            if card.type == '3' and card.owner_id <> 0:
+                material = card.material
+                material.cardprt = None
+                material.save()
+            if card.type == '6' and card.owner_id <> 0:
+                employee = card.work_card
+                employee.cardprt2 = None
+                employee.save()
+            if card.type=='5' and card.owner_id <> 0:
+                employee = card.employ_card
+                employee.cardprt1 = None
+                employee.save()
+            if (card.type == '1' or card.type == '2') and card.owner_id <> 0:
+                workclass = card.workclass
+                workclass.cardprt = None
+                workclass.save() 
+            card.owner_id = 0
+            card.save()
+        return response
+    '''
+    def update_card_owner(self):
         card = self.object
         owner_getter = {'1': WorkClass.objects, '2':WorkClass.objects, '3':Material.objects, '4':Process.objects, '5':Employee.objects, '6':Employee.objects}
-        logger.info("owner_id:%s card.owner_id:%s", owner_id, card.owner_id)
+
         if card.owner_id:
             owner = owner_getter.get(card.type).get(pk = card.owner_id)
             if card.type == '5':
@@ -813,7 +939,7 @@ class CardUpdateView(UpdateView):
                 logger.info("set owner card_num to None")
                 owner.card_num = ''
             owner.save()
-        
+    '''    
     def render_to_json_response(self, context, **response_kwargs):
         logger.info(self.get_object().__dict__)
         data = self.get_object().__dict__
@@ -888,7 +1014,7 @@ class CardDeleteView(DeleteView):
 
 
 #--------------------------------------------------实时数据 界面定义------------------------------------------------------------------   
-from system.models import Production, ProductionSearchForm
+from system.models import Production, ProductionSearchForm, ReportEmployee, ReportEmployeeSearchForm,  ReportClass, ReportClassSearchForm
 class ProductionListView(SystemListView):
     template_name = 'system/production_list.html'
     context_object_name = 'production_list'
@@ -900,6 +1026,8 @@ class ProductionListView(SystemListView):
         context = super(ProductionListView, self).get_context_data(*args, **kwargs)
         context['pageHeader'] = u"实时生产数据"
         context['title'] = u"数据中心"
+        context['is_display'] = 'none'
+        context['sidebar'] = {'data_live':'active'} 
         return context
     def get_queryset(self):
         querySql = '''
@@ -925,14 +1053,24 @@ class ProductionListView(SystemListView):
         '''
         
         querySql = u'''         
-            select pd.id ID, e.NUM EMPLOYEE_NUM,e.NAME EMPLOYEE_NAME ,m.NAME MATERIAL_NAME ,if(ps.IS_FIRST,'领料','交料') IS_FIRST,  ps.name PROCESS_NAME ,pd.COUNT START_COUNT ,pd.TIME START_TIME from production pd
+            select pd.id ID, e.NUM EMPLOYEE_NUM,e.NAME EMPLOYEE_NAME ,m.NAME MATERIAL_NAME ,if(ps.IS_FIRST,'领料','交料') IS_FIRST,  ps.name PROCESS_NAME ,pd.COUNT START_COUNT ,pd.TIME START_TIME 
+            from production pd
             join process ps on pd.PROCESS_ID = ps.ID
             join material m on m.id = pd.MATERIAL_ID
             join employee e on e.ID = pd.EMPLOYEE_ID 
             WHERE 1=1
             
         '''
-        
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                 querySql += " and ( pd.TIME between '%s' and '%s')   " % (start_time, end_time + ' 23:59:59'  )
+
+        if "is_first" in self.request.GET:
+            is_first =  self.request.GET['is_first']
+            if is_first:
+                querySql += "and ps.is_first = %s " % is_first
         if "employee_num" in self.request.GET:
             employee_num =  self.request.GET['employee_num']
             if employee_num:
@@ -950,4 +1088,92 @@ class ProductionListView(SystemListView):
             if material:
                 querySql += "and PD.MATERIAL_ID = '%s' " % material
         return list(Production.objects.raw(querySql   + "  order by   pd.time desc, pd.EMPLOYEE_ID ,pd.MATERIAL_ID "))
- 
+class ReportEmployeeListView(SystemListView):
+    template_name = 'system/reportemployee_list.html'
+    context_object_name = 'reportemployee_list'
+    model = ReportEmployee
+    form_class = ReportEmployeeSearchForm
+    #paginate_by = 10
+    #logger.info("system out test.") 
+    def get_context_data(self, *args, **kwargs):
+        context = super(ReportEmployeeListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"员工汇总"
+        context['title'] = u"数据中心"
+        context['is_display'] = 'none'
+        context['sidebar'] = {'report_employee':'active'} 
+        return context
+    def get_queryset(self):
+        querySql = '''
+         SELECT RP.ID, E.name EMPLOYEE_NAME,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
+            FROM REPORT_EMPLOYEE RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+		    left join employee e on e.id = RP.employee_id
+            WHERE 1=1
+         '''
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "employee_num" in self.request.GET:
+            employee_num =  self.request.GET['employee_num']
+            if employee_num:
+                querySql += "and e.NUM = %s " % employee_num
+        if "employee_name" in self.request.GET:
+            employee_name =  self.request.GET['employee_name']
+            if employee_name:
+                querySql += "and e.NAME = '%s' " % employee_name
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        return list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID "))
+class ReportClassListView(SystemListView):
+    template_name = 'system/reportclass_list.html'
+    context_object_name = 'reportclass_list'
+    model = ReportClass
+    form_class = ReportClassSearchForm
+    #paginate_by = 10
+    #logger.info("system out test.") 
+    def get_context_data(self, *args, **kwargs):
+        context = super(ReportClassListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"班次汇总"
+        context['title'] = u"数据中心"
+        context['sidebar'] = {'report_class':'active'} 
+        context['is_display'] = 'none'
+        return context
+    def get_queryset(self):
+        querySql = '''
+         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
+            FROM REPORT_CLASS RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+            WHERE 1=1
+         '''
+     
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        return list(Production.objects.raw(querySql   + "  GROUP BY RP.WORKSHOP_ID,RP.MATERIAL_ID,RP.PROCESS_FIRST_ID,RP.PROCESS_LAST_ID "))
+         
+         

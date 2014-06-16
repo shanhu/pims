@@ -17,8 +17,8 @@
                             状态
 						</th>
                         <th>
-                            班次卡编号
-						</th> 
+                            卡表号
+						</th>
                          <th>
                             操作
 						</th> 
@@ -40,8 +40,10 @@
 							{{workclass.get_status_display}}
 						</td>
                         <td>
-							{{workclass.card_num | default:''}}
-						</td>
+                            {% if workclass.cardprt %}
+                            {{workclass.cardprt.show_num | default:''}}({{ workclass.cardprt.color  }}) ({{ workclass.cardprt.num  }})
+                            {% endif   %}
+                        </td>
                         <td>
                             <a class="btn btn-primary btn-xs" href="{% url 'workclass_detail'  workclass.id %}"><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a> 
 						</td>  

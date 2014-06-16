@@ -40,6 +40,7 @@
     {{ form.media }} 
 
 <style>
+       
 
 		/* http://css-tricks.com/perfect-full-page-background-image/ */
 		html {
@@ -66,11 +67,16 @@
 			margin: 40px 0;
 		}
 
+	
+
 	</style> 
 </head>
 
 <body>
-<div class="container">
+
+
+<div class="container"> 
+	<img src="{% static "system/img/top_header.png" %}" class="img-responsive" alt="Responsive image">
 	<div class="row clearfix">
 		<div class="col-md-2 column"> 
         
@@ -92,14 +98,11 @@
 				<li class="{{sidebar.data_live}}">
 					<a href="{% url 'data_live' %}">实时数据</a>
 				</li>
-				<li class="{{sidebar.index}}">
-					<a href="{% url 'index' %}">员工汇总</a>
-				</li>
-				 <li class="{{sidebar.index}}">
-					<a href="{% url 'index' %}">生产线汇总</a>
-				</li>
-				 <li class="{{sidebar.index}}">
-					<a href="{% url 'index' %}">班次汇总</a>
+				<li class="{{sidebar.report_employee}}">
+					<a href="{% url 'report_employee' %}">员工汇总</a>
+				</li> 
+				 <li class="{{sidebar.report_class}}">
+					<a href="{% url 'report_class' %}">班次汇总</a>
 				</li> 
 				<li class="nav-divider"> 
 			</ul>

@@ -66,5 +66,9 @@ urlpatterns = patterns('',
     url(r'^cards/(?P<pk>\d+)$', views.CardDetailView.as_view(), name="card_detail"),
     
     url(r'^data/$', views.ProductionListView.as_view(), name="data_live"),
+    url(r'^reportClass/$', views.ReportClassListView.as_view(), name="report_class"),
+    url(r'^reportClassDetail/$', views.ReportClassListView.as_view(), name="report_class_detail"),
+    url(r'^reportEmployee/$', views.ReportEmployeeListView.as_view(), name="report_employee"),
+    url(r'^reportEmployeeDetail/$', views.ReportEmployeeListView.as_view(), name="report_employee_detail"),
     
 )

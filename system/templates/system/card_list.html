@@ -14,10 +14,10 @@
                         类型
 						</th>
                          <th>
-                        拥有者
+                        分配
 						</th>
                         <th>
-                        显示号
+                        卡表号
                         </th>
                         <th>
                         颜色
@@ -44,7 +44,12 @@
 							{{card.get_type_display}}
 						</td>
                         <td>
-                            {{card.NAME | default:''}}
+                            {%if card.owner_id != 0 and card.owner_id != None %}
+                            已分配
+                            {%endif%}
+                            {%if card.owner_id == 0 or card.owner_id == None %}
+                            未分配
+                            {%endif%}
                         </td>
                          <td>
                             {{card.show_num | default:''}}

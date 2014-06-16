@@ -20,7 +20,7 @@
                          关联前工艺
 						</th> 
                         <th>
-                            工艺卡编号
+                            卡表号
 						</th>  
                          <th>
                             统计方式
@@ -52,7 +52,9 @@
 							{{process.firstProcess.name}}
 						</td> 
                         <td>
-							{{process.card_num | default_if_none:'' }}
+                        {%if process.cardprt %}
+							{{process.cardprt.show_num | default_if_none:'' }}({{process.cardprt.color}})
+                         {%endif%}
 						</td>
                         <td>
 							{{process.get_mode_display}}

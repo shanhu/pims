@@ -6,56 +6,59 @@
 				<thead>
 					<tr>
 						<th>
-							工号
+							车间
 						</th>
                         	<th>
-							姓名
+							物料
 						</th>
                 <!--        <th>
                             物料编号
 						</th> -->
                     
                         <th>
-                            物料
-						</th>  
+                            前工艺
+						</th> 
                         <th>
-                        工艺
+                            领料
+						</th> 
+                        <th>
+                            后工艺
 						</th>                
+                        
                          <th>
-                            领料/交料
-						</th>
-                         <th>
-                            数量
+                            交料
 						</th> 
                          <th>
-                            时间
+                            出成率
 						</th> 
 					</tr>
 				</thead>
 				<tbody>
-                {% for production in production_list %}
+                {% for reportclass in reportclass_list %}
 					<tr class={% cycle 'warning'  'success' %}>
 						<td>
-							{{production.EMPLOYEE_NUM  |default_if_none:""}}
+							{{reportclass.WORKSHOP_NAME  |default_if_none:""}}
 						</td> 
                         <td>
-							{{production.EMPLOYEE_NAME  |default_if_none:""}}
+							{{reportclass.MATERIAL_NAME  |default_if_none:""}}
 						</td>  
                      
                           <td>
-							{{production.MATERIAL_NAME  |default_if_none:""}}
+							{{reportclass.FIRST_PROCESS_NAME  |default_if_none:""}}
 						</td>
                          <td>
-							{{production.PROCESS_NAME |default_if_none:""}}
+							{{reportclass.GET_COUNT  |default_if_none:""}}
 						</td> 
-                        <td>
-							{{ production.IS_FIRST   |default_if_none:"" }}
+                         <td>
+							{{reportclass.LAST_PROCESS_NAME |default_if_none:""}}
 						</td> 
+                        
                         <td>
-							{{production.START_COUNT  |default_if_none:""}}
+							{{ reportclass.PUT_COUNT  |default_if_none:""  }}
 						</td> 
+                       
                         <td>
-							{{production.START_TIME | date:"Y-m-d H:i:s" }}
+							{{reportclass.AVERAGERATE   |default_if_none:""  }}
 						</td>  
 					</tr> 
                     {% endfor %}
