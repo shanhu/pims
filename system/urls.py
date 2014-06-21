@@ -67,8 +67,8 @@ urlpatterns = patterns('',
     
     url(r'^data/$', views.ProductionListView.as_view(), name="data_live"),
     url(r'^reportClass/$', views.ReportClassListView.as_view(), name="report_class"),
-    url(r'^reportClassDetail/$', views.ReportClassListView.as_view(), name="report_class_detail"),
+    url(r'^reportClassDetail/$', views.ReportClassDetailListView.as_view(), name="report_class_detail"),
     url(r'^reportEmployee/$', views.ReportEmployeeListView.as_view(), name="report_employee"),
-    url(r'^reportEmployeeDetail/$', views.ReportEmployeeListView.as_view(), name="report_employee_detail"),
+    url(r'^reportEmployeeDetail/$', views.ReportEmployeeDetailListView.as_view(), name="report_employee_detail"),
     
 )

@@ -7,6 +7,7 @@ from django.db.models   import Q
 from django.http import HttpResponse
 from django.contrib import messages
 from django.db import IntegrityError
+from django.core.cache import cache
 
 
 
@@ -35,15 +36,13 @@ class SystemListView(generic.ListView, FormMixin):
         context['pageHeader'] =  u"列表页"
         context['queryString'] = self.get_query_string().urlencode() 
         context['form'] = self.get_form_class()(self.request.GET)
-        logger.info(self.request.GET.get('num'))
         return context
     def get_query_string(self):
         q = self.request.GET.copy() 
-        logger.info(q)
-        logger.info(self.request.GET)
+        #logger.info(q)
+        #logger.info(self.request.GET)
         if q.__contains__('page'):
             q.pop('page')
-        logger.info(" queryString = %s", q.urlencode())
         return q
     def get_queryset(self,**kwargs):
         if self.model:
@@ -607,8 +606,9 @@ class WorkClassCreateView(CreateView):
     def form_valid(self, form):
         response = super(WorkClassCreateView, self).form_valid(form) 
         object = self.object
-        object.cardprt.owner_id = object.id
-        object.cardprt.save()
+        if object.cardprt:
+            object.cardprt.owner_id = object.id
+            object.cardprt.save()
         #logger.info(object.card_num)
         #Card.objects.filter(num=object.card_num).update(owner_id=object.id)
         return response
@@ -796,6 +796,7 @@ class SalaryTimeConfigDeleteView(DeleteView):
 #--------------------------------------------------卡片管理 界面定义------------------------------------------------------------------   
 from system.models import Card, CardForm, CardSearchForm
 
+ 
 class CardListView(SystemListView): 
     template_name = 'system/card_list.html'
     context_object_name = 'card_list'
@@ -804,25 +805,28 @@ class CardListView(SystemListView):
     #paginate_by = 10
     logger.info("system out test.")
     def get_context_data(self, **kwargs): 
-        context = super(CardListView, self).get_context_data(**kwargs)  
-        #form_class = self.get_form_class()
-        #logger.info("form info %s ", context['form'])
+        context = super(CardListView, self).get_context_data(**kwargs)
         context['pageHeader'] = u"卡管理"
         context['title'] = u"卡管理"
         context['sidebar'] = {'card':'active'}
         context['add_url'] = reverse_lazy('card_add')
         context['is_display'] = 'none'
+       # context['form'] = self.get_form_class()(cache.get('card_queryDict'))
+        logger.info(context['page_obj'] )
+        #cache.set('card_page', context['page_obj'] , 15 * 60)
         return context
    
     def get_queryset(self):
-        #type = self.request.GET.get('type')
-        #logger.info("request params type is %s", type)
         q = self.get_query_string()
+        logger.info(q)  
+        #if len(q):
+        #    cache.set('card_queryDict', q , 15 * 60)
+        #else: 
+        #    q = cache.get('card_queryDict')
         return Card.objects.searchCards(q)
-      
-    
     def get_success_url(self):
-        return reverse_lazy('card_list', kwargs={'pk': self.object.pk}) 
+        logger.info(cache.get('card_page').number)
+        return reverse_lazy('card_list', kwargs={'page': cache.get('card_page').number})  
         
 class CardDetailView(SystemDetailView): 
     template_name = 'system/card_detail.html'
@@ -1136,6 +1140,55 @@ class ReportEmployeeListView(SystemListView):
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
         return list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID "))
+class ReportEmployeeDetailListView(SystemListView):
+    template_name = 'system/reportemployeedetail_list.html'
+    context_object_name = 'reportemployee_list'
+    model = ReportEmployee
+    form_class = ReportEmployeeSearchForm
+    #paginate_by = 10
+    #logger.info("system out test.") 
+    def get_context_data(self, *args, **kwargs):
+        context = super(ReportEmployeeDetailListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"员工汇总明细"
+        context['title'] = u"数据中心"
+        context['is_display'] = 'none'
+        context['sidebar'] = {'report_employee_detail':'active'} 
+        return context
+    def get_queryset(self):
+        querySql = '''
+         SELECT RP.ID, E.name EMPLOYEE_NAME,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,RP.PUT_COUNT PUT_COUNT, RP.GET_COUNT GET_COUNT ,  RP.AVERAGE_RATE AVERAGERATE ,RP.STARTTIME STARTTIME, RP.ENDTIME ENDTIME
+            FROM REPORT_EMPLOYEE RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+		    left join employee e on e.id = RP.employee_id
+            WHERE 1=1
+         '''
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "employee_num" in self.request.GET:
+            employee_num =  self.request.GET['employee_num']
+            if employee_num:
+                querySql += "and e.NUM = %s " % employee_num
+        if "employee_name" in self.request.GET:
+            employee_name =  self.request.GET['employee_name']
+            if employee_name:
+                querySql += "and e.NAME = '%s' " % employee_name
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        return list(Production.objects.raw(querySql))
+
 class ReportClassListView(SystemListView):
     template_name = 'system/reportclass_list.html'
     context_object_name = 'reportclass_list'
@@ -1176,4 +1229,43 @@ class ReportClassListView(SystemListView):
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
         return list(Production.objects.raw(querySql   + "  GROUP BY RP.WORKSHOP_ID,RP.MATERIAL_ID,RP.PROCESS_FIRST_ID,RP.PROCESS_LAST_ID "))
          
-         
+class ReportClassDetailListView(SystemListView):
+    template_name = 'system/reportclassdetail_list.html'
+    context_object_name = 'reportclass_list'
+    model = ReportClass
+    form_class = ReportClassSearchForm
+    #paginate_by = 10
+    #logger.info("system out test.") 
+    def get_context_data(self, *args, **kwargs):
+        context = super(ReportClassDetailListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"班次汇总明细"
+        context['title'] = u"数据中心"
+        context['sidebar'] = {'report_class_detail':'active'} 
+        context['is_display'] = 'none'
+        return context
+    def get_queryset(self):
+        querySql = '''
+         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME, RP.PUT_COUNT PUT_COUNT, RP.GET_COUNT GET_COUNT ,  RP.AVERAGE_RATE AVERAGERATE ,RP.STARTTIME STARTTIME, RP.ENDTIME ENDTIME
+            FROM REPORT_CLASS RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+            WHERE 1=1
+         '''
+     
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        return list(Production.objects.raw(querySql))
+        

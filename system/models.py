@@ -65,8 +65,9 @@ class CardManager(models.Manager):
                                     LEFT JOIN CARD C1 ON CD.NUM = C1.NUM
                 WHERE 1 = 1
         '''
-    def searchCards(self, qdict = None,  **kwargs):
-        #logger.info(qdict)
+    def searchCards(self, qdict = [],  **kwargs):
+        #if not qdict :
+        #    return []
         query = self.querySql
         #logger.info('type' in qdict and qdict.get('type') <> '')
         if  'type' in qdict and qdict.get('type') <> '':
@@ -159,10 +160,11 @@ class CardSearchForm(forms.Form):
     typeChoices = DictConfig.getTypeChoices(type="card_type") 
     assignedChoices = DictConfig.getTypeChoices(type="card_assigned") 
     num = forms.CharField(max_length=20, label= u"", widget=forms.TextInput(attrs={'placeholder':'卡号'}), required = False )
+    show_num = forms.CharField(max_length=20, label= u"", widget=forms.TextInput(attrs={'placeholder':'卡表面号'}), required = False )
     type = forms.CharField(max_length=1, widget=forms.Select(choices= [('', '全部')] + typeChoices, attrs={'placeholder':'卡号'}) , label= u"", required = False) # Field name made lowercase.   e 
     assignd = forms.CharField(max_length=1, label = "",  widget=forms.Select( choices= [('', '全部')] + assignedChoices), required = False)
     status = forms.CharField(max_length=1, widget=forms.Select(choices= [('', '全部')] + [('1', '可用'), ('0', '不可用')], attrs={'placeholder':'状态'}) , label= u"", required = False)  
-    show_num = forms.CharField(max_length=20, label= u"", widget=forms.TextInput(attrs={'placeholder':'卡表面号'}), required = False )
+    
     
     
         
@@ -210,6 +212,10 @@ class Workshop(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
     name = models.CharField(db_column='NAME', max_length=20, blank=True) # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase.
+    @staticmethod
+    def getWorkshops(**kwargs):
+        choices = [(workshop.id, workshop.name  ) for workshop in Workshop.objects.filter(**kwargs)] 
+        return  choices
     class Meta:
      #   managed = False
         db_table = 'workshop'
@@ -221,6 +227,7 @@ class WorkGroup(models.Model):
     name = models.CharField(db_column='NAME', max_length=20, blank=True) # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase.
     workshop = models.ForeignKey(Workshop, db_column='WORKSHOP_ID', on_delete=PROTECT, blank=True, null=True) # Field name made lowercase.
+ 
     class Meta:
      #   managed = False
         db_table = 'work_group'
@@ -386,28 +393,12 @@ class EmployeeForm(forms.ModelForm):
     employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
     statusChoices = DictConfig.getTypeChoices(type="employee_status")
     joinTime = forms.DateTimeField(  widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickSeconds": False}),label="入职时间" )
-    def clean1(self): 
+    def clean(self): 
         cleand_data = super(EmployeeForm, self).clean() 
-        card_num1 = cleand_data.get('card_num1')
-        card_num2 = cleand_data.get('card_num2')
-        num = cleand_data.get('num')
-        logger.info(u'card_num1%s card_num2:%s num:%s', card_num1, card_num2, num)
-        #logger.info(u'%s', self.is_valid())
-        employee = Employee.objects.get(num=num)
-        if card_num1:
-           # logger.info(self._errors["card_num1"]  )
-            employee_card = Card.objects.filter(num=card_num1)[0] 
-            #logger.info("employee owner_id %s and id %s", employee_card.owner_id, id)
-            if employee_card and employee_card.owner_id <> employee.id and employee_card.owner_id <> 0l:
-                self._errors["card_num1"] = self.error_class([u"%s卡片已被分配，请重新选择！" %  card_num1 ])
-        if card_num2:
-            #logger.info(self._errors["card_num2"] )
-            work_card = Card.objects.filter(num=card_num2)[0]
-            logger.info( work_card.owner_id <> 0l)
-            if work_card and work_card.owner_id <> employee.id and work_card.owner_id <> 0l:
-                self._errors["card_num2"] = self.error_class([u"%s卡片已被分配，请重新选择！" %  card_num2 ])
-        logger.info(u'%s', self._errors) 
-        logger.info(u'%s', cleand_data) 
+        cardprt1 = cleand_data.get('cardprt1')
+        type = cleand_data.get('type')
+        if cardprt1 and type <> '1':
+            self._errors["cardprt1"] = self.error_class([u"%s卡片只能分配给计件工，请重新选择！" %  cardprt1.show_num ])
         return cleand_data; 
     def __init__(self, *args, **kwargs):
         super(EmployeeForm, self).__init__(*args, **kwargs)
@@ -588,12 +579,13 @@ class ProductionSearchForm(forms.Form):
     
     def __init__(self, *args, **kwargs): 
         super(ProductionSearchForm, self).__init__(*args, **kwargs)
+        self.fields['workshop'] = forms.ChoiceField(required = False, choices= [('', ' 全部车间')] + Workshop.getWorkshops(),  label="")
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
         self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="") 
         self.fields['is_first'] = forms.ChoiceField( required = False, label="", choices=[('', '全部'), ('0', '交料'),('1', '领料')] ,  )
-        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'17','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
-        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'20','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
-        self.fields['start_time'] = forms.DateTimeField( required = False,  widget=DateTimePicker( div_attrs={'class':'input-group date  ' ,  },  attrs={ 'value':datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d'),  "class": "form-control ",'placeholder':'开始时间'   },  options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'10','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
+        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'13','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
+        self.fields['start_time'] = forms.DateTimeField( required = False,  widget=DateTimePicker( div_attrs={'class':'input-group date  ' ,  },  attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),  "class": "form-control ",'placeholder':'开始时间'   },  options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
         self.fields['end_time'] = forms.DateTimeField( required = False  ,  widget=DateTimePicker( div_attrs={'class':'input-group date  ' ,  }, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control "  }, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
         
         
@@ -635,6 +627,7 @@ class ReportEmployee(models.Model):
 class ReportEmployeeSearchForm(forms.Form):      
     def __init__(self, *args, **kwargs): 
         super(ReportEmployeeSearchForm, self).__init__(*args, **kwargs)
+        self.fields['workshop'] = forms.ChoiceField(required = False, choices= [('', ' 全部车间')] + Workshop.getWorkshops(),  label="")
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
         self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="") 
         #self.fields['is_first'] = forms.ChoiceField( required = False, label="", choices=[('', '全部'), ('0', '交料'),('1', '领料')] ,  )
@@ -649,6 +642,7 @@ class ReportEmployeeSearchForm(forms.Form):
 class ReportClassSearchForm(forms.Form):      
     def __init__(self, *args, **kwargs): 
         super(ReportClassSearchForm, self).__init__(*args, **kwargs)
+        self.fields['workshop'] = forms.ChoiceField(required = False, choices= [('', ' 全部车间')] + Workshop.getWorkshops(),  label="")
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
         self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="") 
         #self.fields['is_first'] = forms.ChoiceField( required = False, label="", choices=[('', '全部'), ('0', '交料'),('1', '领料')] ,  )

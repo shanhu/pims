@@ -146,6 +146,14 @@ LOGGING = {
 }
 
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
+
+
 
 BOOTSTRAP3 = {
     'jquery_url': '//cdn.bootcss.com/jquery/2.1.1/jquery.min.js',
