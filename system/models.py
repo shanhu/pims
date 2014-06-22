@@ -116,6 +116,7 @@ class Card(models.Model):
     class Meta:
         #managed = False
         db_table = 'cardPrt'
+        ordering = ['show_num', 'num','color' , 'status']
     def __unicode__(self):  # Python 3: def __str__(self):
         str = u"{0}({1})({2})".format(self.num, self.color, self.show_num)
         if self.owner_id == 0 or self.owner_id == None:
@@ -378,15 +379,20 @@ class Terminal(models.Model):
     ip1 = models.CharField(db_column='IP1', max_length=20, blank=True) # Field name made lowercase.
     ip2 = models.CharField(db_column='IP2', max_length=20, blank=True) # Field name made lowercase.
     remarks = models.TextField(db_column='REMARKS', max_length=200, blank=True) # Field name made lowercase.
-    defaultMaterial = models.ForeignKey(Material, db_column='DEFAULT_MATERIAL_ID', on_delete=PROTECT, blank=True, null=True) # Field name made lowercase.
-    defaultProcess = models.ForeignKey(Process, db_column='DEFAULT_PROCESS_ID', on_delete=PROTECT, blank=True, null=True) # Field name made lowercase.
+    defaultMaterial = models.ForeignKey(Material, db_column='DEFAULT_MATERIAL_ID',   related_name='+' ,  blank=True, null=True) # Field name made lowercase.
+    defaultProcess = models.ForeignKey(Process, db_column='DEFAULT_PROCESS_ID', related_name='+' ,   blank=True, null=True) # Field name made lowercase.
+    currentMaterial = models.ForeignKey(Material, db_column='CURRENT_MATERIAL_ID' ,  related_name='+' ,   blank=True, null=True) # Field name made lowercase.
+    currentProcess = models.ForeignKey(Process, db_column='CURRENT_PROCESS_ID',   related_name='+' ,   blank=True, null=True) # Field name made lowercase.
     class Meta:
         managed = False
         db_table = 'terminal'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"id {0} num {1} name {2}   remarks {3} ".format(self.id , self.num ,  self.name ,  self.remarks)
-        
-
+class TerminalForm(forms.Form):  
+    def __init__(self, *args, **kwargs): 
+        super(TerminalForm, self).__init__(*args, **kwargs)
+        self.fields['workshop'] = forms.ChoiceField(required = False, choices= [('', ' 全部车间')] + Workshop.getWorkshops(),  label="")
+    
 
 class EmployeeForm(forms.ModelForm):
     #sexChoices = DictConfig.getTypeChoices(type="sex") 

@@ -1268,4 +1268,51 @@ class ReportClassDetailListView(SystemListView):
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
         return list(Production.objects.raw(querySql))
-        
+
+from system.models import Terminal, TerminalForm
+class TerminalListView(SystemListView):
+    template_name = 'system/terminal_list.html'
+    context_object_name = 'terminal_list'
+    model = Terminal
+    form_class = TerminalForm
+    def get_context_data(self, *args, **kwargs):
+        context = super(TerminalListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"终端管理"
+        context['title'] = u"数据中心"
+        context['sidebar'] = {'terminal_list':'active'} 
+        context['is_display'] = 'none'
+        return context
+    def get_queryset(self):
+         querySql = '''
+         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME, RP.PUT_COUNT PUT_COUNT, RP.GET_COUNT GET_COUNT ,  RP.AVERAGE_RATE AVERAGERATE ,RP.STARTTIME STARTTIME, RP.ENDTIME ENDTIME
+            FROM REPORT_CLASS RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+            WHERE 1=1
+         '''
+         return list(Terminal.objects.raw(querySql))
+from system.models import Workshop 
+class WorkshopListView(SystemListView):
+    template_name = 'system/workshop_list.html'
+    context_object_name = 'workshop_list'
+    model = Workshop 
+    def get_context_data(self, *args, **kwargs):
+        context = super(WorkshopListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"车间管理"
+        context['title'] = u"数据中心"
+        context['sidebar'] = {'workshop_list':'active'} 
+        context['is_display'] = 'none'
+        return context
+    def get_queryset(self):
+         querySql = '''
+         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME, RP.PUT_COUNT PUT_COUNT, RP.GET_COUNT GET_COUNT ,  RP.AVERAGE_RATE AVERAGERATE ,RP.STARTTIME STARTTIME, RP.ENDTIME ENDTIME
+            FROM REPORT_CLASS RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+            WHERE 1=1
+         '''
+         return list(Workshop.objects.raw(querySql))

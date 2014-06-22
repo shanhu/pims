@@ -71,4 +71,6 @@ urlpatterns = patterns('',
     url(r'^reportEmployee/$', views.ReportEmployeeListView.as_view(), name="report_employee"),
     url(r'^reportEmployeeDetail/$', views.ReportEmployeeDetailListView.as_view(), name="report_employee_detail"),
     
+    url(r'^terminal/$', views.TerminalListView.as_view(), name="terminal_list"),
+    url(r'^workshop/$', views.WorkshopListView.as_view(), name="workshop_list"),
 )
