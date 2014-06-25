@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.db import IntegrityError
 from django.core.cache import cache
-
+from datetime import datetime
 
 
 # import the logging library
@@ -1070,7 +1070,9 @@ class ProductionListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                  querySql += " and ( pd.TIME between '%s' and '%s')   " % (start_time, end_time + ' 23:59:59'  )
-
+        else:
+            querySql += " and ( pd.TIME between '%s' and '%s')   " % (datetime.now().strftime('%Y-%m-%d'), datetime.now().strftime('%Y-%m-%d') + ' 23:59:59'  )
+                
         if "is_first" in self.request.GET:
             is_first =  self.request.GET['is_first']
             if is_first:
@@ -1091,6 +1093,7 @@ class ProductionListView(SystemListView):
             material = self.request.GET['material']
             if material:
                 querySql += "and PD.MATERIAL_ID = '%s' " % material
+        logger.info(querySql   + "  order by   pd.time desc, pd.EMPLOYEE_ID ,pd.MATERIAL_ID ")
         return list(Production.objects.raw(querySql   + "  order by   pd.time desc, pd.EMPLOYEE_ID ,pd.MATERIAL_ID "))
 class ReportEmployeeListView(SystemListView):
     template_name = 'system/reportemployee_list.html'
@@ -1284,14 +1287,21 @@ class TerminalListView(SystemListView):
         return context
     def get_queryset(self):
          querySql = '''
-         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME, RP.PUT_COUNT PUT_COUNT, RP.GET_COUNT GET_COUNT ,  RP.AVERAGE_RATE AVERAGERATE ,RP.STARTTIME STARTTIME, RP.ENDTIME ENDTIME
-            FROM REPORT_CLASS RP 
-            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
-            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
-            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
-            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
-            WHERE 1=1
+         select t.id ID ,t.num TNUM ,t.name TNAME , dc.TYPE_DESC TTYPEDESC,wg.name  WGNAME ,ws.name WSNAME ,dm.NAME DMNAME ,dp.name DPNAME ,cp.name CPNAME,cm.name CMNAME
+            from terminal t
+            left join workgroup wg on wg.ID = t.WORKGROUP_ID
+            left join workshop ws on ws.id = wg.WORKSHOP_ID
+            left join material dm on dm.ID = t.DEFAULT_MATERIAL_ID
+            left join process dp  on dp.ID = t.DEFAULT_PROCESS_ID
+            left join material cm on cm.id  = t.CURRENT_MATERIAL_ID
+            left join process cp  on cp.ID = t.CURRENT_PROCESS_ID
+            left join dictionary_config dc on dc.TYPE = 'terminal_type' and dc.type_code = t.type
+            where 1 = 1 
          '''
+         if "workshop" in self.request.GET:
+            workshop = self.request.GET['workshop']
+            if workshop:
+                querySql += " and ws.id = %s " % (workshop)
          return list(Terminal.objects.raw(querySql))
 from system.models import Workshop 
 class WorkshopListView(SystemListView):
