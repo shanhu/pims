@@ -27,7 +27,9 @@
                                     </dl> 
                                    <dl class="dl-horizontal">
                                     <dt>物料卡号：</dt>
-                                      <dd>{{salarycount.material.card_num}}</dd>
+                                    {% if salarycount.material.cardprt %}
+                                      <dd>{{salarycount.material.cardprt.show_num}}</dd>
+                                      {% endif %}
                                     </dl>  
                                    <dl class="dl-horizontal">
                                     <dt>单价：</dt>
@@ -56,11 +58,13 @@
                                     </dl> 
                                       <dl class="dl-horizontal">
                                      <dt>工艺卡号：</dt>
-                                      <dd>{{salarycount.process.card_num}}</dd>
+                                     {% if salarycount.process.cardprt %}
+                                      <dd>{{salarycount.process.cardprt.show_num}}</dd>
+                                      {%endif %}
                                     </dl> 
                                     <dl class="dl-horizontal">
                                         <dt>单位：</dt>
-                                          <dd>{{salarycount.unit}}</dd>
+                                          <dd>{{salarycount.process.unit}}</dd>
                                         </dl> 
                                 <!--           <dl class="dl-horizontal">
                                     <dt>结束时间：</dt>

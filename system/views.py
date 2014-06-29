@@ -2,6 +2,9 @@
 from django.views import generic
 from django.views.generic.edit import FormMixin
 from django import forms
+from decimal import *
+from django.db import connection
+
 import json
 from django.db.models   import Q
 from django.http import HttpResponse
@@ -9,6 +12,7 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.core.cache import cache
 from datetime import datetime
+from excel_response import ExcelResponse
 
 
 # import the logging library
@@ -796,6 +800,9 @@ class SalaryTimeConfigDeleteView(DeleteView):
 #--------------------------------------------------卡片管理 界面定义------------------------------------------------------------------   
 from system.models import Card, CardForm, CardSearchForm
 
+def cardExportView(request):
+    objects = Card.objects.all()[:5]
+    return ExcelResponse(objects,'card_list')
  
 class CardListView(SystemListView): 
     template_name = 'system/card_list.html'
@@ -815,7 +822,7 @@ class CardListView(SystemListView):
         logger.info(context['page_obj'] )
         #cache.set('card_page', context['page_obj'] , 15 * 60)
         return context
-   
+    
     def get_queryset(self):
         q = self.get_query_string()
         logger.info(q)  
@@ -1018,7 +1025,7 @@ class CardDeleteView(DeleteView):
 
 
 #--------------------------------------------------实时数据 界面定义------------------------------------------------------------------   
-from system.models import Production, ProductionSearchForm, ReportEmployee, ReportEmployeeSearchForm,  ReportClass, ReportClassSearchForm
+from system.models import Production, ProductionSearchForm, ReportEmployee, ReportEmployeeSearchForm,  ReportClass, ReportClassSearchForm, WorkshopSearchForm
 class ProductionListView(SystemListView):
     template_name = 'system/production_list.html'
     context_object_name = 'production_list'
@@ -1191,7 +1198,54 @@ class ReportEmployeeDetailListView(SystemListView):
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
         return list(Production.objects.raw(querySql))
+class ReportEmployeeRealTimeListView(SystemListView):
+    template_name = 'system/realtimereportemployee_list.html'
+    context_object_name = 'reportemployee_list'
+    model = ReportEmployee
+    form_class = ReportEmployeeSearchForm
+    #paginate_by = 10
+    #logger.info("system out test.") 
+    def get_context_data(self, *args, **kwargs):
+        context = super(ReportEmployeeRealTimeListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"实时员工汇总"
+        context['title'] = u"数据中心"
+        context['is_display'] = 'none'
+        context['sidebar'] = {'real_report_employee':'active'} 
+        return context
+    def get_queryset(self):
+        querySql = '''
+         SELECT RP.ID, E.name EMPLOYEE_NAME,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
+            FROM REPORT_EMPLOYEE_TMP RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+		    left join employee e on e.id = RP.employee_id
+            WHERE 1=1
+         '''
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
 
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "employee_num" in self.request.GET:
+            employee_num =  self.request.GET['employee_num']
+            if employee_num:
+                querySql += "and e.NUM = %s " % employee_num
+        if "employee_name" in self.request.GET:
+            employee_name =  self.request.GET['employee_name']
+            if employee_name:
+                querySql += "and e.NAME = '%s' " % employee_name
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        return list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID "))
 class ReportClassListView(SystemListView):
     template_name = 'system/reportclass_list.html'
     context_object_name = 'reportclass_list'
@@ -1271,6 +1325,46 @@ class ReportClassDetailListView(SystemListView):
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
         return list(Production.objects.raw(querySql))
+class ReportClassRealTimeListView(SystemListView):
+    template_name = 'system/realtimereportclass_list.html'
+    context_object_name = 'reportclass_list'
+    model = ReportClass
+    form_class = ReportClassSearchForm
+    #paginate_by = 10
+    #logger.info("system out test.") 
+    def get_context_data(self, *args, **kwargs):
+        context = super(ReportClassRealTimeListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"实时班次汇总"
+        context['title'] = u"数据中心"
+        context['sidebar'] = {'real_report_class':'active'} 
+        context['is_display'] = 'none'
+        return context
+    def get_queryset(self):
+        querySql = '''
+         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
+            FROM REPORT_CLASS_TMP RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+            WHERE 1=1
+         '''
+     
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        return list(Production.objects.raw(querySql   + "  GROUP BY RP.WORKSHOP_ID,RP.MATERIAL_ID,RP.PROCESS_FIRST_ID,RP.PROCESS_LAST_ID "))
+         
 
 from system.models import Terminal, TerminalForm
 class TerminalListView(SystemListView):
@@ -1307,7 +1401,9 @@ from system.models import Workshop
 class WorkshopListView(SystemListView):
     template_name = 'system/workshop_list.html'
     context_object_name = 'workshop_list'
-    model = Workshop 
+    model = Workshop
+    paginate_by = 20
+    form_class = WorkshopSearchForm
     def get_context_data(self, *args, **kwargs):
         context = super(WorkshopListView, self).get_context_data(*args, **kwargs)
         context['pageHeader'] = u"车间管理"
@@ -1316,13 +1412,205 @@ class WorkshopListView(SystemListView):
         context['is_display'] = 'none'
         return context
     def get_queryset(self):
+         start_time = datetime.now().strftime('%Y-%m-%d')
+         end_time = datetime.now().strftime('%Y-%m-%d')
+         workshop = '0'
          querySql = '''
-         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME, RP.PUT_COUNT PUT_COUNT, RP.GET_COUNT GET_COUNT ,  RP.AVERAGE_RATE AVERAGERATE ,RP.STARTTIME STARTTIME, RP.ENDTIME ENDTIME
-            FROM REPORT_CLASS RP 
-            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
-            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
-            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
-            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
-            WHERE 1=1
+         SELECT ID,WORKSHOP_NAME,STARTTIME,ENDTIME FROM (
+             SELECT TMP.* , 
+                                IF(TMP.STARTTIME = @STARTTIME, @RANK:=@RANK+1,@RANK:=1) RANK,
+                                 @STARTTIME := TMP.STARTTIME,
+                                 @ROWNUM := @ROWNUM + 1 ROWNUM
+            FROM (
+            SELECT SWS.ID ID,WS.NAME WORKSHOP_NAME,SWS.TIME STARTTIME, EWS.TIME ENDTIME 
+            FROM WORKSHIFT SWS
+            JOIN WORKCLASS SWC ON SWS.WORKCLASS_ID = SWC.ID AND SWC.TYPE = 0 
+            LEFT JOIN WORKSHOP WS ON WS.ID = SWC.WORKSHOP_ID
+            LEFT JOIN WORKCLASS EWC ON  EWC.TYPE = 1  
+            LEFT JOIN WORKSHIFT EWS ON EWS.WORKCLASS_ID = EWC.ID AND SWS.TIME < EWS.TIME  AND  EWS.TIME BETWEEN '%s' and  DATE_ADD(DATE('%s') , INTERVAL 1 DAY)
+            WHERE 1=1 
+            AND (SWC.WORKSHOP_ID = %s or 0 = %s )
+            AND  SWS.TIME BETWEEN '%s' and  DATE_ADD(DATE('%s') , INTERVAL 1 DAY)
+            
+            ORDER BY SWS.TIME,EWS.TIME  ASC ) TMP,(SELECT @RANK,@ROWNUM:=0,@STARTTIME:= NULL ) T 
+            ) OWS
+            WHERE OWS.RANK = 1
+            AND (OWS.STARTTIME BETWEEN  '%s'  AND  DATE_ADD(DATE('%s') , INTERVAL 1 DAY) ) 
+            order by OWS.STARTTIME DESC;
          '''
-         return list(Workshop.objects.raw(querySql))
+         if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+         if "workshop" in self.request.GET and self.request.GET['workshop'] <> '':
+            workshop = self.request.GET['workshop'] 
+         queryString = querySql % (  start_time,end_time, workshop, workshop, start_time,end_time,  start_time,end_time)
+         logger.info(queryString)
+         return list(Workshop.objects.raw(queryString))
+class SalaryReportListView(SystemListView):
+    template_name = 'system/salaryreport_list.html'
+    context_object_name = 'salaryreport_list' 
+    form_class = ReportEmployeeSearchForm
+    paginate_by = 20
+    #logger.info("system out test.") 
+    def get_context_data(self, *args, **kwargs):
+        queryString = " SELECT 1 ID, ROUND(SUM(GET_COUNT),2 ) G_SUM , ROUND(sum(GET_SUM_PRICE),2 ) G_SUM_P,  ROUND(sum(PUT_COUNT),2 ) P_SUM, ROUND(sum(PUT_SUM_PRICE),2 ) P_SUM_P,  ROUND(sum(SUM_PRICE),2 ) TOTAL_SUM_PRICE From ("
+        querySql = '''
+       
+        SELECT RE.id, RE.STARTTIME STARTTIME ,RE.ENDTIME ENDTIME,E.NUM EMPLOYEE_NUM,E.NAME EMPLOYEE_NAME,M.NAME MATERIAL_NAME,
+        FP.NAME FIRST_PROCESS_NAME,RE.GET_COUNT GET_COUNT, SCCF.PRICE FIRST_PRICE, IFNULL(SCCF.PRICE * RE.GET_COUNT,0) GET_SUM_PRICE,
+        LP.NAME  LAST_PROCESS_NAME,RE.PUT_COUNT PUT_COUNT, SCCL.PRICE LAST_PRICE,  RE.PUT_COUNT * SCCL.PRICE PUT_SUM_PRICE,   
+        ROUND(IFNULL(SCCF.PRICE * RE.GET_COUNT,0) + IFNULL(RE.PUT_COUNT * SCCL.PRICE,0),3) SUM_PRICE  
+        FROM REPORT_EMPLOYEE RE
+        LEFT JOIN SALARY_COUNT_CONFIG SCCL ON SCCL.MATERIAL_ID = RE.MATERIAL_ID AND SCCL.PROCESS_ID = RE.PROCESS_LAST_ID
+        LEFT JOIN SALARY_COUNT_CONFIG SCCF ON SCCF.MATERIAL_ID = RE.MATERIAL_ID AND SCCF.PROCESS_ID = RE.PROCESS_FIRST_ID
+        LEFT JOIN EMPLOYEE E ON RE.EMPLOYEE_ID = E.ID
+        LEFT JOIN MATERIAL M ON M.ID = RE.MATERIAL_ID
+        LEFT JOIN PROCESS FP ON FP.ID = RE.PROCESS_FIRST_ID
+        LEFT JOIN PROCESS LP ON LP.ID = RE.PROCESS_LAST_ID
+        where 1 = 1
+        '''
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                 querySql += "and ( RE.STARTTIME between '%s' and '%s' or RE.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and ( RE.PROCESS_FIRST_ID = '%s' or RE.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "employee_num" in self.request.GET:
+            employee_num =  self.request.GET['employee_num']
+            if employee_num:
+                querySql += "and E.NUM = %s " % employee_num
+        if "employee_name" in self.request.GET:
+            employee_name =  self.request.GET['employee_name']
+            if employee_name:
+                querySql += "and E.NAME = '%s' " % employee_name
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and RE.MATERIAL_ID = '%s' " % material
+        context = super(SalaryReportListView, self).get_context_data(*args, **kwargs)
+        context['pageHeader'] = u"工资管理"
+        context['title'] = u"工资汇总"
+        context['is_display'] = 'none'
+        context['sidebar'] = {'report_salary':'active'} 
+        context['total_sum_list'] = list(ReportEmployee.objects.raw(queryString + querySql + ' ) res  '))
+        return context
+    def get_queryset(self):
+        querySql = '''
+        SELECT RE.id ID, RE.STARTTIME STARTTIME ,RE.ENDTIME ENDTIME,E.NUM EMPLOYEE_NUM,E.NAME EMPLOYEE_NAME,M.NAME MATERIAL_NAME,
+            FP.NAME FIRST_PROCESS_NAME,RE.GET_COUNT G_COUNT, SCCF.PRICE FIRST_PRICE, ROUND(SCCF.PRICE * RE.GET_COUNT,3) GET_SUM_PRICE,
+            LP.NAME  LAST_PROCESS_NAME,RE.PUT_COUNT P_COUNT, SCCL.PRICE LAST_PRICE,  ROUND(RE.PUT_COUNT * SCCL.PRICE,3) PUT_SUM_PRICE,   
+            ROUND(IFNULL(SCCF.PRICE * RE.GET_COUNT,0) + IFNULL(RE.PUT_COUNT * SCCL.PRICE,0),2) SUM_PRICE  
+            FROM REPORT_EMPLOYEE RE
+            LEFT JOIN SALARY_COUNT_CONFIG SCCL ON SCCL.MATERIAL_ID = RE.MATERIAL_ID AND SCCL.PROCESS_ID = RE.PROCESS_LAST_ID
+            LEFT JOIN SALARY_COUNT_CONFIG SCCF ON SCCF.MATERIAL_ID = RE.MATERIAL_ID AND SCCF.PROCESS_ID = RE.PROCESS_FIRST_ID
+            LEFT JOIN EMPLOYEE E ON RE.EMPLOYEE_ID = E.ID
+            LEFT JOIN MATERIAL M ON M.ID = RE.MATERIAL_ID
+            LEFT JOIN PROCESS FP ON FP.ID = RE.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS LP ON LP.ID = RE.PROCESS_LAST_ID
+        WHERE 1=1
+         '''
+        if "start_time" in self.request.GET and "end_time" in self.request.GET:
+            start_time = self.request.GET['start_time']
+            end_time = self.request.GET['end_time']
+            if start_time and end_time:
+                 querySql += "and ( RE.STARTTIME between '%s' and '%s' or RE.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+
+        if "process" in self.request.GET:
+            process = self.request.GET['process']
+            if process:
+                querySql += "and ( RE.PROCESS_FIRST_ID = '%s' or RE.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "employee_num" in self.request.GET:
+            employee_num =  self.request.GET['employee_num']
+            if employee_num:
+                querySql += "and E.NUM = %s " % employee_num
+        if "employee_name" in self.request.GET:
+            employee_name =  self.request.GET['employee_name']
+            if employee_name:
+                querySql += "and E.NAME = '%s' " % employee_name
+        if "material" in self.request.GET:
+            material = self.request.GET['material']
+            if material:
+                querySql += "and RE.MATERIAL_ID = '%s' " % material
+        return list(ReportEmployee.objects.raw(querySql   + "  ORDER BY RE.EMPLOYEE_ID,RE.MATERIAL_ID,RE.PROCESS_LAST_ID,RE.PROCESS_FIRST_ID "))
+def export_salaryReport(request):
+        querySql = '''
+        SELECT RE.id ID, RE.STARTTIME STARTTIME ,RE.ENDTIME ENDTIME,E.NUM EMPLOYEE_NUM,E.NAME EMPLOYEE_NAME,M.NAME MATERIAL_NAME,
+            FP.NAME FIRST_PROCESS_NAME,RE.GET_COUNT G_COUNT, SCCF.PRICE FIRST_PRICE, ROUND(SCCF.PRICE * RE.GET_COUNT,3) GET_SUM_PRICE,
+            LP.NAME  LAST_PROCESS_NAME,RE.PUT_COUNT P_COUNT, SCCL.PRICE LAST_PRICE,  ROUND(RE.PUT_COUNT * SCCL.PRICE,3) PUT_SUM_PRICE,   
+            ROUND(IFNULL(SCCF.PRICE * RE.GET_COUNT,0) + IFNULL(RE.PUT_COUNT * SCCL.PRICE,0),2) SUM_PRICE  
+            FROM REPORT_EMPLOYEE RE
+            LEFT JOIN SALARY_COUNT_CONFIG SCCL ON SCCL.MATERIAL_ID = RE.MATERIAL_ID AND SCCL.PROCESS_ID = RE.PROCESS_LAST_ID
+            LEFT JOIN SALARY_COUNT_CONFIG SCCF ON SCCF.MATERIAL_ID = RE.MATERIAL_ID AND SCCF.PROCESS_ID = RE.PROCESS_FIRST_ID
+            LEFT JOIN EMPLOYEE E ON RE.EMPLOYEE_ID = E.ID
+            LEFT JOIN MATERIAL M ON M.ID = RE.MATERIAL_ID
+            LEFT JOIN PROCESS FP ON FP.ID = RE.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS LP ON LP.ID = RE.PROCESS_LAST_ID
+        WHERE 1=1
+         '''
+        fileName = u'salary_report'
+        if "start_time" in request.GET and "end_time" in request.GET:
+            start_time = request.GET['start_time']
+            end_time = request.GET['end_time']
+            fileName += start_time + '-' + end_time
+            if start_time and end_time:
+                 querySql += "and ( RE.STARTTIME between '%s' and '%s' or RE.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+
+        if "process" in request.GET:
+            process = request.GET['process']
+            if process:
+                querySql += "and ( RE.PROCESS_FIRST_ID = '%s' or RE.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+                processInstance = Process.objects.get(pk = process)
+                fileName += '-' + processInstance.num
+        if "employee_num" in request.GET:
+            employee_num =  request.GET['employee_num']
+            if employee_num:
+                querySql += "and E.NUM = %s " % employee_num
+                fileName += '-' + employee_num
+        if "employee_name" in request.GET:
+            employee_name =  request.GET['employee_name']
+            if employee_name:
+                querySql += "and E.NAME = '%s' " % employee_name
+                #fileName += '-' + employee_name
+        if "material" in request.GET:
+            material = request.GET['material']
+            if material:
+                querySql += "and RE.MATERIAL_ID = '%s' " % material
+                materialInstance = Material.objects.get(pk=material)
+                fileName += '-' + materialInstance.num
+        salary_list = list(ReportEmployee.objects.raw(querySql +  ' ORDER BY RE.EMPLOYEE_ID,RE.MATERIAL_ID,RE.PROCESS_LAST_ID,RE.PROCESS_FIRST_ID '))
+        data = [['开始时间', '结束时间', '员工编号', '员工姓名', '物料', '前工艺', '领料总数', '单价', '领料总价', '后工艺', '交料总数', '单价', '交料总价', '工资总数']]
+        last_employee = None
+        sum_employee_price = Decimal(0.0)
+        for s in salary_list:
+            if s.EMPLOYEE_NUM == last_employee:
+               sum_employee_price += s.SUM_PRICE               
+            else:
+                if sum_employee_price == Decimal(0.0):
+                   sum_employee_price +=  s.SUM_PRICE
+                if last_employee <> None:
+                    data.append([last_employee + u'工资汇总', '', '', '', '', '', '', '', '', '', '', '', '', sum_employee_price])
+                    sum_employee_price = Decimal(0.0)
+                    sum_employee_price +=  s.SUM_PRICE
+            last_employee = s.EMPLOYEE_NUM
+            data.append([s.starttime,s.endtime, s.EMPLOYEE_NUM, s.EMPLOYEE_NAME , s.MATERIAL_NAME, 
+           s.FIRST_PROCESS_NAME, s.G_COUNT , s.FIRST_PRICE , s.GET_SUM_PRICE, 
+           s.LAST_PROCESS_NAME,  s.P_COUNT,  s.LAST_PRICE,   s.PUT_SUM_PRICE, s.SUM_PRICE  ])
+        if sum_employee_price <> Decimal(0.0):
+            data.append([last_employee + u'工资汇总', '', '', '', '', '', '', '', '', '', '', '', '', sum_employee_price])
+        return ExcelResponse(data,output_name=fileName)
+def generate_realTimeReport(request):
+     cursor = connection.cursor() 
+     cursor.execute("CALL PIMS.P_GENERATE_REPORT_TMP()")
+     forward_to = ''
+     to = ''
+     if "to" in request.GET:
+        to = request.GET['to']
+     if to == '1':
+        forward_to = "real_report_class"
+     else:
+        forward_to =  "real_report_employee"
+     return redirect(forward_to)

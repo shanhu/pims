@@ -10,6 +10,7 @@ from django.dispatch import receiver
 from datetime import datetime
 from django.db.models   import Q
 
+
 from django.core.exceptions import ValidationError
 
 
@@ -222,6 +223,12 @@ class Workshop(models.Model):
         db_table = 'workshop'
     def __unicode__(self):  # Python 3: def __str__(self):
         return  u"名称：({0})  ".format(  self.name )
+class WorkshopSearchForm(forms.Form):      
+    def __init__(self, *args, **kwargs): 
+        super(WorkshopSearchForm, self).__init__(*args, **kwargs)
+        self.fields['workshop'] = forms.ChoiceField(required = False, choices= [('', ' 全部车间')] + Workshop.getWorkshops(),  label="")
+        self.fields['start_time'] = forms.DateTimeField( required = False, validators=[validate_notnull],      widget=DateTimePicker( div_attrs={'class':'input-group date '},  attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['end_time'] = forms.DateTimeField( required = False  , validators=[validate_notnull],  widget=DateTimePicker( div_attrs={'class':'input-group date '}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
 
 class WorkGroup(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.

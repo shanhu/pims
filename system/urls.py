@@ -51,6 +51,7 @@ urlpatterns = patterns('',
     url(r'^salaryCounts/(?P<pk>\d+)$', views.SalaryCountConfigDetailView.as_view(), name="salarycount_detail"),
     
     
+    
     url(r'^salaryTime/$', views.SalaryTimeConfigListView.as_view(), name="salarytime_list"),
     url(r'^salaryTime/add/$', views.SalaryTimeConfigCreateView.as_view(), name="salarytime_add"),
     url(r'^salaryTime/(?P<pk>\d+)/$', views.SalaryTimeConfigUpdateView.as_view(), name="salarytime_update"),
@@ -66,11 +67,24 @@ urlpatterns = patterns('',
     url(r'^cards/(?P<pk>\d+)$', views.CardDetailView.as_view(), name="card_detail"),
     
     url(r'^data/$', views.ProductionListView.as_view(), name="data_live"),
+    url(r'^report/generate/$', 'system.views.generate_realTimeReport'), 
     url(r'^reportClass/$', views.ReportClassListView.as_view(), name="report_class"),
+    url(r'^reportClassReal/$', views.ReportClassRealTimeListView.as_view(), name="real_report_class"),
     url(r'^reportClassDetail/$', views.ReportClassDetailListView.as_view(), name="report_class_detail"),
     url(r'^reportEmployee/$', views.ReportEmployeeListView.as_view(), name="report_employee"),
+    url(r'^reportEmployeeReal/$', views.ReportEmployeeRealTimeListView.as_view(), name="real_report_employee"),
     url(r'^reportEmployeeDetail/$', views.ReportEmployeeDetailListView.as_view(), name="report_employee_detail"),
+    url(r'^reportSalary/$', views.SalaryReportListView.as_view(), name="report_salary_list"),
+    url(r'^reportSalary/export/$', 'system.views.export_salaryReport'), 
     
     url(r'^terminal/$', views.TerminalListView.as_view(), name="terminal_list"),
     url(r'^workshop/$', views.WorkshopListView.as_view(), name="workshop_list"),
+    
+    
+    url(r'^cards/export', 'system.views.cardExportView')
+    
+    
+    
+    
+    
 )
