@@ -16,7 +16,7 @@
 						</th>
                     
                         <th>
-                            物料卡编号
+                            物料卡
 						</th>                        
                          <th>
                             状态
@@ -37,7 +37,9 @@
 						</td>
                      
                           <td>
-							{{material.card_num}}
+                          {% if material.cardprt %}
+							{{material.cardprt.show_num | default_if_none:''}}({{material.cardprt.color}})
+                          {%endif %}
 						</td>
                         <td>
 							{{material.get_status_display}}

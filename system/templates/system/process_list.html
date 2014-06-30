@@ -11,16 +11,16 @@
 							名称
 						</th>
                         <th>
-                            是否前工艺
+                            工艺类型
 						</th>
                          <th>
                          前工艺编号
 						</th>
                          <th>
-                         前工艺名称
+                         关联前工艺
 						</th> 
                         <th>
-                            工艺卡编号
+                            卡表号
 						</th>  
                          <th>
                             统计方式
@@ -52,13 +52,15 @@
 							{{process.firstProcess.name}}
 						</td> 
                         <td>
-							{{process.card_num}}
+                        {%if process.cardprt %}
+							{{process.cardprt.show_num | default_if_none:'' }}({{process.cardprt.color}})
+                         {%endif%}
 						</td>
                         <td>
 							{{process.get_mode_display}}
 						</td>
                         <td>
-							{{process.unit}}
+							{{process.unit }}
 						</td>
                         <td>
 							{{process.get_status_display}}

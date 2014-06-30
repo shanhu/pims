@@ -1,35 +1,6 @@
 {% extends "system/base_list.html" %}
 
-{% block maincontent %}
-
-<div >
-    <form role="form" class="form-inline">
-    
-                    <div class="row clearfix">
-						<div class="col-md-12 column">
-                            <div class="form-group">
-                                 <label for="exampleInputEmail1">工号</label><input type="email" class="form-control" id="exampleInputEmail1" />
-                            </div>
-                             <div class="form-group">
-                                 <label for="exampleInputEmail1">姓名</label><input type="email" class="form-control" id="exampleInputEmail1" />
-                            </div>
-                            <div class="form-group">
-                                 <label for="exampleInputPassword1">身份证</label><input type="password" class="form-control" id="exampleInputPassword1" />
-                            </div>
-                          <div class="form-group">
-                                 <label for="sex">性别</label><input type="text" class="form-control" id="sex"  name="sex" />
-                              </div> 
-						</div>
-						<div class="col-md-4 column">
-                                <a   class="btn btn-info " ><i class="fa fa-search"></i>&nbsp;&nbsp;查询</a>
-                            <a   class="btn btn-info " href="{% url 'workclass_add' %}"><i class="fa fa-plus-square"></i>&nbsp;&nbsp;新增</a>
-						</div>
-					</div>
-                   
-                     
-    </form>
-</div>
-
+{% block maincontent %} 
 	<table class="table table-hover table-condensed">
 				<thead>
 					<tr>
@@ -46,8 +17,8 @@
                             状态
 						</th>
                         <th>
-                            班次卡编号
-						</th> 
+                            卡表号
+						</th>
                          <th>
                             操作
 						</th> 
@@ -69,8 +40,10 @@
 							{{workclass.get_status_display}}
 						</td>
                         <td>
-							{{workclass.cardNum}}
-						</td>
+                            {% if workclass.cardprt %}
+                            {{workclass.cardprt.show_num | default:''}}({{ workclass.cardprt.color  }}) ({{ workclass.cardprt.num  }})
+                            {% endif   %}
+                        </td>
                         <td>
                             <a class="btn btn-primary btn-xs" href="{% url 'workclass_detail'  workclass.id %}"><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a> 
 						</td>  

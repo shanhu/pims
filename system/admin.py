@@ -1,6 +1,6 @@
 from django.contrib import admin
-from system.models import MaterialType, Material,Employee, SalaryCountConfig, DictConfig, Card, WorkGroup, Process
-from system.models import Production
+from system.models import MaterialType,WorkClass,  Material,Employee, SalaryCountConfig, DictConfig, Card, WorkGroup, Process
+from system.models import Production, Workshift
 
 # Register your models here.
 admin.site.register(MaterialType)
@@ -12,3 +12,6 @@ admin.site.register(Card)
 admin.site.register(WorkGroup)
 admin.site.register(Process)
 admin.site.register(Production)
+admin.site.register(WorkClass)
+admin.site.register(Workshift)
+

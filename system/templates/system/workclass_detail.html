@@ -39,8 +39,12 @@
                                     </dl> 
                                   
                                      <dl class="dl-horizontal">
-                                      <dt>班次编号：</dt>
-                                      <dd>{{workclass.cardNum}}</dd>
+                                      <dt>卡表号：</dt>
+                                      <dd> 
+                                        {% if workclass.cardprt %}
+                                        {{workclass.cardprt.show_num | default:''}}({{ workclass.cardprt.color  }}) ({{ workclass.cardprt.num  }})
+                                        {% endif   %}
+                                      </dd>
                                     </dl> 
                                 </div> 
                             </div> 

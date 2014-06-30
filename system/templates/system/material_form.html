@@ -18,4 +18,14 @@
     {% endbuttons %}
 </form>
 
+
+<script>
+    $("#id_materialType").on("change",function(){  
+            text = $(this).children("option:selected").text(); 
+            $("#id_num").val(text.substring(text.indexOf("(") + 1,text.indexOf(")")) + '.');  
+    });
+</script>
+
+ 
+
 {% endblock maincontent %}          

@@ -21,8 +21,8 @@
   <!-- Brand and toggle get grouped for better mobile display -->
   <div class="navbar-header">
    
-        <form  role="form" class="navbar-form navbar-left" role="search"    > {#% csrf_token %#}
-          {% bootstrap_form form  %}  
+        <form  role="form" class="navbar-form navbar-left form-inline" role="search"    > {#% csrf_token %#}
+          {% bootstrap_form form  "form-inline" %}  
         <div class="form-group">
              <button type="submit" class="btn btn-primary"><i class="fa fa-search" ></i>&nbsp;&nbsp;查询</button>
         </div> 
@@ -41,30 +41,30 @@
  	<ul class="pagination pagination-right">
             {% if page_obj.has_previous %}
 				<li>
-                <a href="?page={{ page_obj.previous_page_number }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"">上一页</a>
+                <a href="?page={{page_obj.previous_page_number }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%} ">上一页</a>
 				</li>
              {% endif  %} 
              
             {% if page_obj.number == 1 %}
 				<li>
-                <a href="?page={{ 1 }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}">上一页</a>
+                <a href="?page=1{%  if queryString %}{{ '&' | add:queryString}} {% endif%}">上一页</a>
 				</li>
              {% endif  %} 
              
               {% if page_obj.number|add:-1  > 1 %}  
 				<li>
-					<a href="?page={{ page_obj.number | add:-2   }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}""> {{ page_obj.number | add:-2  }} </a>
+					<a href="?page={{  page_obj.number | add:-2   }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"> {{ page_obj.number | add:-2  }} </a>
 				</li>
               {% endif  %}   
              
               {% if page_obj.number|add:-1  >  1 %}  
 				<li>
-					<a href="?page={{ page_obj.number | add:-1   }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}""> {{ page_obj.number | add:-1  }} </a>
+					<a href="?page={{ page_obj.number | add:-1   }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"> {{ page_obj.number | add:-1  }} </a>
 				</li>
               {% endif  %}   
               
 				<li>
-					<a href="?page={{ page_obj.number }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}"">{{ page_obj.number }} </a>
+					<a href="?page={{ page_obj.number }}{%  if queryString %}{{ '&' | add:queryString}} {% endif%}">{{ page_obj.number }} </a>
 				</li>
                 
                 

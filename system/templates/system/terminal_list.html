@@ -1,7 +1,7 @@
 {% extends "system/base_list.html" %}
 
 {% block maincontent %}
- <a class="btn btn-primary btn-xs" href="{% url 'system.views.cardExportView'  %} "><i class=" fa fa-eye"></i>&nbsp;&nbsp;下载</a> 
+
 
 
 	<table class="table table-hover table-condensed">
@@ -11,61 +11,55 @@
                         编号
 						</th> 
                         <th>
+                        名称
+						</th> 
+                        <th>
                         类型
 						</th>
                          <th>
-                        分配
+                        工作组号
 						</th>
                         <th>
-                        卡表号
+                        默认物料
                         </th>
                         <th>
-                        颜色
+                        默认工艺
 						</th>
                          <th>
-                        数量
+                        当前物料
 						</th>
                         <th>
-                        状态
-						</th>
-                          <th>
-                        操作
-						</th>
-                       
+                        当前工艺
+						</th> 
 					</tr>
 				</thead>
 				<tbody>
-                {% for card in card_list %}
+                {% for terminal in terminal_list %}
 					<tr class={% cycle 'warning'  'success' %}>
 						<td>
-							{{card.num}}
+							{{terminal.TNUM | default:''}}
 						</td> 
                          <td>
-							{{card.get_type_display}}
+							{{terminal.TNAME | default:''}}
 						</td>
                         <td>
-                            {%if card.owner_id != 0 and card.owner_id != None %}
-                            已分配
-                            {%endif%}
-                            {%if card.owner_id == 0 or card.owner_id == None %}
-                            未分配
-                            {%endif%}
+                           {{terminal.TTYPEDESC | default:''}}
                         </td>
                          <td>
-                            {{card.show_num | default:''}}
+                            {{terminal.WGNAME | default:''}}
                         </td>
                         <td>
-							{{card.color}}
+							{{terminal.DMNAME | default:''}}
 						</td> 
                          <td>
-							{{card.CARD_COUNT}}
+							{{terminal.DPNAME | default:''}}
 						</td> 
                         <td>
-							{{card.get_status_display}}
+							{{terminal.CMNAME | default:''}}
 						</td> 
                        
                         <td>
-                            <a class="btn btn-primary btn-xs" href="{% url 'card_detail'  card.id %} "><i class=" fa fa-eye"></i>&nbsp;&nbsp;查看</a> 
+                           {{terminal.CPNAME | default:''}}
 						</td>  
 					</tr> 
                     {% endfor %}

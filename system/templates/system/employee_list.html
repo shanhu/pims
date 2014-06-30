@@ -22,6 +22,9 @@
                             身份证
 						</th>
                         <th>
+                            卡表号
+						</th>
+                        <th>
                             类型
 						</th>
                         <th>
@@ -48,6 +51,11 @@
 						<td>
 							{{employee.idCard}}
 						</td>
+                        <td>
+                            {% if employee.cardprt1 %}
+                            {{employee.cardprt1.show_num | default:''}}({{ employee.cardprt1.color  }})
+                            {% endif   %}
+                        </td>
                         <td>
 							{{employee.get_type_display}}
 						</td>

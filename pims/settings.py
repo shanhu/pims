@@ -42,7 +42,7 @@ INSTALLED_APPS = (
     'bootstrap3',
     'system', 
     'bootstrap3_datetime', 
-    
+    #'debug_toolbar',    
 )
 
 MIDDLEWARE_CLASSES = (
@@ -68,8 +68,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pims',
-        'USER': 'root', 
-        'PASSWORD': '123456', 
+        'USER': 'pims', 
+        'PASSWORD': 'admin', 
         'HOST': '127.0.0.1', 
         'port': '3306', 
     }
@@ -107,7 +107,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(pathname)s %(funcName)s %(process)d [%(thread)d] - %(threadName)s %(message)s'
+            'format': '%(levelname)s %(asctime)s %(module)s %(pathname)s  [%(funcName)s:%(lineno)s] - %(process)d [%(thread)d - %(threadName)s] %(message)s'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -116,7 +116,7 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/tmp/django/pims-debug.log',
             'formatter': 'verbose'
         },
@@ -136,18 +136,31 @@ LOGGING = {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
-        },
+        }, 
+        'django.request':{
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     },
+}
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
 }
 
 
 
 BOOTSTRAP3 = {
-    'jquery_url': '//code.jquery.com/jquery.min.js',
-    'base_url': '//netdna.bootstrapcdn.com/bootstrap/3.1.1/',
-    'css_url': None,
-    'theme_url': None,
-    'javascript_url': None,
+    'jquery_url': '//cdn.bootcss.com/jquery/2.1.1/jquery.min.js',
+    'base_url': '//cdn.bootcss.com/bootstrap/3.1.1/',
+    'css_url': '//cdn.bootcss.com/bootstrap/3.1.1/css/bootstrap.css',
+    'theme_url': '//cdn.bootcss.com/bootstrap/3.1.1/css/bootstrap-theme.css',
+    'javascript_url': '//cdn.bootcss.com/bootstrap/3.1.1/js/bootstrap.min.js',
     'javascript_in_head': False,
     'include_jquery': False,
     'horizontal_label_class': 'col-md-2',
@@ -160,6 +173,10 @@ BOOTSTRAP3 = {
     },
     'field_renderers': {
         'default': 'bootstrap3.renderers.FieldRenderer',
-        'inline': 'bootstrap3.renderers.InlineFieldRenderer',
+        #'inline': 'bootstrap3.renderers.InlineFieldRenderer',
+        #'default': 'bootstrap3.renderers.InlineFieldRenderer',
     },
+    
+
+
 }

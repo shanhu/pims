@@ -33,12 +33,50 @@
   
 	<script type="text/javascript" src="{% static "system/js/jquery.min.js"%}"></script>
 	<script type="text/javascript" src="{% static "system/js/bootstrap.min.js"%}"></script>
+	<!--<script type="text/javascript" src="http://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>-->
 	<script type="text/javascript" src="{% static "system/js/scripts.js"%}"></script>
-    {{ form.media }}
+	<script type="text/javascript" src="{% static "system/js/hideshow.js"%}"></script>
+
+    {{ form.media }} 
+
+<style>
+       
+
+		/* http://css-tricks.com/perfect-full-page-background-image/ */
+		html {
+			background: url(img/6133364748_89f2365922_o.jpg) no-repeat center center fixed; 
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+		}
+
+		body {
+			padding: 20px 1px;
+			font-size: 14px;
+			font-family: "微软雅黑",serif;
+			background: transparent;
+		} 
+
+		/* Override B3 .panel adding a subtly transparent background */
+		.panel {
+			background-color: rgba(255, 255, 255, 0.9);
+		}
+
+		.margin-base-vertical {
+			margin: 40px 0;
+		}
+
+	
+
+	</style> 
 </head>
 
 <body>
-<div class="container">
+
+
+<div class="container"> 
+	<img src="{% static "system/img/top_header.png" %}" class="img-responsive" alt="Responsive image">
 	<div class="row clearfix">
 		<div class="col-md-2 column"> 
         
@@ -52,79 +90,100 @@
 				<div class="panel-body">
 
                 
-{% block sidebar %}   
+{% block sidebar %}  
 
-
- <ul id="sidebar" class="nav nav-pills nav-stacked">
-							<li class="nav-header">
-                                <i class='fa fa-bar-chart-o'></i> 数据中心
-                            </li>
-                            <li class="{{sidebar.data_live}}">
-                                <a href="{% url 'data_live' %}">实时数据</a>
-                            </li>
-                            <li class="{{sidebar.index}}">
-                                <a href="{% url 'index' %}">员工汇总</a>
-                            </li>
-							 <li class="{{sidebar.index}}">
-                                <a href="{% url 'index' %}">生产线汇总</a>
-                            </li>
-							 <li class="{{sidebar.index}}">
-                                <a href="{% url 'index' %}">班次汇总</a>
-                            </li> 
-
-                            <li class="nav-header">
-                                <i class='fa fa-users'></i> 人事管理
-                            </li>
-                            <li class="{{sidebar.employee_add}}">
-                                <a href="{% url 'employee_add' %}">员工注册</a>
-                            </li>
-                            <li class="{{sidebar.employee_list}}">
-                                <a href="{% url 'employee_list' %}">员工汇总</a>
-                            </li>
-                            <li class="nav-divider">
-                            <li class="nav-header">
-                                 <i class='fa fa-money'></i>  工资管理
-                            </li>
-							  <li class="{{sidebar.index}}" >
-                                <a href="{% url 'index' %}">工资汇总</a>
-                            </li>
-                            <li class="{{sidebar.salary_count_config}}" >
-                                <a href="{% url 'salarycount_list' %}">计件工资参数</a>
-                            </li>
-                            <li class="{{sidebar.salary_time_config}}" >
-                                <a href="{% url 'salarytime_list' %}">计时工资参数</a>
-                            </li>
-                               <li class="nav-divider">
-                               <li class="nav-header">
-                                  <i class='fa fa-credit-card'></i> 卡片管理
-                            </li>
-                                <li class="{{sidebar.card}}">
-                                <a href="{% url 'card_list'   %}">卡片管理</a>
-                            </li>
-                            <li class="nav-divider">
-                            <li class="nav-header">
-                                  <i class='fa fa-shopping-cart'></i> 物料管理
-                            </li>
-							<li class="{{sidebar.material_type}}" >
-								<a href="{% url 'material_type_list' %}">物料类型管理</a>
-							</li>
-							<li class="{{sidebar.material}}" >
-								<a href="{%url 'material_list' %}">物料管理</a>
-							</li>
-                            <li class="nav-divider">
-							<li class="nav-header">
-								  <i class='fa fa-sort-numeric-asc'></i> 工艺管理
-							</li>
-							<li  class="{{sidebar.process}}" >
-								<a href="{%url 'process_list' %}">工艺管理</a>
-							</li>
-                           
-                            <li class="nav-divider">
-                            <li  class="{{sidebar.help}}" >
-                                <a href="#">帮助</a>
-                            </li>
-                        </ul> 
-
+	<aside id="sidebar" class="column">
+			<h5><i class='fa fa-bar-chart-o' style="width:20px;"></i> 数据中心</h5> 
+			<ul class="nav nav-pills nav-stacked toggle"> 
+				<li class="{{sidebar.data_live}}">
+					<a href="{% url 'data_live' %}">实时数据</a>
+				</li>
+				<li class="{{sidebar.report_employee}}">
+					<a href="{% url 'report_employee' %}">员工汇总</a>
+				</li>
+				<li class="{{sidebar.real_report_employee}}">
+					<a href="{% url 'real_report_employee' %}">实时员工汇总</a>
+				</li> 
+				<li class="{{sidebar.report_employee_detail}}">
+					<a href="{% url 'report_employee_detail' %}">员工汇总明细</a>
+				</li> 
+				 <li class="{{sidebar.report_class}}">
+					<a href="{% url 'report_class' %}">班次汇总</a>
+				</li> 
+				 <li class="{{sidebar.real_report_class}}">
+					<a href="{% url 'real_report_class' %}">实时班次汇总</a>
+				</li> 
+				 <li class="{{sidebar.report_class_detail}}">
+					<a href="{% url 'report_class_detail' %}">班次汇总明细</a>
+				</li> 
+				 <li class="{{sidebar.terminal_list}}">
+					<a href="{% url 'terminal_list' %}">终端管理</a>
+				</li> 
+				 <li class="{{sidebar.workshop_list}}">
+					<a href="{% url 'workshop_list' %}">车间管理</a>
+				</li>
+				<li class="nav-divider"> 
+			</ul>
+			<h5><i class='fa fa-users' style="width:20px;"></i> 人事管理</h5>
+			<ul class="nav nav-pills nav-stacked toggle"> 
+				<li class="{{sidebar.employee_add}}">
+					<a href="{% url 'employee_add' %}">员工注册</a>
+				</li>
+				<li class="{{sidebar.employee_list}}">
+					<a href="{% url 'employee_list' %}">员工汇总</a>
+				</li>
+			</ul>
+			<h5><i class='fa fa-money' style="width:20px;"></i>  工资管理</h5>
+			 <ul class="nav nav-pills nav-stacked toggle"> 
+				 <li class="{{sidebar.report_salary}}" >
+					<a href="{% url 'report_salary_list' %}">工资汇总</a>
+				</li>
+				<li class="{{sidebar.salary_count_config}}" >
+					<a href="{% url 'salarycount_list' %}">计件工资参数</a>
+				</li>
+				<li class="{{sidebar.salary_time_config}}"  >
+					<a href="{% url 'salarytime_list' %}">计时工资参数</a>
+				</li>
+			</ul>
+			 <h5><i class='fa fa-credit-card' style="width:20px;"></i> 卡片管理</h5>
+			   <ul class="nav nav-pills nav-stacked toggle">
+				<li class="{{sidebar.card}}">
+				<a href="{% url 'card_list'   %}">卡片管理</a>
+				</li>
+				<li class="nav-divider">
+			  </ul>
+			<h5><i class='fa fa-shopping-cart' style="width:20px;"></i> 物料管理</h5>
+			<ul class="nav nav-pills nav-stacked toggle"> 	 
+				<li class="{{sidebar.material_type}}" >
+					<a href="{% url 'material_type_list' %}">物料类型管理</a>
+				</li>
+				<li class="{{sidebar.material}}" >
+					<a href="{%url 'material_list' %}">物料管理</a>
+				</li>
+				<li class="nav-divider">
+			</ul>
+			<h5><i class='fa fa-sort-numeric-asc' style="width:23px;"></i>工艺管理</h5>
+			<ul class="nav nav-pills nav-stacked toggle"> 
+				<li  class="{{sidebar.process}}" >
+					<a href="{%url 'process_list' %}">工艺管理</a>
+				</li>
+			</ul>
+			<h5><i class='fa fa-home' style="width:23px;"></i>班次管理</h5>
+			<ul class="nav nav-pills nav-stacked toggle"> 
+				<li  class="{{sidebar.workclass}}" >
+					<a href="{%url 'workclass_list' %}">班次管理</a>
+				</li>
+			   
+				<li class="nav-divider">
+				<li  class="{{sidebar.help}}" >
+					<a href="#">帮助</a>
+				</li>
+			</ul>
+		<footer> 
+			<p><strong>Copyright &copy; </strong></p>
+			<p><strong>鑫诺科技 </strong></p>
+		</footer>
+	</aside><!-- end of sidebar -->
 
 {% endblock sidebar %}
      
@@ -132,9 +191,9 @@
 			</div>
 		</div> <!-- col-md-2 column -->
 		<div class="col-md-10 column">
-			<h3>
+			<h1>
 				{% block pageHeader  %} I'm in base page {% endblock pageHeader  %}
-			</h3>
+			</h1>
  {% block breadcrumb %}              
             <ul class="breadcrumb">
 				<li>
