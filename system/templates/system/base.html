@@ -93,38 +93,51 @@
 {% block sidebar %}  
 
 	<aside id="sidebar" class="column">
-			<h5><i class='fa fa-bar-chart-o' style="width:20px;"></i> 数据中心</h5> 
+			<h5><i class='fa fa-bar-chart-o' style="width:20px;"></i>实时数据</h5> 
 			<ul class="nav nav-pills nav-stacked toggle"> 
 				<li class="{{sidebar.data_live}}">
 					<a href="{% url 'data_live' %}">实时数据</a>
 				</li>
-				<li class="{{sidebar.report_employee}}">
-					<a href="{% url 'report_employee' %}">员工汇总</a>
-				</li>
 				<li class="{{sidebar.real_report_employee}}">
 					<a href="{% url 'real_report_employee' %}">实时员工汇总</a>
 				</li> 
+				 <li class="{{sidebar.real_report_class}}">
+					<a href="{% url 'real_report_class' %}">实时班次汇总</a>
+				</li> 
+			</ul>
+			<h5><i class='fa fa-bar-chart-o' style="width:20px;"></i> 生产数据</h5> 
+			<ul class="nav nav-pills nav-stacked toggle"> 
+				 
+				<li class="{{sidebar.report_employee}}">
+					<a href="{% url 'report_employee' %}">员工汇总</a>
+				</li>
+				
 				<li class="{{sidebar.report_employee_detail}}">
 					<a href="{% url 'report_employee_detail' %}">员工汇总明细</a>
 				</li> 
 				 <li class="{{sidebar.report_class}}">
 					<a href="{% url 'report_class' %}">班次汇总</a>
 				</li> 
-				 <li class="{{sidebar.real_report_class}}">
-					<a href="{% url 'real_report_class' %}">实时班次汇总</a>
-				</li> 
+				
 				 <li class="{{sidebar.report_class_detail}}">
 					<a href="{% url 'report_class_detail' %}">班次汇总明细</a>
-				</li> 
-				 <li class="{{sidebar.terminal_list}}">
-					<a href="{% url 'terminal_list' %}">终端管理</a>
-				</li> 
-				 <li class="{{sidebar.workshop_list}}">
-					<a href="{% url 'workshop_list' %}">车间管理</a>
-				</li>
+				</li>  
 				<li class="nav-divider"> 
 			</ul>
-			<h5><i class='fa fa-users' style="width:20px;"></i> 人事管理</h5>
+			<h5><i class='fa fa-users' style="width:20px;"></i> 终端管理</h5>
+			<ul class="nav nav-pills nav-stacked toggle"> 
+			 <li class="{{sidebar.terminal_list}}">
+					<a href="{% url 'terminal_list' %}">终端管理</a>
+			</li> 
+			</ul>
+			<h5><i class='fa fa-users' style="width:20px;"></i> 车间管理</h5>
+			<ul class="nav nav-pills nav-stacked toggle"> 
+			 <li class="{{sidebar.workshop_list}}">
+					<a href="{% url 'workshop_list' %}">车间管理</a>
+				</li>
+			</ul>
+
+			<h5><i class='fa fa-users' style="width:20px;"></i> 员工管理</h5>
 			<ul class="nav nav-pills nav-stacked toggle"> 
 				<li class="{{sidebar.employee_add}}">
 					<a href="{% url 'employee_add' %}">员工注册</a>
@@ -133,25 +146,6 @@
 					<a href="{% url 'employee_list' %}">员工汇总</a>
 				</li>
 			</ul>
-			<h5><i class='fa fa-money' style="width:20px;"></i>  工资管理</h5>
-			 <ul class="nav nav-pills nav-stacked toggle"> 
-				 <li class="{{sidebar.report_salary}}" >
-					<a href="{% url 'report_salary_list' %}">工资汇总</a>
-				</li>
-				<li class="{{sidebar.salary_count_config}}" >
-					<a href="{% url 'salarycount_list' %}">计件工资参数</a>
-				</li>
-				<li class="{{sidebar.salary_time_config}}"  >
-					<a href="{% url 'salarytime_list' %}">计时工资参数</a>
-				</li>
-			</ul>
-			 <h5><i class='fa fa-credit-card' style="width:20px;"></i> 卡片管理</h5>
-			   <ul class="nav nav-pills nav-stacked toggle">
-				<li class="{{sidebar.card}}">
-				<a href="{% url 'card_list'   %}">卡片管理</a>
-				</li>
-				<li class="nav-divider">
-			  </ul>
 			<h5><i class='fa fa-shopping-cart' style="width:20px;"></i> 物料管理</h5>
 			<ul class="nav nav-pills nav-stacked toggle"> 	 
 				<li class="{{sidebar.material_type}}" >
@@ -172,13 +166,28 @@
 			<ul class="nav nav-pills nav-stacked toggle"> 
 				<li  class="{{sidebar.workclass}}" >
 					<a href="{%url 'workclass_list' %}">班次管理</a>
+				</li> 
+			</ul>
+			<h5><i class='fa fa-credit-card' style="width:20px;"></i> 卡片管理</h5>
+			   <ul class="nav nav-pills nav-stacked toggle">
+				<li class="{{sidebar.card}}">
+				<a href="{% url 'card_list'   %}">卡片管理</a>
 				</li>
-			   
 				<li class="nav-divider">
-				<li  class="{{sidebar.help}}" >
-					<a href="#">帮助</a>
+			 </ul>
+				<h5><i class='fa fa-money' style="width:20px;"></i>  工资管理</h5>
+			 <ul class="nav nav-pills nav-stacked toggle"> 
+				 <li class="{{sidebar.report_salary}}" >
+					<a href="{% url 'report_salary_list' %}">工资汇总</a>
+				</li>
+				<li class="{{sidebar.salary_count_config}}" >
+					<a href="{% url 'salarycount_list' %}">计件工资参数</a>
+				</li>
+				<li class="{{sidebar.salary_time_config}}"  >
+					<a href="{% url 'salarytime_list' %}">计时工资参数</a>
 				</li>
 			</ul>
+			
 		<footer> 
 			<p><strong>Copyright &copy; </strong></p>
 			<p><strong>鑫诺科技 </strong></p>
