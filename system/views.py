@@ -1069,7 +1069,11 @@ class ProductionListView(SystemListView):
             join process ps on pd.PROCESS_ID = ps.ID
             join material m on m.id = pd.MATERIAL_ID
             join employee e on e.ID = pd.EMPLOYEE_ID 
+            left join terminal t on t.ID = pd.TERMINAL_ID
+			left join workgroup wg on wg.ID = t.WORKGROUP_ID
+			left join workshop ws on ws.ID = wg.WORKSHOP_ID
             WHERE 1=1
+            
             
         '''
         if "start_time" in self.request.GET and "end_time" in self.request.GET:
@@ -1092,10 +1096,16 @@ class ProductionListView(SystemListView):
             employee_name =  self.request.GET['employee_name']
             if employee_name:
                 querySql += "and e.NAME = '%s' " % employee_name
+                
         if "process" in self.request.GET:
             process = self.request.GET['process']
             if process:
                 querySql += "and PD.PROCESS_ID = '%s' " % process
+        if "workshop" in self.request.GET:
+            workshop = self.request.GET['workshop']
+            if workshop:
+                querySql += "and ws.id = %s " % workshop
+            
         if "material" in self.request.GET:
             material = self.request.GET['material']
             if material:
@@ -1132,7 +1142,11 @@ class ReportEmployeeListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                  querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
-
+        if "workshop" in self.request.GET:
+            workshop = self.request.GET['workshop']
+            if workshop:
+                querySql += "and RP.workshop_id = %s " % workshop
+                
         if "process" in self.request.GET:
             process = self.request.GET['process']
             if process:
@@ -1180,7 +1194,10 @@ class ReportEmployeeDetailListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                  querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
-
+        if "workshop" in self.request.GET:
+            workshop = self.request.GET['workshop']
+            if workshop:
+                querySql += "and RP.workshop_id = %s " % workshop
         if "process" in self.request.GET:
             process = self.request.GET['process']
             if process:
@@ -1276,6 +1293,11 @@ class ReportClassListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        if "workshop" in self.request.GET:
+            workshop = self.request.GET['workshop']
+            if workshop:
+                querySql += "and ws.id = %s " % workshop
+                
         if "process" in self.request.GET:
             process = self.request.GET['process']
             if process:
@@ -1320,6 +1342,11 @@ class ReportClassDetailListView(SystemListView):
             process = self.request.GET['process']
             if process:
                 querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "workshop" in self.request.GET:
+            workshop = self.request.GET['workshop']
+            if workshop:
+                querySql += "and ws.id = %s " % workshop
+        
         if "material" in self.request.GET:
             material = self.request.GET['material']
             if material:
@@ -1426,7 +1453,7 @@ class WorkshopListView(SystemListView):
             FROM WORKSHIFT SWS
             JOIN WORKCLASS SWC ON SWS.WORKCLASS_ID = SWC.ID AND SWC.TYPE = 0 
             LEFT JOIN WORKSHOP WS ON WS.ID = SWC.WORKSHOP_ID
-            LEFT JOIN WORKCLASS EWC ON  EWC.TYPE = 1  
+            LEFT JOIN WORKCLASS EWC ON  EWC.TYPE = 1 and EWC.WORKSHOP_ID = SWC.WORKSHOP_ID  
             LEFT JOIN WORKSHIFT EWS ON EWS.WORKCLASS_ID = EWC.ID AND SWS.TIME < EWS.TIME  AND  EWS.TIME BETWEEN '%s' and  DATE_ADD(DATE('%s') , INTERVAL 1 DAY)
             WHERE 1=1 
             AND (SWC.WORKSHOP_ID = %s or 0 = %s )
