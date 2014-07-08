@@ -1245,7 +1245,10 @@ class ReportEmployeeRealTimeListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                  querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
-
+        if "workshop" in self.request.GET:
+            workshop = self.request.GET['workshop']
+            if workshop:
+                querySql += "and RP.workshop_id = %s " % workshop
         if "process" in self.request.GET:
             process = self.request.GET['process']
             if process:
