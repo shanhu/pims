@@ -8,7 +8,7 @@
 						<th>
 							车间
 						</th>
-                        <th>
+                        <th >
 							时间
 						</th>
                        <th>
@@ -44,7 +44,7 @@
 							{{reportclass.WORKSHOP_NAME  |default_if_none:""}}
 						</td> 
                          <td>
-                        {{reportclass.STARTTIME   | date:"Y-m-d H:i:s" }}-{{reportclass.ENDTIME   | date:"Y-m-d H:i:s"}}
+                        【{{reportclass.STARTTIME   | date:"Y-m-d H:i:s" }}】---【{{reportclass.ENDTIME   | date:"Y-m-d H:i:s"}}】
                         </td>
                          <td>
 							{{reportclass.EMPLOYEE_NAME  |default_if_none:""}}

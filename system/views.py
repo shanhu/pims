@@ -13,6 +13,9 @@ from django.db import IntegrityError
 from django.core.cache import cache
 from datetime import datetime
 from excel_response import ExcelResponse
+from django.shortcuts import render
+
+from django.contrib.auth import authenticate, login, logout
 
 
 # import the logging library
@@ -29,6 +32,28 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         """Return the last five published polls."""
         return MaterialType.objects.order_by('id')[:5] 
+        
+        
+def login_view(request):    
+    if request.method == 'POST': 
+        username = request.POST['username']
+        password = request.POST['password']
+        next = request.POST['next']
+        user = authenticate(username=username, password=password)
+        logger.info("next: %s" % next)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect('/system/data/')
+            else:            
+                pass
+        else:            
+            pass
+    else:
+        return render(request,'accounts/login.html')
+def logout_view(request):
+    logout(request)
+    return redirect('/accounts/login/')
 
 
 class SystemListView(generic.ListView, FormMixin):
@@ -52,7 +77,7 @@ class SystemListView(generic.ListView, FormMixin):
         if self.model:
             return self.model.objects.filter(**{key : self.request.GET[key] for key in self.request.GET  if  self.request.GET[key] <> '' and  key <> 'page' })
         
-        
+     
 class SystemDetailView(generic.DetailView):
     template_name = 'system/base_detail.html'
     #todo add dynamic menus here!
@@ -64,6 +89,7 @@ class SystemDetailView(generic.DetailView):
 
 #--------------------------------------------------员工管理 界面定义------------------------------------------------------------------
 from system.models import Employee, EmployeeForm,  NormalSearchForm, EmployeeSearchForm
+
 class EmployeeListView(SystemListView): 
     template_name = 'system/employee_list.html'
     context_object_name = 'employee_list'
@@ -78,8 +104,12 @@ class EmployeeListView(SystemListView):
         context['sidebar'] = {'employee_list':'active'}
         context['add_url'] = reverse_lazy('employee_add')
         return context
+    def get_queryset(self,**kwargs):
+        if self.model:
+            return self.model.objects.filter(**{key : self.request.GET[key] for key in self.request.GET  if  self.request.GET[key] <> '' and  key <> 'page' }).order_by("num")
+        
     
-    
+   
 class EmployeeDetailView(SystemDetailView): 
     template_name = 'system/employee_detail.html'
     context_object_name = 'employee'
@@ -1025,7 +1055,7 @@ class CardDeleteView(DeleteView):
 
 
 #--------------------------------------------------实时数据 界面定义------------------------------------------------------------------   
-from system.models import Production, ProductionSearchForm, ReportEmployee, ReportEmployeeSearchForm,  ReportClass, ReportClassSearchForm, WorkshopSearchForm
+from system.models import Production, ProductionSearchForm, ReportEmployee, ReportEmployeeSearchForm, ReportEmployeeRealTimeSearchForm,  ReportClass, ReportClassSearchForm,ReportClassRealTimeSearchForm, WorkshopSearchForm
 class ProductionListView(SystemListView):
     template_name = 'system/production_list.html'
     context_object_name = 'production_list'
@@ -1163,7 +1193,7 @@ class ReportEmployeeListView(SystemListView):
             material = self.request.GET['material']
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
-        return list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID "))
+        return list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID ORDER BY RP.WORKSHOP_ID ,  RP.MATERIAL_ID , RP.PROCESS_LAST_ID  ,  SUM(RP.PUT_COUNT)  desc   "))
 class ReportEmployeeDetailListView(SystemListView):
     template_name = 'system/reportemployeedetail_list.html'
     context_object_name = 'reportemployee_list'
@@ -1219,7 +1249,7 @@ class ReportEmployeeRealTimeListView(SystemListView):
     template_name = 'system/realtimereportemployee_list.html'
     context_object_name = 'reportemployee_list'
     model = ReportEmployee
-    form_class = ReportEmployeeSearchForm
+    form_class = ReportEmployeeRealTimeSearchForm
     #paginate_by = 10
     #logger.info("system out test.") 
     def get_context_data(self, *args, **kwargs):
@@ -1265,7 +1295,7 @@ class ReportEmployeeRealTimeListView(SystemListView):
             material = self.request.GET['material']
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
-        return list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID "))
+        return list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID   ORDER BY RP.WORKSHOP_ID ,  RP.MATERIAL_ID , RP.PROCESS_LAST_ID  ,  SUM(RP.PUT_COUNT)  desc   "))
 class ReportClassListView(SystemListView):
     template_name = 'system/reportclass_list.html'
     context_object_name = 'reportclass_list'
@@ -1309,7 +1339,7 @@ class ReportClassListView(SystemListView):
             material = self.request.GET['material']
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
-        return list(Production.objects.raw(querySql   + "  GROUP BY RP.WORKSHOP_ID,RP.MATERIAL_ID,RP.PROCESS_FIRST_ID,RP.PROCESS_LAST_ID "))
+        return list(Production.objects.raw(querySql   + "  GROUP BY RP.WORKSHOP_ID,RP.MATERIAL_ID,RP.PROCESS_FIRST_ID,RP.PROCESS_LAST_ID  ORDER BY RP.WORKSHOP_ID ,  RP.MATERIAL_ID , RP.PROCESS_LAST_ID  ,  SUM(RP.PUT_COUNT)  desc   "))
          
 class ReportClassDetailListView(SystemListView):
     template_name = 'system/reportclassdetail_list.html'
@@ -1359,7 +1389,7 @@ class ReportClassRealTimeListView(SystemListView):
     template_name = 'system/realtimereportclass_list.html'
     context_object_name = 'reportclass_list'
     model = ReportClass
-    form_class = ReportClassSearchForm
+    form_class = ReportClassRealTimeSearchForm
     #paginate_by = 10
     #logger.info("system out test.") 
     def get_context_data(self, *args, **kwargs):
@@ -1393,7 +1423,7 @@ class ReportClassRealTimeListView(SystemListView):
             material = self.request.GET['material']
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
-        return list(Production.objects.raw(querySql   + "  GROUP BY RP.WORKSHOP_ID,RP.MATERIAL_ID,RP.PROCESS_FIRST_ID,RP.PROCESS_LAST_ID "))
+        return list(Production.objects.raw(querySql   + "  GROUP BY RP.WORKSHOP_ID,RP.MATERIAL_ID,RP.PROCESS_FIRST_ID,RP.PROCESS_LAST_ID  ORDER BY RP.WORKSHOP_ID ,  RP.MATERIAL_ID , RP.PROCESS_LAST_ID  ,  SUM(RP.PUT_COUNT)  desc  "))
          
 
 from system.models import Terminal, TerminalForm

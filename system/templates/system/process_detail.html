@@ -93,7 +93,7 @@
       </div>
       <form action="{% url 'process_delete' process.id %}" method="post">{% csrf_token %}
       <div class="modal-body"> 
-        <p>是否确认删除 "{{ process.name }}物料"？ </p> 
+        <p>是否确认删除 "{{ process.name }}工艺"？ </p> 
         <input type="hidden" name="id" value="{{process.id}}" />
       </div>
       <div class="modal-footer">
