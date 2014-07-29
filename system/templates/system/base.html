@@ -67,6 +67,10 @@
 			margin: 40px 0;
 		}
 
+		.form_time_width {
+			width: 180px;
+		}
+
 	
 
 	</style> 
@@ -93,7 +97,7 @@
 {% block sidebar %}  
 
 	<aside id="sidebar" class="column">
-			<h5><i class='fa fa-bar-chart-o' style="width:20px;"></i>实时数据</h5> 
+			<h5><i class='fa fa-clock-o' style="width:24px;"></i>实时数据</h5> 
 			<ul class="nav nav-pills nav-stacked toggle"> 
 				<li class="{{sidebar.data_live}}">
 					<a href="{% url 'data_live' %}">实时数据</a>
@@ -124,13 +128,13 @@
 				</li>  
 				<li class="nav-divider"> 
 			</ul>
-			<h5><i class='fa fa-users' style="width:20px;"></i> 终端管理</h5>
+			<h5><i class='fa fa-desktop' style="width:20px;"></i> 终端管理</h5>
 			<ul class="nav nav-pills nav-stacked toggle"> 
 			 <li class="{{sidebar.terminal_list}}">
 					<a href="{% url 'terminal_list' %}">终端管理</a>
 			</li> 
 			</ul>
-			<h5><i class='fa fa-users' style="width:20px;"></i> 车间管理</h5>
+			<h5><i class='fa fa-building-o' style="width:20px;"></i> 车间管理</h5>
 			<ul class="nav nav-pills nav-stacked toggle"> 
 			 <li class="{{sidebar.workshop_list}}">
 					<a href="{% url 'workshop_list' %}">车间管理</a>
@@ -173,7 +177,6 @@
 				<li class="{{sidebar.card}}">
 				<a href="{% url 'card_list'   %}">卡片管理</a>
 				</li>
-				<li class="nav-divider">
 			 </ul>
 				<h5><i class='fa fa-money' style="width:20px;"></i>  工资管理</h5>
 			 <ul class="nav nav-pills nav-stacked toggle"> 
@@ -187,7 +190,8 @@
 					<a href="{% url 'salarytime_list' %}">计时工资参数</a>
 				</li>
 			</ul>
-			
+			<li class="nav-divider">
+			<a href="{% url 'log_out' %}">退出系统</a>
 		<footer> 
 			<p><strong>Copyright &copy; </strong></p>
 			<p><strong>鑫诺科技 </strong></p>
