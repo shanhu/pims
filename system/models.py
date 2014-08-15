@@ -227,8 +227,8 @@ class WorkshopSearchForm(forms.Form):
     def __init__(self, *args, **kwargs): 
         super(WorkshopSearchForm, self).__init__(*args, **kwargs)
         self.fields['workshop'] = forms.ChoiceField(required = False, choices= [('', ' 全部车间')] + Workshop.getWorkshops(),  label="")
-        self.fields['start_time'] = forms.DateTimeField( required = False, validators=[validate_notnull],      widget=DateTimePicker( div_attrs={'class':'input-group date '},  attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
-        self.fields['end_time'] = forms.DateTimeField( required = False  , validators=[validate_notnull],  widget=DateTimePicker( div_attrs={'class':'input-group date '}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['start_time'] = forms.DateTimeField( required = False, validators=[validate_notnull],      widget=DateTimePicker( div_attrs={'class':'input-group date form_time_width'},  attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['end_time'] = forms.DateTimeField( required = False  , validators=[validate_notnull],  widget=DateTimePicker( div_attrs={'class':'input-group date form_time_width'}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
 
 class WorkGroup(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True) # Field name made lowercase.
@@ -405,7 +405,7 @@ class EmployeeForm(forms.ModelForm):
     #sexChoices = DictConfig.getTypeChoices(type="sex") 
     employeeTypeChoices  = DictConfig.getTypeChoices(type="employee_type")
     statusChoices = DictConfig.getTypeChoices(type="employee_status")
-    joinTime = forms.DateTimeField(  widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickSeconds": False}),label="入职时间" )
+    joinTime = forms.DateTimeField(  widget=DateTimePicker( div_attrs={'class':'input-group date'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="入职时间" )
     def clean(self): 
         cleand_data = super(EmployeeForm, self).clean() 
         cardprt1 = cleand_data.get('cardprt1')
@@ -598,8 +598,8 @@ class ProductionSearchForm(forms.Form):
         self.fields['is_first'] = forms.ChoiceField( required = False, label="", choices=[('', '全部'), ('0', '交料'),('1', '领料')] ,  )
         self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'10','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
         self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'13','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
-        self.fields['start_time'] = forms.DateTimeField( required = False,  widget=DateTimePicker( div_attrs={'class':'input-group date  ' ,  },  attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),  "class": "form-control ",'placeholder':'开始时间'   },  options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
-        self.fields['end_time'] = forms.DateTimeField( required = False  ,  widget=DateTimePicker( div_attrs={'class':'input-group date  ' ,  }, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control "  }, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['start_time'] = forms.DateTimeField( required = False,  widget=DateTimePicker( div_attrs={'class':'input-group date  form_time_width' ,  },  attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),  "class": "form-control ",'placeholder':'开始时间'   },  options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['end_time'] = forms.DateTimeField( required = False  ,  widget=DateTimePicker( div_attrs={'class':'input-group date  form_time_width' ,  }, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control "  }, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
         
         
 
@@ -646,8 +646,8 @@ class ReportEmployeeSearchForm(forms.Form):
         #self.fields['is_first'] = forms.ChoiceField( required = False, label="", choices=[('', '全部'), ('0', '交料'),('1', '领料')] ,  )
         self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'17','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
         self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'20','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
-        self.fields['start_time'] = forms.DateTimeField( required = False,   validators=[validate_notnull],   widget=DateTimePicker( div_attrs={'class':'input-group date '},  attrs={ 'value':datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d'),  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
-        self.fields['end_time'] = forms.DateTimeField( required = False ,  validators=[validate_notnull],   widget=DateTimePicker( div_attrs={'class':'input-group date '}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['start_time'] = forms.DateTimeField( required = False,   validators=[validate_notnull],   widget=DateTimePicker( div_attrs={'class':'input-group date  form_time_width'},  attrs={ 'value':datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d'),  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['end_time'] = forms.DateTimeField( required = False ,  validators=[validate_notnull],   widget=DateTimePicker( div_attrs={'class':'input-group date  form_time_width'}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
         
 class ReportEmployeeRealTimeSearchForm(forms.Form):      
     def __init__(self, *args, **kwargs): 
@@ -670,8 +670,8 @@ class ReportClassSearchForm(forms.Form):
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
         self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="") 
         #self.fields['is_first'] = forms.ChoiceField( required = False, label="", choices=[('', '全部'), ('0', '交料'),('1', '领料')] ,  )
-        self.fields['start_time'] = forms.DateTimeField( required = False, validators=[validate_notnull],      widget=DateTimePicker( div_attrs={'class':'input-group date '},  attrs={ 'value':datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d'),  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
-        self.fields['end_time'] = forms.DateTimeField( required = False  , validators=[validate_notnull],  widget=DateTimePicker( div_attrs={'class':'input-group date '}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['start_time'] = forms.DateTimeField( required = False, validators=[validate_notnull],      widget=DateTimePicker( div_attrs={'class':'input-group date form_time_width'},  attrs={ 'value':datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d'),  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
+        self.fields['end_time'] = forms.DateTimeField( required = False  , validators=[validate_notnull],  widget=DateTimePicker( div_attrs={'class':'input-group date form_time_width'}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
 
 class ReportClassRealTimeSearchForm(forms.Form):      
     def __init__(self, *args, **kwargs): 

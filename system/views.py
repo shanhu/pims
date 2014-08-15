@@ -45,10 +45,11 @@ def login_view(request):
             if user.is_active:
                 login(request, user)
                 return redirect('/system/data/')
-            else:            
-                pass
-        else:            
-            pass
+            else:
+                messages.error(request,u'用户未激活')
+        else:
+            messages.error(request,u'用户密码不匹配，请重试.')
+        return render(request,'accounts/login.html')
     else:
         return render(request,'accounts/login.html')
 def logout_view(request):

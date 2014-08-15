@@ -87,7 +87,7 @@
 			
 				{% if form.errors %}
 					<div class="alert alert-danger" role="alert" >用户名密码输入错误，请重试！</div>
-				{% endif %}
+				{% endif %} 
 
 				<form class="margin-base-vertical" method="post" action="{% url 'login_view' %}" >
 					{% csrf_token %}
@@ -106,7 +106,24 @@
 					</span>
 					<input type="hidden" name="next" value="{{ next }}" />
 				</form>
+					{% if messages %}
+		 
+								<ul class="list-unstyled">
+									{% for message in messages %}
+									<li>
+									<div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}  alert-dismissable">
+										{{ message }}
+									</div>
+									</li>
+									{% endfor %}
+								</ul>
+ 
+				   {% endif %}
 			</div><!-- //main content -->
+			
+					
+
+				
 		</div><!-- //row -->
 	</div> <!-- //container -->
 </body>
