@@ -31,6 +31,9 @@
 						<th>
 							车间
 						</th>
+                         <th style="width: 200px;">
+                            时间
+                        </th>
                        <th>
                            员工
 						</th>  
@@ -63,6 +66,9 @@
 						<td>
 							{{reportclass.WORKSHOP_NAME  |default_if_none:""}}
 						</td> 
+                         <td>
+                        【{{reportclass.STARTTIME   | date:"Y-m-d H:i:s" }}】
+                        </td>
                          <td>
 							{{reportclass.EMPLOYEE_NAME  |default_if_none:""}}
 						</td>  
