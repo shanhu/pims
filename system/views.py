@@ -1225,6 +1225,11 @@ class ReportEmployeeDetailListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                  querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        else:
+            start_time = datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d')
+            end_time = datetime.now().strftime('%Y-%m-%d')         
+            querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+            
         if "workshop" in self.request.GET:
             workshop = self.request.GET['workshop']
             if workshop:
@@ -1262,7 +1267,7 @@ class ReportEmployeeRealTimeListView(SystemListView):
         return context
     def get_queryset(self):
         querySql = '''
-         SELECT RP.ID, E.name EMPLOYEE_NAME,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
+         SELECT RP.STARTTIME,RP.ENDTIME,RP.ID, E.name EMPLOYEE_NAME,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
             FROM REPORT_EMPLOYEE_TMP RP 
             LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
             LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
@@ -1372,6 +1377,11 @@ class ReportClassDetailListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        else:
+            start_time = datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d')
+            end_time = datetime.now().strftime('%Y-%m-%d')         
+            querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        
         if "process" in self.request.GET:
             process = self.request.GET['process']
             if process:
@@ -1402,7 +1412,7 @@ class ReportClassRealTimeListView(SystemListView):
         return context
     def get_queryset(self):
         querySql = '''
-         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
+         SELECT RP.STARTTIME,RP.ENDTIME,RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
             FROM REPORT_CLASS_TMP RP 
             LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
             LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
