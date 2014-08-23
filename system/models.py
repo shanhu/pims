@@ -481,7 +481,18 @@ class WorkClassForm(forms.ModelForm):
         super(WorkClassForm, self).__init__(*args, **kwargs)
         self.fields['card_num']  = forms.ChoiceField( choices= [('', '------')] + Card.getCardChoices(type=1) + Card.getCardChoices(type=2),  label="班次卡", required=False )
     '''   
-        
+    def clean(self): 
+        cleand_data = super(WorkClassForm, self).clean() 
+        cardprt = cleand_data.get('cardprt'  )
+        type = cleand_data.get('type')
+        logger.info(cardprt )
+        #logger.info(cardprt.show_num )
+        logger.info(type) 
+        if cardprt.num.startswith('16') and type == '1':
+            self._errors["cardprt"] = self.error_class([u"%s开始功能请选择16开头的卡片！" %  cardprt.show_num ])
+        if cardprt.num.startswith('33') and type == '0':
+            self._errors["cardprt"] = self.error_class([u"%s结束功能请选择33开头的卡片！" %  cardprt.show_num ])
+        return cleand_data;  
  
 
 class Workshift(models.Model):
@@ -596,8 +607,8 @@ class ProductionSearchForm(forms.Form):
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
         self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="") 
         self.fields['is_first'] = forms.ChoiceField( required = False, label="", choices=[('', '全部'), ('0', '交料'),('1', '领料')] ,  )
-        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'10','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
-        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'13','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
+        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'18','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
+        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'18','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
         self.fields['start_time'] = forms.DateTimeField( required = False,  widget=DateTimePicker( div_attrs={'class':'input-group date  form_time_width' ,  },  attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),  "class": "form-control ",'placeholder':'开始时间'   },  options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
         self.fields['end_time'] = forms.DateTimeField( required = False  ,  widget=DateTimePicker( div_attrs={'class':'input-group date  form_time_width' ,  }, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control "  }, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
         
@@ -644,8 +655,8 @@ class ReportEmployeeSearchForm(forms.Form):
         self.fields['material'] = forms.ChoiceField(required = False, choices= [('', ' 全部物料')] + Material.getMaterialChoices(),  label="")
         self.fields['process'] = forms.ChoiceField(required = False, choices= [('', ' 全部工艺')] + Process.getProcessChoices(),  label="") 
         #self.fields['is_first'] = forms.ChoiceField( required = False, label="", choices=[('', '全部'), ('0', '交料'),('1', '领料')] ,  )
-        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'17','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
-        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'20','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
+        self.fields['employee_num'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={ 'size':'25','placeholder':'工号'}),   label="",  required = False ) # Field name made lowercase.         
+        self.fields['employee_name'] = forms.CharField(max_length=20,widget=forms.TextInput(attrs={  'size':'25','placeholder':'姓名'}), label="", required = False ) # Field name made lowercase. 
         self.fields['start_time'] = forms.DateTimeField( required = False,   validators=[validate_notnull],   widget=DateTimePicker( div_attrs={'class':'input-group date  form_time_width'},  attrs={ 'value':(datetime.now() - timedelta(30)) .strftime('%Y-%m-%d'),  "class": "form-control",'placeholder':'开始时间'}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
         self.fields['end_time'] = forms.DateTimeField( required = False ,  validators=[validate_notnull],   widget=DateTimePicker( div_attrs={'class':'input-group date  form_time_width'}, attrs={ 'value':datetime.now().strftime('%Y-%m-%d'),'placeholder':'结束时间',  "class": "form-control",}, options={"format": "YYYY-MM-DD","pickSeconds": False}),label="" )
         

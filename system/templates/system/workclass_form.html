@@ -1,7 +1,7 @@
 {% extends "system/base_detail.html" %}
 {% load bootstrap3 %}
-{% block maincontent %}
-
+{% block maincontent %} 
+<span class=" lead text-danger  col-md-offset-2">开始功能请选择16开头的卡片，结束功能请选择33开头的卡片！</span>
 <form action="" method="post"  class="form-horizontal" role="form">
     {% csrf_token %}
      {% bootstrap_form form layout='horizontal' %}

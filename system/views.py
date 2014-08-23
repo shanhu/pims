@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.db import IntegrityError
 from django.core.cache import cache
-from datetime import datetime
+from datetime import datetime,timedelta
 from excel_response import ExcelResponse
 from django.shortcuts import render
 
@@ -44,6 +44,7 @@ def login_view(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
+                request.session.set_expiry(300)
                 return redirect('/system/data/')
             else:
                 messages.error(request,u'用户未激活')
@@ -668,14 +669,17 @@ class WorkClassUpdateView(UpdateView):
                 card.save()
                 object.save()
         else:
-            if object.cardprt:
+            if  object.cardprt:
                 object.cardprt.owner_id = object.id
                 object.cardprt.save()
                 messages.success(self.request, u"%s班次，新卡片 %s 已被分配！" % (self.object.name, self.object.cardprt.show_num) )
             else:
                 messages.warning(self.request, u"%s班次，未分配卡片！" % (self.object.name) )
         return result
-    
+    def form_invalid(self, form):
+        #logger.info(form.is_valid())
+        logger.info(u'%s', form.errors)
+        return super(WorkClassUpdateView, self).form_invalid(form)
     
 class WorkClassDeleteView(DeleteView):
     form_class= WorkClassForm
@@ -1173,6 +1177,11 @@ class ReportEmployeeListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                  querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        else:
+            start_time = (datetime.now() - timedelta(30)).strftime('%Y-%m-%d')
+            end_time = datetime.now().strftime('%Y-%m-%d')         
+            querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        
         if "workshop" in self.request.GET:
             workshop = self.request.GET['workshop']
             if workshop:
@@ -1226,7 +1235,7 @@ class ReportEmployeeDetailListView(SystemListView):
             if start_time and end_time:
                  querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
         else:
-            start_time = datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d')
+            start_time = (datetime.now() - timedelta(30)).strftime('%Y-%m-%d')
             end_time = datetime.now().strftime('%Y-%m-%d')         
             querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
             
@@ -1250,6 +1259,7 @@ class ReportEmployeeDetailListView(SystemListView):
             material = self.request.GET['material']
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
+        logger.info(querySql)
         return list(Production.objects.raw(querySql))
 class ReportEmployeeRealTimeListView(SystemListView):
     template_name = 'system/realtimereportemployee_list.html'
@@ -1257,13 +1267,15 @@ class ReportEmployeeRealTimeListView(SystemListView):
     model = ReportEmployee
     form_class = ReportEmployeeRealTimeSearchForm
     #paginate_by = 10
-    #logger.info("system out test.") 
+    #logger.info("system out test.")  
     def get_context_data(self, *args, **kwargs):
         context = super(ReportEmployeeRealTimeListView, self).get_context_data(*args, **kwargs)
         context['pageHeader'] = u"实时员工汇总"
         context['title'] = u"数据中心"
         context['is_display'] = 'none'
         context['sidebar'] = {'real_report_employee':'active'} 
+        #cursor = connection.cursor() 
+        #cursor.execute("CALL PIMS.P_GENERATE_REPORT_TMP()")
         return context
     def get_queryset(self):
         querySql = '''
@@ -1300,7 +1312,7 @@ class ReportEmployeeRealTimeListView(SystemListView):
         if "material" in self.request.GET:
             material = self.request.GET['material']
             if material:
-                querySql += "and RP.MATERIAL_ID = '%s' " % material
+                querySql += "and RP.MATERIAL_ID = '%s' " % material 
         return list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID   ORDER BY RP.WORKSHOP_ID ,  RP.MATERIAL_ID , RP.PROCESS_LAST_ID  ,  SUM(RP.PUT_COUNT)  desc   "))
 class ReportClassListView(SystemListView):
     template_name = 'system/reportclass_list.html'
@@ -1308,7 +1320,7 @@ class ReportClassListView(SystemListView):
     model = ReportClass
     form_class = ReportClassSearchForm
     #paginate_by = 10
-    #logger.info("system out test.") 
+    #logger.info("system out test.")
     def get_context_data(self, *args, **kwargs):
         context = super(ReportClassListView, self).get_context_data(*args, **kwargs)
         context['pageHeader'] = u"班次汇总"
@@ -1332,6 +1344,11 @@ class ReportClassListView(SystemListView):
             end_time = self.request.GET['end_time']
             if start_time and end_time:
                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        else:
+            start_time = (datetime.now() - timedelta(30)).strftime('%Y-%m-%d')
+            end_time = datetime.now().strftime('%Y-%m-%d')         
+            querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        
         if "workshop" in self.request.GET:
             workshop = self.request.GET['workshop']
             if workshop:
@@ -1378,7 +1395,7 @@ class ReportClassDetailListView(SystemListView):
             if start_time and end_time:
                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
         else:
-            start_time = datetime.now().replace(month=datetime.now().month - 1).strftime('%Y-%m-%d')
+            start_time = (datetime.now() - timedelta(30)).strftime('%Y-%m-%d')
             end_time = datetime.now().strftime('%Y-%m-%d')         
             querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
         
@@ -1395,20 +1412,23 @@ class ReportClassDetailListView(SystemListView):
             material = self.request.GET['material']
             if material:
                 querySql += "and RP.MATERIAL_ID = '%s' " % material
+        logger.info(querySql)
         return list(Production.objects.raw(querySql))
 class ReportClassRealTimeListView(SystemListView):
     template_name = 'system/realtimereportclass_list.html'
     context_object_name = 'reportclass_list'
     model = ReportClass
-    form_class = ReportClassRealTimeSearchForm
-    #paginate_by = 10
-    #logger.info("system out test.") 
+    form_class = ReportClassRealTimeSearchForm 
+    def get(self, request,  *args, **kwargs):
+        #cursor = connection.cursor() 
+        #cursor.execute("CALL PIMS.P_GENERATE_REPORT_TMP()")
+        return super(ReportClassRealTimeListView, self).get(request, *args, **kwargs)
     def get_context_data(self, *args, **kwargs):
         context = super(ReportClassRealTimeListView, self).get_context_data(*args, **kwargs)
         context['pageHeader'] = u"实时班次汇总"
         context['title'] = u"数据中心"
         context['sidebar'] = {'real_report_class':'active'} 
-        context['is_display'] = 'none'
+        context['is_display'] = 'none' 
         return context
     def get_queryset(self):
         querySql = '''
@@ -1685,3 +1705,179 @@ def generate_realTimeReport(request):
      else:
         forward_to =  "real_report_employee"
      return redirect(forward_to)
+     
+def export_reportEmployee(request):
+        querySql = '''
+         SELECT RP.ID, E.name EMPLOYEE_NAME,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
+            FROM REPORT_EMPLOYEE RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+		    left join employee e on e.id = RP.employee_id
+            WHERE 1=1
+         '''
+        if "start_time" in request.GET and "end_time" in request.GET:
+            start_time = request.GET['start_time']
+            end_time = request.GET['end_time']
+            if start_time and end_time:
+                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        if "workshop" in request.GET:
+            workshop = request.GET['workshop']
+            if workshop:
+                querySql += "and RP.workshop_id = %s " % workshop
+                
+        if "process" in request.GET:
+            process = request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "employee_num" in request.GET:
+            employee_num =  request.GET['employee_num']
+            if employee_num:
+                querySql += "and e.NUM = %s " % employee_num
+        if "employee_name" in request.GET:
+            employee_name =  request.GET['employee_name']
+            if employee_name:
+                querySql += "and e.NAME = '%s' " % employee_name
+        if "material" in request.GET:
+            material = request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        report_employee_list =  list(Production.objects.raw(querySql   + "  group by RP.employee_id, rp.WORKSHOP_ID,rp.MATERIAL_ID,rp.PROCESS_FIRST_ID,rp.PROCESS_LAST_ID ORDER BY RP.WORKSHOP_ID ,  RP.MATERIAL_ID , RP.PROCESS_LAST_ID  ,  SUM(RP.PUT_COUNT)  desc   "))
+        data = [[ '车间',  '员工',   '物料', '前工艺', '领料',  '后工艺', '交料',   '出成率']] 
+        for s in report_employee_list:
+           data.append([s.WORKSHOP_NAME,   s.EMPLOYEE_NAME , s.MATERIAL_NAME, 
+           s.FIRST_PROCESS_NAME, s.GET_COUNT , 
+           s.LAST_PROCESS_NAME,  s.PUT_COUNT,  s.AVERAGERATE ]) 
+        fileName = 'employee_report-' + datetime.now().strftime('%Y%m%d')
+        return ExcelResponse(data,output_name=fileName)
+def export_reportEmployeedetail(request):
+        querySql = '''
+         SELECT RP.ID, E.name EMPLOYEE_NAME,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,RP.PUT_COUNT PUT_COUNT, RP.GET_COUNT GET_COUNT ,  RP.AVERAGE_RATE AVERAGERATE ,RP.STARTTIME STARTTIME, RP.ENDTIME ENDTIME
+            FROM REPORT_EMPLOYEE RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+		    left join employee e on e.id = RP.employee_id
+            WHERE 1=1
+         '''
+        if "start_time" in request.GET and "end_time" in request.GET:
+            start_time = request.GET['start_time']
+            end_time = request.GET['end_time']
+            if start_time and end_time:
+                 querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        else:
+            start_time = (datetime.now() - timedelta(30)).strftime('%Y-%m-%d')
+            end_time = datetime.now().strftime('%Y-%m-%d')         
+            querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+            
+        if "workshop" in request.GET:
+            workshop = request.GET['workshop']
+            if workshop:
+                querySql += "and RP.workshop_id = %s " % workshop
+        if "process" in request.GET:
+            process = request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "employee_num" in request.GET:
+            employee_num =  request.GET['employee_num']
+            if employee_num:
+                querySql += "and e.NUM = %s " % employee_num
+        if "employee_name" in request.GET:
+            employee_name =  request.GET['employee_name']
+            if employee_name:
+                querySql += "and e.NAME = '%s' " % employee_name
+        if "material" in request.GET:
+            material = request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        logger.info(querySql)
+        report_employee_list = list(Production.objects.raw(querySql))
+        data = [[ '车间', '时间',  '员工',   '物料', '前工艺', '领料',  '后工艺', '交料',   '出成率']] 
+        for s in report_employee_list:
+           data.append([s.WORKSHOP_NAME, u'【' + s.STARTTIME.strftime('%Y-%m-%d %H:%M:%S') + '-----' + s.ENDTIME.strftime('%Y-%m-%d %H:%M:%S') + u'】',   s.EMPLOYEE_NAME , s.MATERIAL_NAME, 
+           s.FIRST_PROCESS_NAME, s.GET_COUNT , 
+           s.LAST_PROCESS_NAME,  s.PUT_COUNT,  s.AVERAGERATE ]) 
+        fileName = 'employee_report_detail-' + datetime.now().strftime('%Y%m%d')
+        return ExcelResponse(data,output_name=fileName)
+def export_reportClass(request):
+        querySql = '''
+         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME,SUM(RP.PUT_COUNT) PUT_COUNT, SUM(RP.GET_COUNT) GET_COUNT ,  ROUND(SUM(RP.PUT_COUNT) /  SUM(RP.GET_COUNT) * 100 ,2) AVERAGERATE 
+            FROM REPORT_CLASS RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+            WHERE 1=1
+         '''
+     
+        if "start_time" in request.GET and "end_time" in request.GET:
+            start_time = request.GET['start_time']
+            end_time = request.GET['end_time']
+            if start_time and end_time:
+                querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        if "workshop" in request.GET:
+            workshop = request.GET['workshop']
+            if workshop:
+                querySql += "and ws.id = %s " % workshop
+                
+        if "process" in request.GET:
+            process = request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "material" in request.GET:
+            material = request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        report_class_list = list(Production.objects.raw(querySql   + "  GROUP BY RP.WORKSHOP_ID,RP.MATERIAL_ID,RP.PROCESS_FIRST_ID,RP.PROCESS_LAST_ID  ORDER BY RP.WORKSHOP_ID ,  RP.MATERIAL_ID , RP.PROCESS_LAST_ID  ,  SUM(RP.PUT_COUNT)  desc   "))
+        data = [[ '车间',  '物料', '前工艺', '领料',  '后工艺', '交料',   '出成率']] 
+        for s in report_class_list:
+           data.append([s.WORKSHOP_NAME,  s.MATERIAL_NAME, 
+           s.FIRST_PROCESS_NAME, s.GET_COUNT , 
+           s.LAST_PROCESS_NAME,  s.PUT_COUNT,  s.AVERAGERATE ]) 
+        fileName = 'class_report-' + datetime.now().strftime('%Y%m%d')
+        return ExcelResponse(data,output_name=fileName)
+def export_reportClassDetail(request):
+        querySql = '''
+         SELECT RP.ID,WS.NAME WORKSHOP_NAME,M.NAME MATERIAL_NAME,BPS.NAME FIRST_PROCESS_NAME,APS.NAME LAST_PROCESS_NAME, RP.PUT_COUNT PUT_COUNT, RP.GET_COUNT GET_COUNT ,  RP.AVERAGE_RATE AVERAGERATE ,RP.STARTTIME STARTTIME, RP.ENDTIME ENDTIME
+            FROM REPORT_CLASS RP 
+            LEFT JOIN WORKSHOP WS ON WS.ID = RP.WORKSHOP_ID
+            LEFT JOIN MATERIAL M ON M.ID = RP.MATERIAL_ID
+            LEFT JOIN PROCESS BPS ON BPS.ID = RP.PROCESS_FIRST_ID
+            LEFT JOIN PROCESS APS ON APS.ID = RP.PROCESS_LAST_ID
+            WHERE 1=1
+         '''
+     
+        if "start_time" in request.GET and "end_time" in request.GET:
+            start_time = request.GET['start_time']
+            end_time = request.GET['end_time']
+            if start_time and end_time:
+                querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        else:
+            start_time = (datetime.now() - timedelta(30)).strftime('%Y-%m-%d')
+            end_time = datetime.now().strftime('%Y-%m-%d')         
+            querySql += "and ( RP.STARTTIME between '%s' and '%s' or RP.ENDTIME between '%s' and '%s'  )   " % (start_time, end_time + ' 23:59:59' , start_time, end_time + ' 23:59:59' )
+        
+        if "process" in request.GET:
+            process = request.GET['process']
+            if process:
+                querySql += "and ( RP.PROCESS_FIRST_ID = '%s' or RP.PROCESS_LAST_ID = '%s'   )   " % (process, process )
+        if "workshop" in request.GET:
+            workshop = request.GET['workshop']
+            if workshop:
+                querySql += "and ws.id = %s " % workshop
+        
+        if "material" in request.GET:
+            material = request.GET['material']
+            if material:
+                querySql += "and RP.MATERIAL_ID = '%s' " % material
+        logger.info(querySql)
+        report_class_list = list(Production.objects.raw(querySql))
+        data = [[ '车间', '时间',    '物料', '前工艺', '领料',  '后工艺', '交料',   '出成率']] 
+        for s in report_class_list:
+           data.append([s.WORKSHOP_NAME, u'【' + s.STARTTIME.strftime('%Y-%m-%d %H:%M:%S') + '-----' + s.ENDTIME.strftime('%Y-%m-%d %H:%M:%S') + u'】',    s.MATERIAL_NAME, 
+           s.FIRST_PROCESS_NAME, s.GET_COUNT , 
+           s.LAST_PROCESS_NAME,  s.PUT_COUNT,  s.AVERAGERATE ]) 
+        fileName = 'class_report_detail-' + datetime.now().strftime('%Y%m%d')
+        return ExcelResponse(data,output_name=fileName)
